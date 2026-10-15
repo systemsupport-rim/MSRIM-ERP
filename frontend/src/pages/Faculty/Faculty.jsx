@@ -39,10 +39,13 @@ export default function Faculty() {
       ]);
       setFaculty(fRes.data);
       // Staff = all non-student, non-faculty users (admin staff, accounts, library, placement, registrar)
-      setStaff(uRes.data.filter(u =>
-        !['student','faculty'].includes(u.role) &&
-        (search ? u.name?.toLowerCase().includes(search.toLowerCase()) || u.department?.toLowerCase().includes(search.toLowerCase()) : true)
-      ));
+      setStaff(uRes.data
+        .filter(u =>
+          !['student','faculty'].includes(u.role) &&
+          (search ? u.name?.toLowerCase().includes(search.toLowerCase()) || u.department?.toLowerCase().includes(search.toLowerCase()) : true)
+        )
+        .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+      );
     } finally { setLoading(false); }
   }
 

@@ -15,7 +15,13 @@ router.post('/types', authorize('admin'), (req, res) => {
   try {
     const r = db.prepare('INSERT INTO leave_types (code,name,max_days_per_year,is_paid,carry_forward,max_carry_forward,color,description,applicable_to) VALUES (?,?,?,?,?,?,?,?,?)')
       .run(code, name, max_days_per_year || 0, is_paid ? 1 : 0, carry_forward ? 1 : 0, max_carry_forward || 0, color || '#3b82f6', description || '', applicable_to || 'all');
-    res.status(201).json({ id: r.lastInsertRowid, message: 'Leave type created.' });
+    const newId = r.lastInsertRowid;
+    // Auto-create balance rows for all active staff for current year
+    const year = new Date().getFullYear();
+    const staff = db.prepare("SELECT id FROM users WHERE role IN ('faculty','admin','registrar','hod','librarian','accounts','placement') AND is_active=1").all();
+    const balInsert = db.prepare('INSERT OR IGNORE INTO leave_balances (user_id,leave_type_id,year,total_days) VALUES (?,?,?,?)');
+    staff.forEach(u => balInsert.run(u.id, newId, year, max_days_per_year || 0));
+    res.status(201).json({ id: newId, message: 'Leave type created.' });
   } catch (e) { res.status(400).json({ error: 'Code already exists.' }); }
 });
 

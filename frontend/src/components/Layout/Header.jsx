@@ -292,60 +292,31 @@ export default function Header({ onMenuClick }) {
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-[560px] bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
-              {/* Header strip */}
-              <div className="flex items-center justify-between px-5 py-3 bg-gray-50 border-b border-gray-100">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-msrim-blue rounded-full flex items-center justify-center text-white font-bold">
-                    {user?.name?.charAt(0)?.toUpperCase()}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-800">{user?.name}</p>
-                    <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${roleColors[user?.role] || 'bg-gray-100 text-gray-700'}`}>
-                      {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1)}
-                    </span>
-                  </div>
+            <div className="absolute right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden min-w-[320px]">
+              <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+                <div className="w-9 h-9 bg-msrim-blue rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
+                  {user?.name?.charAt(0)?.toUpperCase()}
                 </div>
-                <div className="flex items-center gap-1">
-                  <button onClick={() => { navigate('/profile'); setDropdownOpen(false); }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200 rounded-lg transition-colors">
-                    <UserCircle className="w-3.5 h-3.5" /> My Profile
-                  </button>
-                  <button onClick={() => { window.open('/admin-console', '_blank'); setDropdownOpen(false); }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-msrim-blue hover:bg-blue-50 rounded-lg transition-colors border border-msrim-blue/20">
-                    <ExternalLink className="w-3.5 h-3.5" /> Admin Console
-                  </button>
-                  <button onClick={handleLogout}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                    <LogOut className="w-3.5 h-3.5" /> Sign Out
-                  </button>
+                <div>
+                  <p className="text-sm font-semibold text-gray-800">{user?.name}</p>
+                  <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${roleColors[user?.role] || 'bg-gray-100 text-gray-700'}`}>
+                    {user?.role?.charAt(0).toUpperCase() + user?.role?.slice(1)}
+                  </span>
                 </div>
               </div>
-
-              {/* Module grid */}
-              <div className="p-4 max-h-[70vh] overflow-y-auto">
-                {moduleGroups.map(({ group, items }) => {
-                  const visible = items.filter(i => hasAccess(i.roles));
-                  if (visible.length === 0) return null;
-                  return (
-                    <div key={group} className="mb-4">
-                      <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-2 px-1">{group}</p>
-                      <div className="grid grid-cols-3 gap-1">
-                        {visible.map(item => (
-                          <NavLink key={item.to} to={item.to}
-                            onClick={() => setDropdownOpen(false)}
-                            className={({ isActive }) =>
-                              `flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-colors
-                               ${isActive ? 'bg-msrim-blue/10 text-msrim-blue font-semibold' : 'text-gray-700 hover:bg-gray-100'}`
-                            }>
-                            <item.icon className="w-4 h-4 flex-shrink-0 text-gray-400" />
-                            <span className="truncate text-xs">{item.label}</span>
-                          </NavLink>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="p-2 space-y-0.5">
+                <button onClick={() => { navigate('/profile'); setDropdownOpen(false); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-xl transition-colors">
+                  <UserCircle className="w-4 h-4 text-gray-400" /> My Profile
+                </button>
+                <button onClick={() => { navigate('/admin-console'); setDropdownOpen(false); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-msrim-blue hover:bg-blue-50 rounded-xl transition-colors font-medium">
+                  <ExternalLink className="w-4 h-4" /> Admin Console
+                </button>
+                <button onClick={handleLogout}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-colors">
+                  <LogOut className="w-4 h-4" /> Sign Out
+                </button>
               </div>
             </div>
           )}

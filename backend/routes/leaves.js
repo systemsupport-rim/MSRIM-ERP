@@ -27,8 +27,12 @@ router.put('/types/:id', authorize('admin'), (req, res) => {
 });
 
 router.delete('/types/:id', authorize('admin'), (req, res) => {
-  const inUse = db.prepare('SELECT COUNT(*) as c FROM leave_applications WHERE leave_type = (SELECT code FROM leave_types WHERE id=?)').get(req.params.id).c;
-  if (inUse > 0) return res.status(400).json({ error: 'Cannot delete: leave type is in use.' });
+  const lt = db.prepare('SELECT code FROM leave_types WHERE id = ?').get(req.params.id);
+  if (!lt) return res.status(404).json({ error: 'Leave type not found.' });
+  const inUse = db.prepare('SELECT COUNT(*) as c FROM leave_applications WHERE leave_type = ?').get(lt.code).c;
+  if (inUse > 0) return res.status(400).json({ error: `Cannot delete: "${lt.code}" is used in ${inUse} leave application(s).` });
+  // Remove balances first (no actual leave data, safe to delete)
+  db.prepare('DELETE FROM leave_balances WHERE leave_type_id = ?').run(req.params.id);
   db.prepare('DELETE FROM leave_types WHERE id = ?').run(req.params.id);
   res.json({ message: 'Leave type deleted.' });
 });

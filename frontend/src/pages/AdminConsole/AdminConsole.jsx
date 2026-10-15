@@ -5,7 +5,7 @@ import {
   Star, UserCheck, FileText, ClipboardList, Map, Award, DollarSign, Users2,
   Briefcase, Library, BedDouble, Building, HelpCircle, Heart,
   Zap, Banknote, ShoppingCart, Network, BadgeCheck, Sparkles,
-  Layers, Brain, BarChart3, HardDrive, Shield, LayoutDashboard
+  Layers, Brain, BarChart3, HardDrive, Shield, LayoutDashboard, ArrowLeft, X
 } from 'lucide-react';
 
 const allGroups = [
@@ -110,11 +110,19 @@ export default function AdminConsole() {
     <div className="space-y-8 fade-in pb-10">
       {/* Hero */}
       <div className="bg-gradient-to-r from-msrim-blue to-msrim-blue-light rounded-2xl p-6 text-white">
-        <div className="flex items-center gap-3 mb-1">
-          <LayoutDashboard className="w-6 h-6" />
-          <h1 className="text-2xl font-bold">Admin Console</h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 mb-1">
+            <LayoutDashboard className="w-6 h-6" />
+            <h1 className="text-2xl font-bold">Admin Console</h1>
+          </div>
+          <button
+            onClick={() => window.close()}
+            className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl text-sm font-medium transition-colors"
+          >
+            <X className="w-4 h-4" /> Close &amp; Return
+          </button>
         </div>
-        <p className="text-blue-100 text-sm">
+        <p className="text-blue-100 text-sm mt-1">
           All {visibleGroups.reduce((n, g) => n + g.items.length, 0)} modules available to your role — {user?.role}
         </p>
       </div>

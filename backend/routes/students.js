@@ -123,6 +123,14 @@ router.put('/:id', authorize('admin', 'registrar', 'student'), (req, res) => {
   res.json({ message: 'Student updated.' });
 });
 
+router.put('/:id/activate', authorize('admin', 'registrar'), (req, res) => {
+  const student = db.prepare('SELECT user_id FROM students WHERE id = ?').get(req.params.id);
+  if (!student) return res.status(404).json({ error: 'Student not found.' });
+  db.prepare("UPDATE students SET status = 'active' WHERE id = ?").run(req.params.id);
+  db.prepare('UPDATE users SET is_active = 1 WHERE id = ?').run(student.user_id);
+  res.json({ message: 'Student activated.' });
+});
+
 router.put('/:id/deactivate', authorize('admin', 'registrar'), (req, res) => {
   const student = db.prepare('SELECT user_id FROM students WHERE id = ?').get(req.params.id);
   if (!student) return res.status(404).json({ error: 'Student not found.' });

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
-import { Search, Plus, BookOpen, ArrowDownToLine, ArrowUpFromLine, X } from 'lucide-react';
+import { Search, Plus, BookOpen, ArrowDownToLine, ArrowUpFromLine, X, Trash2 } from 'lucide-react';
 
 export default function Library() {
   const { user } = useAuth();
@@ -97,10 +97,19 @@ export default function Library() {
                       </td>
                       {['librarian','admin'].includes(user.role) && (
                         <td className="table-td">
-                          <button onClick={() => setShowIssue(b)} disabled={b.available_copies === 0}
-                            className="btn-primary py-1.5 px-3 text-xs disabled:opacity-50">
-                            <ArrowDownToLine className="w-3 h-3" /> Issue
-                          </button>
+                          <div className="flex items-center gap-1.5">
+                            <button onClick={() => setShowIssue(b)} disabled={b.available_copies === 0}
+                              className="btn-primary py-1 px-2.5 text-xs disabled:opacity-50">
+                              <ArrowDownToLine className="w-3 h-3" /> Issue
+                            </button>
+                            <button onClick={async () => {
+                              if (!window.confirm(`Remove "${b.title}" from catalog?`)) return;
+                              try { await api.delete(`/library/books/${b.id}`); toast.success('Book removed'); fetchData(); }
+                              catch (e) { toast.error(e.response?.data?.error || 'Cannot remove issued book'); }
+                            }} className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg border border-red-300 text-red-600 hover:bg-red-50 font-medium transition-colors">
+                              <Trash2 className="w-3 h-3" /> Remove
+                            </button>
+                          </div>
                         </td>
                       )}
                     </tr>

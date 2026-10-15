@@ -70,6 +70,16 @@ router.put('/:id', authorize('admin', 'registrar', 'hod'), (req, res) => {
   res.json({ message: 'Course updated.' });
 });
 
+router.put('/:id/deactivate', authorize('admin', 'registrar', 'hod'), (req, res) => {
+  db.prepare("UPDATE courses SET status = 'inactive' WHERE id = ?").run(req.params.id);
+  res.json({ message: 'Course deactivated.' });
+});
+
+router.put('/:id/activate', authorize('admin', 'registrar', 'hod'), (req, res) => {
+  db.prepare("UPDATE courses SET status = 'active' WHERE id = ?").run(req.params.id);
+  res.json({ message: 'Course activated.' });
+});
+
 router.delete('/:id', authorize('admin', 'registrar', 'hod'), (req, res) => {
   const hasData = db.prepare('SELECT id FROM attendance WHERE course_id = ? LIMIT 1').get(req.params.id) ||
     db.prepare('SELECT id FROM results r JOIN examinations e ON r.examination_id = e.id WHERE e.course_id = ? LIMIT 1').get(req.params.id);

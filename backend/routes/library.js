@@ -68,6 +68,15 @@ router.post('/return/:transactionId', authorize('librarian','admin'), (req, res)
   res.json({ message: 'Book returned.', fine_amount: fine, overdue_days: overdueDays });
 });
 
+router.delete('/books/:id', authorize('admin','librarian'), (req, res) => {
+  const book = db.prepare('SELECT id FROM library_books WHERE id = ?').get(req.params.id);
+  if (!book) return res.status(404).json({ error: 'Book not found.' });
+  const issued = db.prepare("SELECT COUNT(*) as c FROM library_transactions WHERE book_id = ? AND status = 'issued'").get(req.params.id).c;
+  if (issued > 0) return res.status(400).json({ error: 'Cannot remove a book that is currently issued.' });
+  db.prepare('DELETE FROM library_books WHERE id = ?').run(req.params.id);
+  res.json({ message: 'Book removed.' });
+});
+
 router.get('/stats', (req, res) => {
   const total = db.prepare('SELECT COUNT(*) as count, SUM(total_copies) as copies FROM library_books').get();
   const issued = db.prepare("SELECT COUNT(*) as count FROM library_transactions WHERE status = 'issued'").get();

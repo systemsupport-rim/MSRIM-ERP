@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
-import { BookOpen, Plus, X, Users, Clock } from 'lucide-react';
+import { BookOpen, Plus, X, Users, Clock, Trash2, PowerOff, Power } from 'lucide-react';
 
 export default function Courses() {
   const { user } = useAuth();
@@ -43,21 +43,45 @@ export default function Courses() {
               <th className="table-th">Program</th><th className="table-th">Semester</th>
               <th className="table-th">Credits</th><th className="table-th">Type</th>
               <th className="table-th">Faculty</th>
+              {['admin','registrar','hod'].includes(user.role) && <th className="table-th">Actions</th>}
             </tr></thead>
             <tbody className="divide-y divide-gray-50">
-              {loading ? <tr><td colSpan={7} className="table-td text-center py-8"><div className="w-6 h-6 border-2 border-msrim-blue border-t-transparent rounded-full animate-spin mx-auto" /></td></tr>
+              {loading ? <tr><td colSpan={8} className="table-td text-center py-8"><div className="w-6 h-6 border-2 border-msrim-blue border-t-transparent rounded-full animate-spin mx-auto" /></td></tr>
                 : filtered.map(c => (
-                  <tr key={c.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => setSelected(c)}>
-                    <td className="table-td font-mono text-xs font-bold text-msrim-blue">{c.code}</td>
-                    <td className="table-td font-medium">{c.name}</td>
+                  <tr key={c.id} className={`hover:bg-gray-50 ${c.status === 'inactive' ? 'opacity-60' : ''}`}>
+                    <td className="table-td font-mono text-xs font-bold text-msrim-blue cursor-pointer" onClick={() => setSelected(c)}>{c.code}</td>
+                    <td className="table-td font-medium cursor-pointer" onClick={() => setSelected(c)}>{c.name}</td>
                     <td className="table-td"><span className="badge-blue">{c.program_name}</span></td>
                     <td className="table-td">Semester {c.semester}</td>
                     <td className="table-td font-semibold">{c.credits}</td>
                     <td className="table-td"><span className={c.type === 'core' ? 'badge-blue' : c.type === 'lab' ? 'badge-green' : 'badge-orange'}>{c.type}</span></td>
                     <td className="table-td">{c.faculty_name || <span className="text-gray-400">Not assigned</span>}</td>
+                    {['admin','registrar','hod'].includes(user.role) && (
+                      <td className="table-td">
+                        <div className="flex items-center gap-1.5">
+                          <button onClick={async () => {
+                            const action = c.status === 'inactive' ? 'activate' : 'deactivate';
+                            if (!window.confirm(`${action === 'activate' ? 'Activate' : 'Deactivate'} "${c.name}"?`)) return;
+                            try { await api.put(`/courses/${c.id}/${action}`); toast.success(`Course ${action}d`); api.get('/courses').then(r => setCourses(r.data)); }
+                            catch (e) { toast.error(e.response?.data?.error || 'Failed'); }
+                          }} className={`flex items-center gap-1 px-2 py-1 text-xs rounded-lg border font-medium transition-colors
+                            ${c.status === 'inactive' ? 'border-green-300 text-green-700 hover:bg-green-50' : 'border-yellow-300 text-yellow-700 hover:bg-yellow-50'}`}>
+                            {c.status === 'inactive' ? <Power className="w-3 h-3" /> : <PowerOff className="w-3 h-3" />}
+                            {c.status === 'inactive' ? 'Activate' : 'Deactivate'}
+                          </button>
+                          <button onClick={async () => {
+                            if (!window.confirm(`Delete "${c.name}"? This cannot be undone.`)) return;
+                            try { await api.delete(`/courses/${c.id}`); toast.success('Course deleted'); api.get('/courses').then(r => setCourses(r.data)); }
+                            catch (e) { toast.error(e.response?.data?.error || 'Deactivate first'); }
+                          }} className="flex items-center gap-1 px-2 py-1 text-xs rounded-lg border border-red-300 text-red-600 hover:bg-red-50 font-medium transition-colors">
+                            <Trash2 className="w-3 h-3" /> Remove
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
-              {!loading && !filtered.length && <tr><td colSpan={7} className="table-td text-center py-8 text-gray-400">No courses found</td></tr>}
+              {!loading && !filtered.length && <tr><td colSpan={8} className="table-td text-center py-8 text-gray-400">No courses found</td></tr>}
             </tbody>
           </table>
         </div>

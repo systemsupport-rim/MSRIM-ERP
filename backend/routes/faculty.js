@@ -91,4 +91,19 @@ router.put('/:id/deactivate', authorize('admin', 'registrar'), (req, res) => {
   res.json({ message: 'Faculty account deactivated.' });
 });
 
+router.put('/:id/activate', authorize('admin', 'registrar'), (req, res) => {
+  const faculty = db.prepare('SELECT user_id FROM faculty WHERE id = ?').get(req.params.id);
+  if (!faculty) return res.status(404).json({ error: 'Faculty not found.' });
+  db.prepare('UPDATE users SET is_active = 1 WHERE id = ?').run(faculty.user_id);
+  res.json({ message: 'Faculty account activated.' });
+});
+
+router.delete('/:id', authorize('admin'), (req, res) => {
+  const faculty = db.prepare('SELECT user_id FROM faculty WHERE id = ?').get(req.params.id);
+  if (!faculty) return res.status(404).json({ error: 'Faculty not found.' });
+  db.prepare('DELETE FROM faculty WHERE id = ?').run(req.params.id);
+  db.prepare('UPDATE users SET is_active = 0 WHERE id = ?').run(faculty.user_id);
+  res.json({ message: 'Faculty removed.' });
+});
+
 module.exports = router;

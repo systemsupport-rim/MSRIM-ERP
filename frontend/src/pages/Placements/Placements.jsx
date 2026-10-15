@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
-import { Briefcase, Plus, CheckCircle, Clock, XCircle, TrendingUp, X } from 'lucide-react';
+import { Briefcase, Plus, CheckCircle, Clock, XCircle, TrendingUp, X, Trash2, Ban } from 'lucide-react';
 
 export default function Placements() {
   const { user } = useAuth();
@@ -95,7 +95,24 @@ export default function Placements() {
                   </button>
                 )}
                 {['admin','placement'].includes(user.role) && (
-                  <button onClick={() => toast('Manage applications coming soon')} className="btn-secondary text-sm py-1.5">Manage</button>
+                  <div className="flex items-center gap-1.5">
+                    {p.status !== 'cancelled' && (
+                      <button onClick={async () => {
+                        if (!window.confirm(`Cancel "${p.company_name}" drive?`)) return;
+                        try { await api.put(`/placements/${p.id}/deactivate`); toast.success('Drive cancelled'); fetchData(); }
+                        catch (e) { toast.error(e.response?.data?.error || 'Failed'); }
+                      }} className="flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-lg border border-yellow-300 text-yellow-700 hover:bg-yellow-50 font-medium transition-colors">
+                        <Ban className="w-3 h-3" /> Cancel
+                      </button>
+                    )}
+                    <button onClick={async () => {
+                      if (!window.confirm(`Permanently remove "${p.company_name}" drive?`)) return;
+                      try { await api.delete(`/placements/${p.id}`); toast.success('Drive removed'); fetchData(); }
+                      catch (e) { toast.error(e.response?.data?.error || 'Failed'); }
+                    }} className="flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-lg border border-red-300 text-red-600 hover:bg-red-50 font-medium transition-colors">
+                      <Trash2 className="w-3 h-3" /> Remove
+                    </button>
+                  </div>
                 )}
               </div>
             </div>

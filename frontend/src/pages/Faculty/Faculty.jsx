@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
-import { Search, Plus, X, Edit2, UserX } from 'lucide-react';
+import { Search, Plus, X, Edit2, UserX, UserCheck, Trash2 } from 'lucide-react';
 
 export default function Faculty() {
   const { user } = useAuth();
@@ -45,8 +45,8 @@ export default function Faculty() {
         {loading ? (
           <div className="col-span-3 text-center py-12"><div className="w-8 h-8 border-4 border-msrim-blue border-t-transparent rounded-full animate-spin mx-auto" /></div>
         ) : faculty.map(f => (
-          <div key={f.id} className="card hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelected(f)}>
-            <div className="flex items-start gap-4">
+          <div key={f.id} className="card hover:shadow-md transition-shadow">
+            <div className="flex items-start gap-4 cursor-pointer" onClick={() => setSelected(f)}>
               <div className="w-12 h-12 bg-msrim-blue rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
                 {f.name?.charAt(0)}
               </div>
@@ -56,10 +56,33 @@ export default function Faculty() {
                 <p className="text-gray-400 text-xs">{f.dept_name}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <span className="badge-blue text-xs">{f.employee_id}</span>
-                  <span className="badge-green text-xs">{f.experience_years} yrs exp</span>
+                  <span className={`text-xs ${f.is_active === 0 ? 'badge-red' : 'badge-green'}`}>{f.is_active === 0 ? 'Inactive' : `${f.experience_years} yrs`}</span>
                 </div>
               </div>
             </div>
+            {canManage && (
+              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+                <button onClick={async () => {
+                  const action = f.is_active === 0 ? 'activate' : 'deactivate';
+                  if (!window.confirm(`${action === 'activate' ? 'Activate' : 'Deactivate'} ${f.name}?`)) return;
+                  try { await api.put(`/faculty/${f.id}/${action}`); toast.success(`Faculty ${action}d`); fetchFaculty(); }
+                  catch (e) { toast.error(e.response?.data?.error || 'Failed'); }
+                }} className={`flex-1 flex items-center justify-center gap-1 py-1.5 text-xs rounded-lg border font-medium transition-colors
+                  ${f.is_active === 0 ? 'border-green-300 text-green-700 hover:bg-green-50' : 'border-yellow-300 text-yellow-700 hover:bg-yellow-50'}`}>
+                  {f.is_active === 0 ? <UserCheck className="w-3 h-3" /> : <UserX className="w-3 h-3" />}
+                  {f.is_active === 0 ? 'Activate' : 'Deactivate'}
+                </button>
+                {user.role === 'admin' && (
+                  <button onClick={async () => {
+                    if (!window.confirm(`Permanently remove ${f.name}?`)) return;
+                    try { await api.delete(`/faculty/${f.id}`); toast.success('Faculty removed'); fetchFaculty(); }
+                    catch (e) { toast.error(e.response?.data?.error || 'Failed'); }
+                  }} className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg border border-red-300 text-red-600 hover:bg-red-50 font-medium transition-colors">
+                    <Trash2 className="w-3 h-3" /> Remove
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         ))}
         {!loading && !faculty.length && <div className="col-span-3 card text-center py-12 text-gray-400">No faculty found</div>}

@@ -76,6 +76,17 @@ router.put('/applications/:id/status', authorize('admin','placement'), (req, res
   res.json({ message: 'Status updated.' });
 });
 
+router.put('/:id/deactivate', authorize('admin','placement'), (req, res) => {
+  db.prepare("UPDATE placements SET status = 'cancelled' WHERE id = ?").run(req.params.id);
+  res.json({ message: 'Drive cancelled.' });
+});
+
+router.delete('/:id', authorize('admin','placement'), (req, res) => {
+  db.prepare('DELETE FROM placement_applications WHERE placement_id = ?').run(req.params.id);
+  db.prepare('DELETE FROM placements WHERE id = ?').run(req.params.id);
+  res.json({ message: 'Drive removed.' });
+});
+
 router.get('/stats', (req, res) => {
   const total = db.prepare("SELECT COUNT(*) as count FROM placements WHERE status = 'completed'").get();
   const selected = db.prepare("SELECT COUNT(*) as count FROM placement_applications WHERE status = 'selected'").get();

@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import api from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
-import { Search, Plus, Eye, X, BarChart2, BookOpen, UserX } from 'lucide-react';
+import { Search, Plus, Eye, X, BarChart2, BookOpen, UserX, UserCheck, Trash2 } from 'lucide-react';
+
+async function confirmAction(msg) { return window.confirm(msg); }
 
 export default function Students() {
   const { user } = useAuth();
@@ -105,9 +107,38 @@ export default function Students() {
                     </span>
                   </td>
                   <td className="table-td">
-                    <button onClick={() => setSelected(s)} className="btn-secondary py-1.5 px-3 text-xs">
-                      <Eye className="w-3 h-3" /> View
-                    </button>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button onClick={() => setSelected(s)} className="btn-secondary py-1 px-2.5 text-xs">
+                        <Eye className="w-3 h-3" /> View
+                      </button>
+                      {['admin','registrar'].includes(user.role) && (<>
+                        <button title={s.status === 'active' ? 'Deactivate' : 'Activate'}
+                          onClick={async () => {
+                            if (!await confirmAction(`${s.status === 'active' ? 'Deactivate' : 'Activate'} ${s.name}?`)) return;
+                            try {
+                              await api.put(`/students/${s.id}/${s.status === 'active' ? 'deactivate' : 'activate'}`);
+                              toast.success(`Student ${s.status === 'active' ? 'deactivated' : 'activated'}`);
+                              fetchStudents();
+                            } catch (e) { toast.error(e.response?.data?.error || 'Failed'); }
+                          }}
+                          className={`py-1 px-2.5 text-xs rounded-lg border font-medium flex items-center gap-1 transition-colors
+                            ${s.status === 'active' ? 'border-yellow-300 text-yellow-700 hover:bg-yellow-50' : 'border-green-300 text-green-700 hover:bg-green-50'}`}>
+                          {s.status === 'active' ? <UserX className="w-3 h-3" /> : <UserCheck className="w-3 h-3" />}
+                          {s.status === 'active' ? 'Deactivate' : 'Activate'}
+                        </button>
+                        {user.role === 'admin' && (
+                          <button title="Delete student" onClick={async () => {
+                            if (!await confirmAction(`Permanently delete ${s.name}? This cannot be undone.`)) return;
+                            try {
+                              await api.delete(`/students/${s.id}`);
+                              toast.success('Student deleted'); fetchStudents();
+                            } catch (e) { toast.error(e.response?.data?.error || 'Deactivate first before deleting'); }
+                          }} className="py-1 px-2.5 text-xs rounded-lg border border-red-300 text-red-600 hover:bg-red-50 font-medium flex items-center gap-1 transition-colors">
+                            <Trash2 className="w-3 h-3" /> Remove
+                          </button>
+                        )}
+                      </>)}
+                    </div>
                   </td>
                 </tr>
               ))}

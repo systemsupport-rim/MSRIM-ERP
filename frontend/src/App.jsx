@@ -42,6 +42,7 @@ import Intelligence from './pages/Intelligence/Intelligence';
 import AdminConsole from './pages/AdminConsole/AdminConsole';
 import LeaveManagement from './pages/LeaveManagement/LeaveManagement';
 import StaffAttendance from './pages/StaffAttendance/StaffAttendance';
+import AdminPrivileges from './pages/AdminPrivileges/AdminPrivileges';
 
 function ProtectedRoute({ children, roles }) {
   const { user } = useAuth();
@@ -110,6 +111,7 @@ function AppRoutes() {
         <Route path="/admin-console" element={<AdminConsole />} />
         <Route path="/leave-management" element={<LeaveManagement />} />
         <Route path="/staff-attendance" element={<StaffAttendance />} />
+        <Route path="/admin-privileges" element={<ProtectedRoute roles={['admin']}><AdminPrivileges /></ProtectedRoute>} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" />} />
     </Routes>

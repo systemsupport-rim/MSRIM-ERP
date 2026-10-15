@@ -63,9 +63,41 @@ router.post('/change-password', authenticate, (req, res) => {
   if (!bcrypt.compareSync(currentPassword, user.password)) {
     return res.status(400).json({ error: 'Current password is incorrect.' });
   }
-  if (newPassword.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+  if (newPassword.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters.' });
   db.prepare('UPDATE users SET password = ? WHERE id = ?').run(bcrypt.hashSync(newPassword, 10), req.user.id);
   res.json({ message: 'Password changed successfully.' });
+});
+
+// ── Admin user management ──────────────────────────────────────────────────────
+const { authorize } = require('../middleware/auth');
+
+router.get('/users', authenticate, authorize('admin'), (req, res) => {
+  const users = db.prepare('SELECT id, username, name, email, phone, role, department, is_active, last_login, created_at FROM users ORDER BY role, name').all();
+  res.json(users);
+});
+
+router.put('/users/:id/toggle-active', authenticate, authorize('admin'), (req, res) => {
+  const u = db.prepare('SELECT id, is_active, role FROM users WHERE id = ?').get(req.params.id);
+  if (!u) return res.status(404).json({ error: 'User not found.' });
+  if (u.role === 'admin' && req.user.id.toString() === req.params.id.toString()) return res.status(400).json({ error: 'Cannot deactivate your own account.' });
+  db.prepare('UPDATE users SET is_active = ? WHERE id = ?').run(u.is_active ? 0 : 1, req.params.id);
+  res.json({ message: `Account ${u.is_active ? 'deactivated' : 'activated'}.` });
+});
+
+router.put('/users/:id/role', authenticate, authorize('admin'), (req, res) => {
+  const { role } = req.body;
+  const allowed = ['admin','faculty','student','hod','registrar','librarian','accounts','placement','parent'];
+  if (!allowed.includes(role)) return res.status(400).json({ error: 'Invalid role.' });
+  if (req.user.id.toString() === req.params.id.toString()) return res.status(400).json({ error: 'Cannot change your own role.' });
+  db.prepare('UPDATE users SET role = ? WHERE id = ?').run(role, req.params.id);
+  res.json({ message: 'Role updated.' });
+});
+
+router.put('/users/:id/reset-password', authenticate, authorize('admin'), (req, res) => {
+  const { password } = req.body;
+  if (!password || password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+  db.prepare('UPDATE users SET password = ? WHERE id = ?').run(bcrypt.hashSync(password, 10), req.params.id);
+  res.json({ message: 'Password reset successfully.' });
 });
 
 module.exports = router;

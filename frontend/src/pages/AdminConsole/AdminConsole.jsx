@@ -7,7 +7,7 @@ import {
   Briefcase, Library, BedDouble, Building, HelpCircle, Heart,
   Zap, Banknote, ShoppingCart, Network, BadgeCheck, Sparkles,
   Layers, Brain, BarChart3, HardDrive, Shield, LayoutDashboard,
-  ArrowLeft, Plus, Trash2, RotateCcw, Settings2, X, Check
+  ArrowLeft, Plus, Trash2, RotateCcw, Settings2, X, Check, KeyRound
 } from 'lucide-react';
 
 const allGroups = [
@@ -95,11 +95,12 @@ const allGroups = [
     iconColor: 'text-red-600',
     headingColor: 'text-red-700',
     items: [
-      { to: '/structure', icon: Layers,    label: 'Structure',           desc: 'Dept, program & semester config',  roles: ['admin','registrar','hod'] },
-      { to: '/analytics', icon: Brain,     label: 'Analytics / BI',      desc: 'BI dashboards & data insights',    roles: ['admin','registrar','hod'] },
-      { to: '/reports',   icon: BarChart3, label: 'Reports & Logs',      desc: 'Detailed reports & audit logs',    roles: ['admin','registrar','hod'] },
-      { to: '/drive',     icon: HardDrive, label: 'Drive',               desc: 'File storage & document sharing',  roles: 'all' },
-      { to: '/roles',     icon: Shield,    label: 'Roles & Privileges',  desc: 'User roles & access permissions',  roles: ['admin'] },
+      { to: '/structure',          icon: Layers,    label: 'Structure',           desc: 'Dept, program & semester config',          roles: ['admin','registrar','hod'] },
+      { to: '/analytics',          icon: Brain,     label: 'Analytics / BI',      desc: 'BI dashboards & data insights',            roles: ['admin','registrar','hod'] },
+      { to: '/reports',            icon: BarChart3, label: 'Reports & Logs',      desc: 'Detailed reports & audit logs',            roles: ['admin','registrar','hod'] },
+      { to: '/drive',              icon: HardDrive, label: 'Drive',               desc: 'File storage & document sharing',          roles: 'all' },
+      { to: '/roles',              icon: Shield,    label: 'Roles & Privileges',  desc: 'User roles & access permissions',          roles: ['admin'] },
+      { to: '/admin-privileges',   icon: KeyRound,  label: 'Admin Privileges',    desc: 'Manage admin access, passwords & system settings', roles: ['admin'] },
     ]
   },
 ];

@@ -412,7 +412,7 @@ function AddFacultyModal({ onClose }) {
         </div>
         <form onSubmit={handleSubmit} className="p-6 grid grid-cols-2 gap-4">
           {[['Full Name *', 'name', 'text', true], ['Email *', 'email', 'email', true], ['Phone', 'phone', 'tel', false],
-            ['Employee ID *', 'employee_id', 'text', true], ['Designation', 'designation', 'text', false],
+            ['Employee ID *', 'employee_id', 'text', true],
             ['Qualification', 'qualification', 'text', false], ['Experience (yrs)', 'experience_years', 'number', false],
             ['Joining Date', 'joining_date', 'date', false]].map(([l, k, t, r]) => (
             <div key={k}>
@@ -420,6 +420,13 @@ function AddFacultyModal({ onClose }) {
               <input type={t} required={r} value={form[k]} onChange={e => set(k, e.target.value)} className="input-field" />
             </div>
           ))}
+          <div>
+            <label className="block text-sm font-medium mb-1">Designation</label>
+            <select value={form.designation} onChange={e => set('designation', e.target.value)} className="select-field">
+              <option value="">Select designation</option>
+              {DESIGNATIONS.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </div>
           <div>
             <label className="block text-sm font-medium mb-1">Employment Type</label>
             <select value={form.employment_type} onChange={e => set('employment_type', e.target.value)} className="select-field">
@@ -435,6 +442,24 @@ function AddFacultyModal({ onClose }) {
     </div>
   );
 }
+
+// ── Shared designations from MSRIM Excel ─────────────────────────────────────
+const DESIGNATIONS = [
+  'Adjunct Faculty','Admission Co-Ordinator','Admissions Counselor',
+  'Assistant Librarian','Assistant Professor','Assistant Registrar',
+  'Associate Professor','Attender - Evaluation','Attender Library',
+  'Chairperson & Professor','Chairperson and Associate Professor',
+  'Chairperson and Senior Assistant Professor','Chief of Examination',
+  'Computer Lab Assistant','Digital Marketing Executive','Driver',
+  'Executive Assistant','Head - Ramaiah Japan Center','Head Admissions',
+  'Head Placements & Corporate Relations','Librarian','Library Assistant',
+  'Manager - Accounts & Administration','Manager Admin',
+  'Office Assistant - Accounts','Office Assistant - Admin',
+  'Office Assistant - Evaluation','Placement Executive',
+  'Placements – Senior Executive','Professor','Professor and Dean',
+  'Receptionist','Security Officer','Senior Assistant Professor',
+  'Site Engineer','Sweeper','Watchman',
+];
 
 // ── Edit Faculty Modal ────────────────────────────────────────────────────────
 function EditFacultyModal({ faculty: f, onClose }) {
@@ -492,7 +517,10 @@ function EditFacultyModal({ faculty: f, onClose }) {
           </div>
           <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Designation</label>
-            <input value={form.designation} onChange={e => set('designation', e.target.value)} className="input-field" placeholder="e.g. Assistant Professor" />
+            <select value={form.designation} onChange={e => set('designation', e.target.value)} className="select-field">
+              <option value="">Select designation</option>
+              {DESIGNATIONS.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
@@ -534,11 +562,12 @@ function EditFacultyModal({ faculty: f, onClose }) {
 // ── Edit Staff Modal ──────────────────────────────────────────────────────────
 function EditStaffModal({ staff: s, onClose }) {
   const [form, setForm] = useState({
-    name:       s.name || '',
-    email:      s.email || '',
-    phone:      s.phone || '',
-    department: s.department || '',
-    role:       s.role || 'registrar',
+    name:        s.name || '',
+    email:       s.email || '',
+    phone:       s.phone || '',
+    department:  s.department || '',
+    designation: s.designation || '',
+    role:        s.role || 'registrar',
   });
   const [loading, setLoading] = useState(false);
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
@@ -557,7 +586,8 @@ function EditStaffModal({ staff: s, onClose }) {
     e.preventDefault(); setLoading(true);
     try {
       await api.put(`/auth/users/${s.id}/profile`, {
-        name: form.name, email: form.email, phone: form.phone, department: form.department
+        name: form.name, email: form.email, phone: form.phone,
+        department: form.department, designation: form.designation,
       });
       if (form.role !== s.role) {
         await api.put(`/auth/users/${s.id}/role`, { role: form.role });
@@ -592,6 +622,13 @@ function EditStaffModal({ staff: s, onClose }) {
               <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
               <input value={form.phone} onChange={e => set('phone', e.target.value)} className="input-field" />
             </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+            <select value={form.designation} onChange={e => set('designation', e.target.value)} className="select-field">
+              <option value="">Select designation</option>
+              {DESIGNATIONS.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>

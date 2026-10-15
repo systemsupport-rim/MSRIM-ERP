@@ -105,13 +105,20 @@ router.put('/users/:id/profile', authenticate, authorize('admin','registrar'), (
   const u = db.prepare('SELECT id FROM users WHERE id = ?').get(req.params.id);
   if (!u) return res.status(404).json({ error: 'User not found.' });
   const sets = []; const vals = [];
-  if (name)       { sets.push('name=?');       vals.push(name); }
-  if (email)      { sets.push('email=?');      vals.push(email); }
-  if (phone)      { sets.push('phone=?');      vals.push(phone); }
-  if (department) { sets.push('department=?'); vals.push(department); }
+  if (name       !== undefined) { sets.push('name=?');       vals.push(name); }
+  if (email      !== undefined) { sets.push('email=?');      vals.push(email); }
+  if (phone      !== undefined) { sets.push('phone=?');      vals.push(phone); }
+  if (department !== undefined) { sets.push('department=?'); vals.push(department); }
   if (sets.length === 0) return res.status(400).json({ error: 'Nothing to update.' });
   vals.push(req.params.id);
   db.prepare(`UPDATE users SET ${sets.join(',')} WHERE id=?`).run(...vals);
+
+  // If user has a faculty record, update designation too
+  const { designation } = req.body;
+  if (designation !== undefined) {
+    const fac = db.prepare('SELECT id FROM faculty WHERE user_id=?').get(req.params.id);
+    if (fac) db.prepare('UPDATE faculty SET designation=? WHERE id=?').run(designation, fac.id);
+  }
   res.json({ message: 'Profile updated.' });
 });
 

@@ -244,21 +244,9 @@ export default function Sidebar({ isOpen, onToggle }) {
       </div>
 
       <nav className="flex-1 overflow-y-auto py-3">
-        {/* Main nav — always visible */}
-        <p className="px-4 pb-1.5 text-xs font-semibold uppercase tracking-widest text-blue-300">Main</p>
-        <div className="space-y-0.5 px-2 mb-4">
-          {mainItems.map(item => (
-            <NavLink key={item.to} to={item.to}
-              className={({ isActive }) => `sidebar-link text-xs py-2 ${isActive ? 'active' : ''}`}>
-              <item.icon className="w-3.5 h-3.5 flex-shrink-0" />
-              <span className="truncate">{item.label}</span>
-            </NavLink>
-          ))}
-        </div>
-
-        {/* Module-specific nav */}
-        {moduleNav && (
-          <div className="border-t border-white/10 pt-3">
+        {moduleNav ? (
+          /* Inside a module — show only module nav */
+          <>
             <div className="flex items-center gap-2 px-4 pb-1.5">
               <button onClick={() => navigate(moduleNav.back)}
                 className="text-blue-400 hover:text-white transition-colors">
@@ -275,7 +263,21 @@ export default function Sidebar({ isOpen, onToggle }) {
                 </NavLink>
               ))}
             </div>
-          </div>
+          </>
+        ) : (
+          /* Main pages — show main nav */
+          <>
+            <p className="px-4 pb-1.5 text-xs font-semibold uppercase tracking-widest text-blue-300">Main</p>
+            <div className="space-y-0.5 px-2">
+              {mainItems.map(item => (
+                <NavLink key={item.to} to={item.to}
+                  className={({ isActive }) => `sidebar-link text-xs py-2 ${isActive ? 'active' : ''}`}>
+                  <item.icon className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="truncate">{item.label}</span>
+                </NavLink>
+              ))}
+            </div>
+          </>
         )}
       </nav>
 

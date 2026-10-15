@@ -37,7 +37,7 @@ export default function Faculty() {
         api.get('/faculty', { params }),
         canManage ? api.get('/auth/users') : Promise.resolve({ data: [] }),
       ]);
-      setFaculty(fRes.data);
+      setFaculty([...fRes.data].sort((a, b) => (a.name || '').localeCompare(b.name || '')));
       // Staff = all non-student, non-faculty users (admin staff, accounts, library, placement, registrar)
       setStaff(uRes.data
         .filter(u =>

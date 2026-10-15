@@ -90,18 +90,53 @@ function MyLeaves() {
   return (
     <div className="space-y-6">
       {/* Balance cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {balances.map(b => (
-          <div key={b.id} className="card p-3 border-t-4" style={{ borderTopColor: b.color }}>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{b.code}</p>
-            <p className="text-xl font-black mt-1" style={{ color: b.color }}>{b.available}</p>
-            <p className="text-xs text-gray-400">of {b.total_days} left</p>
-            <div className="w-full bg-gray-100 rounded-full h-1 mt-2">
-              <div className="h-1 rounded-full" style={{ width: `${b.total_days > 0 ? (b.used_days / b.total_days) * 100 : 0}%`, backgroundColor: b.color }} />
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+        {balances.map(b => {
+          const isUnlimited = b.total_days === 0;
+          const usedPct = (!isUnlimited && b.total_days > 0) ? Math.min((b.used_days / b.total_days) * 100, 100) : 0;
+          const low = !isUnlimited && b.available <= 2 && b.available > 0;
+          const exhausted = !isUnlimited && b.available <= 0 && b.total_days > 0;
+          return (
+            <div key={b.id} className={`card p-4 border-t-4 transition-shadow hover:shadow-md ${exhausted ? 'bg-red-50/40' : low ? 'bg-yellow-50/40' : ''}`}
+              style={{ borderTopColor: b.color }}>
+              {/* Code badge + name */}
+              <div className="flex items-start justify-between gap-1 mb-2">
+                <span className="px-2 py-0.5 rounded-md text-xs font-bold text-white leading-tight" style={{ backgroundColor: b.color }}>
+                  {b.code}
+                </span>
+                {b.is_paid === 0 && <span className="text-xs text-gray-400 font-medium">Unpaid</span>}
+              </div>
+              <p className="text-xs font-semibold text-gray-700 leading-tight mb-2">{b.type_name}</p>
+
+              {/* Available days — big number */}
+              <div className="flex items-end gap-1 mb-1">
+                <p className="text-2xl font-black leading-none" style={{ color: exhausted ? '#ef4444' : low ? '#f59e0b' : b.color }}>
+                  {isUnlimited ? '∞' : b.available}
+                </p>
+                {!isUnlimited && (
+                  <p className="text-xs text-gray-400 mb-0.5">/ {b.total_days} days</p>
+                )}
+              </div>
+
+              {/* Progress bar */}
+              {!isUnlimited && b.total_days > 0 && (
+                <div className="w-full bg-gray-100 rounded-full h-1.5 mb-2">
+                  <div className="h-1.5 rounded-full transition-all" style={{ width: `${usedPct}%`, backgroundColor: b.color }} />
+                </div>
+              )}
+              {isUnlimited && <p className="text-xs text-gray-400 mb-2">Unlimited</p>}
+
+              {/* Stats */}
+              <div className="flex justify-between text-xs text-gray-400">
+                <span>{b.used_days} used</span>
+                {b.pending_days > 0 && <span className="text-yellow-600 font-medium">{b.pending_days} pending</span>}
+              </div>
+
+              {exhausted && <p className="text-xs text-red-500 font-medium mt-1">Balance exhausted</p>}
+              {low && !exhausted && <p className="text-xs text-yellow-600 font-medium mt-1">Running low</p>}
             </div>
-            <p className="text-xs text-gray-400 mt-1">{b.used_days} used · {b.pending_days} pending</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {onLeaveToday && (

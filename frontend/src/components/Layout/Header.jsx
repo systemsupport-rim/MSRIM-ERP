@@ -1,4 +1,4 @@
-import { Menu, Bell, Search, LogOut, Settings, ChevronDown } from 'lucide-react';
+import { Menu, Bell, Search, LogOut, Settings, ChevronDown, Layers, HardDrive, Users2, Brain, BarChart3, Shield, UserCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -75,13 +75,59 @@ export default function Header({ onMenuClick }) {
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+              {/* Profile */}
               <button onClick={() => { navigate('/profile'); setDropdownOpen(false); }}
-                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
-                <Settings className="w-4 h-4" /> My Profile
+                className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                <UserCircle className="w-4 h-4 text-gray-400" /> My Profile
               </button>
+
+              {/* Admin Console — shown to admin/registrar/hod */}
+              {['admin','registrar','hod'].includes(user?.role) && (<>
+                <div className="border-t border-gray-100 my-1" />
+                <p className="px-4 py-1 text-xs font-semibold text-gray-400 uppercase tracking-widest">Admin Console</p>
+
+                {['admin','registrar','hod'].includes(user?.role) && (
+                  <button onClick={() => { navigate('/structure'); setDropdownOpen(false); }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    <Layers className="w-4 h-4 text-gray-400" /> Structure
+                  </button>
+                )}
+                {['admin','registrar','hod'].includes(user?.role) && (
+                  <button onClick={() => { navigate('/analytics'); setDropdownOpen(false); }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    <Brain className="w-4 h-4 text-gray-400" /> Analytics / BI
+                  </button>
+                )}
+                {['admin','registrar','hod'].includes(user?.role) && (
+                  <button onClick={() => { navigate('/reports'); setDropdownOpen(false); }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    <BarChart3 className="w-4 h-4 text-gray-400" /> Reports & Logs
+                  </button>
+                )}
+                {['admin','registrar'].includes(user?.role) && (
+                  <button onClick={() => { navigate('/parents'); setDropdownOpen(false); }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    <Users2 className="w-4 h-4 text-gray-400" /> Parent Management
+                  </button>
+                )}
+                {user?.role === 'admin' && (
+                  <button onClick={() => { navigate('/roles'); setDropdownOpen(false); }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    <Shield className="w-4 h-4 text-gray-400" /> Roles & Privileges
+                  </button>
+                )}
+              </>)}
+
+              {/* Drive — all roles */}
               <div className="border-t border-gray-100 my-1" />
-              <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
+              <button onClick={() => { navigate('/drive'); setDropdownOpen(false); }}
+                className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                <HardDrive className="w-4 h-4 text-gray-400" /> Drive
+              </button>
+
+              <div className="border-t border-gray-100 my-1" />
+              <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
                 <LogOut className="w-4 h-4" /> Sign Out
               </button>
             </div>

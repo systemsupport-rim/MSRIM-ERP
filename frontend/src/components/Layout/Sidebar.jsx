@@ -93,17 +93,6 @@ const moduleGroups = [
       { to: '/accreditation', icon: BadgeCheck, label: 'Accreditation & NAAC', roles: ['admin','registrar','hod'] },
     ]
   },
-  {
-    group: 'Data & Admin',
-    items: [
-      { to: '/structure', icon: Layers, label: 'Structure', roles: ['admin','registrar','hod'] },
-      { to: '/drive', icon: HardDrive, label: 'Drive', roles: 'all' },
-      { to: '/parents', icon: Users2, label: 'Parent Management', roles: ['admin','registrar'] },
-      { to: '/analytics', icon: Brain, label: 'Analytics / BI', roles: ['admin','registrar','hod'] },
-      { to: '/reports', icon: BarChart3, label: 'Reports & Logs', roles: ['admin','registrar','hod'] },
-      { to: '/roles', icon: Shield, label: 'Roles & Privileges', roles: ['admin'] },
-    ]
-  },
 ];
 
 export default function Sidebar({ isOpen, onToggle }) {

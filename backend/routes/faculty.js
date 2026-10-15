@@ -72,14 +72,14 @@ router.put('/:id', authorize('admin', 'registrar'), (req, res) => {
   const { department_id, designation, qualification, specialization, experience_years, employment_type, salary, bank_account, ifsc_code } = req.body;
   db.prepare('UPDATE faculty SET department_id=?, designation=?, qualification=?, specialization=?, experience_years=?, employment_type=?, salary=?, bank_account=?, ifsc_code=? WHERE id=?')
     .run(department_id || faculty.department_id, designation || faculty.designation, qualification || faculty.qualification, specialization || faculty.specialization, experience_years !== undefined ? experience_years : faculty.experience_years, employment_type || faculty.employment_type, salary !== undefined ? salary : faculty.salary, bank_account || faculty.bank_account, ifsc_code || faculty.ifsc_code, req.params.id);
-  if (req.body.name || req.body.phone || req.body.email) {
-    const uUpdates = [];
-    const vals = [];
-    if (req.body.name) { uUpdates.push('name = ?'); vals.push(req.body.name); }
-    if (req.body.phone) { uUpdates.push('phone = ?'); vals.push(req.body.phone); }
-    if (req.body.email) { uUpdates.push('email = ?'); vals.push(req.body.email); }
+  // Always update user fields if provided (use !== undefined so empty string is allowed)
+  const uUpdates = []; const vals = [];
+  if (req.body.name  !== undefined) { uUpdates.push('name=?');  vals.push(req.body.name); }
+  if (req.body.phone !== undefined) { uUpdates.push('phone=?'); vals.push(req.body.phone); }
+  if (req.body.email !== undefined) { uUpdates.push('email=?'); vals.push(req.body.email); }
+  if (uUpdates.length > 0) {
     vals.push(faculty.user_id);
-    db.prepare(`UPDATE users SET ${uUpdates.join(', ')} WHERE id = ?`).run(...vals);
+    db.prepare(`UPDATE users SET ${uUpdates.join(',')} WHERE id=?`).run(...vals);
   }
   res.json({ message: 'Faculty updated.' });
 });

@@ -22,7 +22,7 @@ export default function Profile() {
     finally { setLoading(false); }
   }
 
-  const roleColors = { admin:'bg-red-500',registrar:'bg-purple-500',hod:'bg-blue-500',faculty:'bg-green-500',student:'bg-yellow-500',librarian:'bg-pink-500',accounts:'bg-indigo-500',placement:'bg-orange-500' };
+  const roleColors = { admin:'bg-red-500',registrar:'bg-purple-500',hod:'bg-blue-500',faculty:'bg-green-500',student:'bg-yellow-500',librarian:'bg-pink-500',accounts:'bg-indigo-500',placement:'bg-orange-500',staff:'bg-teal-500' };
 
   return (
     <div className="space-y-6 max-w-3xl">

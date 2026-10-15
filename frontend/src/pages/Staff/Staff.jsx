@@ -12,6 +12,7 @@ const ROLE_COLORS = {
   librarian: 'bg-pink-100 text-pink-700 border-pink-200',
   hod:       'bg-blue-100 text-blue-700 border-blue-200',
   admin:     'bg-red-100 text-red-700 border-red-200',
+  staff:     'bg-teal-100 text-teal-700 border-teal-200',
 };
 
 const ROLE_AVATAR = {
@@ -21,6 +22,7 @@ const ROLE_AVATAR = {
   librarian: 'bg-pink-600',
   hod:       'bg-blue-700',
   admin:     'bg-red-600',
+  staff:     'bg-teal-600',
 };
 
 export default function Staff() {
@@ -217,7 +219,7 @@ function EditStaffModal({ staff: s, onClose }) {
   const [loading, setLoading] = useState(false);
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
-  const ROLES = ['admin','registrar','hod','faculty','librarian','accounts','placement'];
+  const ROLES = ['admin','registrar','hod','faculty','librarian','accounts','placement','staff'];
   const DEPTS = [
     'Administration','Admissions Department','Accounts Department',
     'Business Analytics & Data Science','Examination Department',

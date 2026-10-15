@@ -33,7 +33,7 @@ router.get('/daily/:date', authorize('admin','registrar','hod'), (req, res) => {
     sa.id as att_id, sa.status, sa.check_in, sa.check_out, sa.remarks
     FROM users u
     LEFT JOIN staff_attendance sa ON sa.user_id = u.id AND sa.date = ?
-    WHERE u.is_active = 1 AND u.role IN ('faculty','admin','registrar','hod','librarian','accounts','placement')`;
+    WHERE u.is_active = 1 AND u.role IN ('faculty','admin','registrar','hod','librarian','accounts','placement','staff')`;
   const params = [req.params.date];
   if (department) { q += ' AND u.department = ?'; params.push(department); }
   if (role_filter) { q += ' AND u.role = ?'; params.push(role_filter); }
@@ -110,7 +110,7 @@ router.get('/summary-all', authorize('admin','registrar','hod'), (req, res) => {
     ROUND(100.0 * (SUM(CASE WHEN sa.status IN ('present','od') THEN 1 WHEN sa.status='late' THEN 1 WHEN sa.status='half_day' THEN 0.5 ELSE 0 END)) / NULLIF(SUM(CASE WHEN sa.status != 'holiday' THEN 1 ELSE 0 END),0),1) as pct
     FROM users u
     LEFT JOIN staff_attendance sa ON sa.user_id = u.id AND sa.date LIKE ?
-    WHERE u.is_active = 1 AND u.role IN ('faculty','admin','registrar','hod','librarian','accounts','placement')`;
+    WHERE u.is_active = 1 AND u.role IN ('faculty','admin','registrar','hod','librarian','accounts','placement','staff')`;
   const params = [`${y}-${m}%`];
   if (department) { q += ' AND u.department = ?'; params.push(department); }
   q += ' GROUP BY u.id ORDER BY u.name';

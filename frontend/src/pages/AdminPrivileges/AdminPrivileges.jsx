@@ -19,7 +19,7 @@ const ROLE_COLORS = {
   placement: 'bg-orange-100 text-orange-700 border-orange-200',
 };
 
-const ROLES = ['admin','registrar','hod','faculty','student','librarian','accounts','placement'];
+const ROLES = ['admin','registrar','hod','faculty','student','librarian','accounts','placement','staff'];
 
 export default function AdminPrivileges() {
   const { user: currentUser } = useAuth();

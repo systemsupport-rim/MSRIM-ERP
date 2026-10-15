@@ -86,7 +86,7 @@ router.put('/users/:id/toggle-active', authenticate, authorize('admin'), (req, r
 
 router.put('/users/:id/role', authenticate, authorize('admin'), (req, res) => {
   const { role } = req.body;
-  const allowed = ['admin','faculty','student','hod','registrar','librarian','accounts','placement','parent'];
+  const allowed = ['admin','faculty','student','hod','registrar','librarian','accounts','placement','parent','staff'];
   if (!allowed.includes(role)) return res.status(400).json({ error: 'Invalid role.' });
   if (req.user.id.toString() === req.params.id.toString()) return res.status(400).json({ error: 'Cannot change your own role.' });
   db.prepare('UPDATE users SET role = ? WHERE id = ?').run(role, req.params.id);

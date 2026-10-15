@@ -99,6 +99,8 @@ function extendDatabase() {
       UPDATE faculty SET employee_id=?, designation=?, joining_date=? WHERE user_id=?
     `);
 
+    const setStaffRole = db.prepare("UPDATE users SET role='staff' WHERE email=? AND role NOT IN ('admin','faculty','student','hod')");
+
     let updated = 0;
     for (const s of staffData) {
       const u = db.prepare('SELECT id, role FROM users WHERE email = ?').get(s.email);
@@ -107,6 +109,8 @@ function extendDatabase() {
       if (u.role === 'faculty') {
         const fac = db.prepare('SELECT id FROM faculty WHERE user_id=?').get(u.id);
         if (fac) updateFaculty.run(s.employee_id, s.designation, s.joining_date, u.id);
+      } else if (!['admin','faculty','student','hod'].includes(u.role)) {
+        setStaffRole.run(s.email);
       }
       updated++;
     }
@@ -140,7 +144,7 @@ function extendDatabase() {
 
     // Ensure leave balances exist for all staff for current year
     const year = new Date().getFullYear();
-    const staff = db.prepare("SELECT id FROM users WHERE role IN ('faculty','admin','hod','registrar','librarian','accounts','placement') AND is_active=1").all();
+    const staff = db.prepare("SELECT id FROM users WHERE role IN ('faculty','admin','hod','registrar','librarian','accounts','placement','staff') AND is_active=1").all();
     const types = db.prepare('SELECT * FROM leave_types WHERE is_active=1').all();
     const balInsert = db.prepare('INSERT OR IGNORE INTO leave_balances (user_id,leave_type_id,year,total_days) VALUES (?,?,?,?)');
     let newBal = 0;
@@ -183,14 +187,14 @@ function extendDatabase() {
 
   // Migration: add 'parent' to users role enum if not already present
   const userSchema = db.prepare("SELECT sql FROM sqlite_master WHERE name = 'users' AND type = 'table'").get();
-  if (userSchema && !userSchema.sql.includes("'parent'")) {
+  if (userSchema && (!userSchema.sql.includes("'parent'") || !userSchema.sql.includes("'staff'"))) {
     db.exec(`PRAGMA foreign_keys = OFF`);
     db.exec(`
       CREATE TABLE users_v2 (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
-        role TEXT NOT NULL CHECK(role IN ('admin','faculty','student','hod','registrar','librarian','accounts','placement','parent')),
+        role TEXT NOT NULL CHECK(role IN ('admin','faculty','student','hod','registrar','librarian','accounts','placement','parent','staff')),
         name TEXT NOT NULL,
         email TEXT UNIQUE NOT NULL,
         phone TEXT,
@@ -205,7 +209,7 @@ function extendDatabase() {
       ALTER TABLE users_v2 RENAME TO users;
     `);
     db.exec(`PRAGMA foreign_keys = ON`);
-    console.log('Migrated users table: added parent role.');
+    console.log('Migrated users table: added parent/staff roles.');
   }
 
   db.exec(`

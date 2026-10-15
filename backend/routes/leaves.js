@@ -18,7 +18,7 @@ router.post('/types', authorize('admin'), (req, res) => {
     const newId = r.lastInsertRowid;
     // Auto-create balance rows for all active staff for current year
     const year = new Date().getFullYear();
-    const staff = db.prepare("SELECT id FROM users WHERE role IN ('faculty','admin','registrar','hod','librarian','accounts','placement') AND is_active=1").all();
+    const staff = db.prepare("SELECT id FROM users WHERE role IN ('faculty','admin','registrar','hod','librarian','accounts','placement','staff') AND is_active=1").all();
     const balInsert = db.prepare('INSERT OR IGNORE INTO leave_balances (user_id,leave_type_id,year,total_days) VALUES (?,?,?,?)');
     staff.forEach(u => balInsert.run(u.id, newId, year, max_days_per_year || 0));
     res.status(201).json({ id: newId, message: 'Leave type created.' });
@@ -67,7 +67,7 @@ router.get('/balances/all', authorize('admin','registrar','hod'), (req, res) => 
     FROM users u
     JOIN leave_balances lb ON lb.user_id = u.id
     JOIN leave_types lt ON lb.leave_type_id = lt.id
-    WHERE u.role IN ('faculty','admin','registrar','hod','librarian','accounts','placement')
+    WHERE u.role IN ('faculty','admin','registrar','hod','librarian','accounts','placement','staff')
       AND lb.year = ? AND lt.is_active = 1 AND u.is_active = 1
     GROUP BY u.id ORDER BY u.name
   `).all(year);

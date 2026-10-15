@@ -39,7 +39,7 @@ function initializeDatabase() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT UNIQUE NOT NULL,
       password TEXT NOT NULL,
-      role TEXT NOT NULL CHECK(role IN ('admin','faculty','student','hod','registrar','librarian','accounts','placement','parent')),
+      role TEXT NOT NULL CHECK(role IN ('admin','faculty','student','hod','registrar','librarian','accounts','placement','parent','staff')),
       name TEXT NOT NULL,
       email TEXT UNIQUE NOT NULL,
       phone TEXT,

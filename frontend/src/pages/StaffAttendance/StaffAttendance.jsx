@@ -167,7 +167,7 @@ function MarkAttendance() {
                     <td className="table-td text-gray-400 text-xs">{i + 1}</td>
                     <td className="table-td">
                       <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ backgroundColor: cfg.dot.replace('bg-', '#').length > 10 ? '#6b7280' : undefined }} className2={`w-7 h-7 rounded-full ${cfg.dot} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>
+                        <div className={`w-7 h-7 rounded-full ${cfg.dot} flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>
                           {s.name?.charAt(0)}
                         </div>
                         <span className="font-medium text-sm">{s.name}</span>

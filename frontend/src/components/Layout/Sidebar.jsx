@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   LayoutDashboard, UserCircle, Calendar, Bell, Megaphone,
@@ -17,12 +17,13 @@ const mainItems = [
 
 export default function Sidebar({ isOpen, onToggle }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <aside className={`${isOpen ? 'w-64' : 'w-0 overflow-hidden'} transition-all duration-300 bg-msrim-blue-dark flex flex-col flex-shrink-0`}>
       {/* Logo */}
       <div className="flex items-center justify-between p-4 border-b border-white/10 flex-shrink-0">
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-3 min-w-0 cursor-pointer" onClick={() => navigate('/dashboard')}>
           <div className="bg-white rounded-lg p-1 flex-shrink-0">
             <img src="https://msrim.in/images/logo-2.png" alt="MSRIM" className="h-8 w-8 object-contain"
               onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='block'; }} />

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
-import { Search, Plus, X, Edit2, UserX, UserCheck, Trash2, Users, Building2 } from 'lucide-react';
+import { Search, Plus, X, Edit2, UserX, UserCheck, Trash2, Users, Building2, Save } from 'lucide-react';
 
 const ROLE_COLORS = {
   registrar: 'bg-purple-100 text-purple-700',
@@ -21,8 +21,10 @@ export default function Faculty() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch]   = useState('');
   const [deptFilter, setDeptFilter] = useState('');
-  const [selected, setSelected] = useState(null);
-  const [showAdd, setShowAdd]   = useState(false);
+  const [selected, setSelected]       = useState(null);
+  const [showAdd, setShowAdd]         = useState(false);
+  const [editFaculty, setEditFaculty] = useState(null);
+  const [editStaff, setEditStaff]     = useState(null);
   const canManage = ['admin', 'registrar'].includes(user.role);
 
   useEffect(() => { fetchAll(); }, [search]);
@@ -111,13 +113,17 @@ export default function Faculty() {
               </div>
             </div>
             {canManage && (
-              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100 flex-wrap">
+                <button onClick={() => setEditFaculty(f)}
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg border border-msrim-blue text-msrim-blue hover:bg-blue-50 font-medium transition-colors">
+                  <Edit2 className="w-3 h-3" /> Edit
+                </button>
                 <button onClick={async () => {
                   const action = f.is_active === 0 ? 'activate' : 'deactivate';
                   if (!window.confirm(`${action === 'activate' ? 'Activate' : 'Deactivate'} ${f.name}?`)) return;
                   try { await api.put(`/faculty/${f.id}/${action}`); toast.success(`Faculty ${action}d`); fetchAll(); }
                   catch (e) { toast.error(e.response?.data?.error || 'Failed'); }
-                }} className={`flex-1 flex items-center justify-center gap-1 py-1.5 text-xs rounded-lg border font-medium transition-colors
+                }} className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg border font-medium transition-colors
                   ${f.is_active === 0 ? 'border-green-300 text-green-700 hover:bg-green-50' : 'border-yellow-300 text-yellow-700 hover:bg-yellow-50'}`}>
                   {f.is_active === 0 ? <UserCheck className="w-3 h-3" /> : <UserX className="w-3 h-3" />}
                   {f.is_active === 0 ? 'Activate' : 'Deactivate'}
@@ -176,27 +182,26 @@ export default function Faculty() {
 
               {/* Actions */}
               {canManage && (
-                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100 flex-wrap">
+                  <button onClick={() => setEditStaff(s)}
+                    className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg border border-msrim-blue text-msrim-blue hover:bg-blue-50 font-medium transition-colors">
+                    <Edit2 className="w-3 h-3" /> Edit
+                  </button>
                   <button onClick={async () => {
                     const action = s.is_active ? 'deactivate' : 'activate';
                     if (!window.confirm(`${s.is_active ? 'Deactivate' : 'Activate'} ${s.name}?`)) return;
-                    try {
-                      await api.put(`/auth/users/${s.id}/toggle-active`);
-                      toast.success(`Account ${action}d`);
-                      fetchAll();
-                    } catch (e) { toast.error(e.response?.data?.error || 'Failed'); }
-                  }} className={`flex-1 flex items-center justify-center gap-1 py-1.5 text-xs rounded-lg border font-medium transition-colors
+                    try { await api.put(`/auth/users/${s.id}/toggle-active`); toast.success(`Account ${action}d`); fetchAll(); }
+                    catch (e) { toast.error(e.response?.data?.error || 'Failed'); }
+                  }} className={`flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg border font-medium transition-colors
                     ${s.is_active ? 'border-yellow-300 text-yellow-700 hover:bg-yellow-50' : 'border-green-300 text-green-700 hover:bg-green-50'}`}>
                     {s.is_active ? <><UserX className="w-3 h-3" />Deactivate</> : <><UserCheck className="w-3 h-3" />Activate</>}
                   </button>
                   <button onClick={async () => {
                     const pwd = window.prompt(`Reset password for ${s.name}:`);
                     if (!pwd) return;
-                    try {
-                      await api.put(`/auth/users/${s.id}/reset-password`, { password: pwd });
-                      toast.success('Password reset');
-                    } catch (e) { toast.error(e.response?.data?.error || 'Failed'); }
-                  }} className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg border border-blue-300 text-blue-700 hover:bg-blue-50 font-medium transition-colors">
+                    try { await api.put(`/auth/users/${s.id}/reset-password`, { password: pwd }); toast.success('Password reset'); }
+                    catch (e) { toast.error(e.response?.data?.error || 'Failed'); }
+                  }} className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium transition-colors">
                     🔑 Reset
                   </button>
                 </div>
@@ -217,6 +222,8 @@ export default function Faculty() {
         />
       )}
       {showAdd && <AddFacultyModal onClose={() => { setShowAdd(false); fetchAll(); }} />}
+      {editFaculty && <EditFacultyModal faculty={editFaculty} onClose={() => { setEditFaculty(null); fetchAll(); }} />}
+      {editStaff   && <EditStaffModal   staff={editStaff}     onClose={() => { setEditStaff(null);   fetchAll(); }} />}
     </div>
   );
 }
@@ -419,6 +426,188 @@ function AddFacultyModal({ onClose }) {
           <div className="col-span-2 flex justify-end gap-3">
             <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
             <button type="submit" disabled={loading} className="btn-primary">{loading ? 'Adding...' : 'Add Faculty'}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ── Edit Faculty Modal ────────────────────────────────────────────────────────
+function EditFacultyModal({ faculty: f, onClose }) {
+  const [form, setForm] = useState({
+    name:             f.name || '',
+    email:            f.email || '',
+    phone:            f.phone || '',
+    designation:      f.designation || '',
+    qualification:    f.qualification || '',
+    specialization:   f.specialization || '',
+    experience_years: f.experience_years || 0,
+    employment_type:  f.employment_type || 'full-time',
+    department_id:    f.department_id || '',
+  });
+  const [depts,   setDepts]   = useState([]);
+  const [loading, setLoading] = useState(false);
+  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  useEffect(() => {
+    api.get('/structure/departments').then(r => setDepts(r.data)).catch(() => {});
+  }, []);
+
+  async function handleSubmit(e) {
+    e.preventDefault(); setLoading(true);
+    try {
+      await api.put(`/faculty/${f.id}`, form);
+      toast.success('Faculty updated successfully');
+      onClose();
+    } catch (err) { toast.error(err.response?.data?.error || 'Failed to update'); }
+    finally { setLoading(false); }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b">
+          <div>
+            <h2 className="font-bold text-xl">Edit Faculty</h2>
+            <p className="text-sm text-gray-500 mt-0.5">{f.name} · {f.employee_id}</p>
+          </div>
+          <button onClick={onClose}><X className="w-5 h-5" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 grid grid-cols-2 gap-4">
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+            <input required value={form.name} onChange={e => set('name', e.target.value)} className="input-field" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+            <input required type="email" value={form.email} onChange={e => set('email', e.target.value)} className="input-field" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+            <input value={form.phone} onChange={e => set('phone', e.target.value)} className="input-field" placeholder="Mobile number" />
+          </div>
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+            <input value={form.designation} onChange={e => set('designation', e.target.value)} className="input-field" placeholder="e.g. Assistant Professor" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+            <select value={form.department_id} onChange={e => set('department_id', e.target.value)} className="select-field">
+              <option value="">Select department</option>
+              {depts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Experience (Years)</label>
+            <input type="number" min="0" value={form.experience_years} onChange={e => set('experience_years', parseInt(e.target.value) || 0)} className="input-field" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Qualification</label>
+            <input value={form.qualification} onChange={e => set('qualification', e.target.value)} className="input-field" placeholder="e.g. Ph.D, MBA" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Specialization</label>
+            <input value={form.specialization} onChange={e => set('specialization', e.target.value)} className="input-field" placeholder="e.g. Finance, Marketing" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Employment Type</label>
+            <select value={form.employment_type} onChange={e => set('employment_type', e.target.value)} className="select-field">
+              {['full-time','part-time','visiting','adjunct','contract'].map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+          <div className="col-span-2 flex justify-end gap-3 pt-2 border-t border-gray-100">
+            <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
+            <button type="submit" disabled={loading} className="btn-primary">
+              <Save className="w-4 h-4" />{loading ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ── Edit Staff Modal ──────────────────────────────────────────────────────────
+function EditStaffModal({ staff: s, onClose }) {
+  const [form, setForm] = useState({
+    name:       s.name || '',
+    email:      s.email || '',
+    phone:      s.phone || '',
+    department: s.department || '',
+    role:       s.role || 'registrar',
+  });
+  const [loading, setLoading] = useState(false);
+  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  const ROLES = ['admin','registrar','hod','faculty','librarian','accounts','placement'];
+  const DEPTS = [
+    'Administration','Admissions Department','Accounts Department',
+    'Business Analytics & Data Science','Examination Department',
+    'Finance, Banking & Insurance','HR & General Management',
+    'International Affairs','IT Department','Library',
+    'Marketing & International Business','Operations & Supply Chain Mgmt',
+    'Placements & Corporate Relations',
+  ];
+
+  async function handleSubmit(e) {
+    e.preventDefault(); setLoading(true);
+    try {
+      await api.put(`/auth/users/${s.id}/profile`, {
+        name: form.name, email: form.email, phone: form.phone, department: form.department
+      });
+      if (form.role !== s.role) {
+        await api.put(`/auth/users/${s.id}/role`, { role: form.role });
+      }
+      toast.success('Staff profile updated');
+      onClose();
+    } catch (err) { toast.error(err.response?.data?.error || 'Failed'); }
+    finally { setLoading(false); }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b">
+          <div>
+            <h2 className="font-bold text-xl">Edit Staff Profile</h2>
+            <p className="text-sm text-gray-500 mt-0.5 font-mono">{s.username}</p>
+          </div>
+          <button onClick={onClose}><X className="w-5 h-5" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+            <input required value={form.name} onChange={e => set('name', e.target.value)} className="input-field" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+              <input required type="email" value={form.email} onChange={e => set('email', e.target.value)} className="input-field" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <input value={form.phone} onChange={e => set('phone', e.target.value)} className="input-field" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+            <select value={form.department} onChange={e => set('department', e.target.value)} className="select-field">
+              <option value="">Select department</option>
+              {DEPTS.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+            <select value={form.role} onChange={e => set('role', e.target.value)} className="select-field">
+              {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+            </select>
+          </div>
+          <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">
+            <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
+            <button type="submit" disabled={loading} className="btn-primary">
+              <Save className="w-4 h-4" />{loading ? 'Saving...' : 'Save Changes'}
+            </button>
           </div>
         </form>
       </div>

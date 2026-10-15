@@ -100,4 +100,19 @@ router.put('/users/:id/reset-password', authenticate, authorize('admin'), (req, 
   res.json({ message: 'Password reset successfully.' });
 });
 
+router.put('/users/:id/profile', authenticate, authorize('admin','registrar'), (req, res) => {
+  const { name, email, phone, department } = req.body;
+  const u = db.prepare('SELECT id FROM users WHERE id = ?').get(req.params.id);
+  if (!u) return res.status(404).json({ error: 'User not found.' });
+  const sets = []; const vals = [];
+  if (name)       { sets.push('name=?');       vals.push(name); }
+  if (email)      { sets.push('email=?');      vals.push(email); }
+  if (phone)      { sets.push('phone=?');      vals.push(phone); }
+  if (department) { sets.push('department=?'); vals.push(department); }
+  if (sets.length === 0) return res.status(400).json({ error: 'Nothing to update.' });
+  vals.push(req.params.id);
+  db.prepare(`UPDATE users SET ${sets.join(',')} WHERE id=?`).run(...vals);
+  res.json({ message: 'Profile updated.' });
+});
+
 module.exports = router;

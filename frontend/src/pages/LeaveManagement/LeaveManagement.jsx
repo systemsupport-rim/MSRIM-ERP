@@ -600,17 +600,73 @@ function LeaveTypeModal({ type, onClose }) {
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b"><h2 className="font-bold text-xl">{type ? 'Edit' : 'Add'} Leave Type</h2><button onClick={onClose}><X className="w-5 h-5" /></button></div>
-        <form onSubmit={handleSubmit} className="p-6 grid grid-cols-2 gap-4">
-          <div><label className="block text-sm font-medium mb-1">Code * (e.g. CL)</label><input required value={form.code} onChange={e => set('code', e.target.value.toUpperCase())} className="input-field font-mono" disabled={!!type} /></div>
-          <div><label className="block text-sm font-medium mb-1">Name *</label><input required value={form.name} onChange={e => set('name', e.target.value)} className="input-field" /></div>
-          <div><label className="block text-sm font-medium mb-1">Max Days/Year (0 = unlimited)</label><input type="number" min="0" value={form.max_days_per_year} onChange={e => set('max_days_per_year', parseInt(e.target.value))} className="input-field" /></div>
-          <div><label className="block text-sm font-medium mb-1">Color</label><div className="flex gap-2"><input type="color" value={form.color} onChange={e => set('color', e.target.value)} className="h-10 w-16 rounded-lg border border-gray-300 cursor-pointer" /><input value={form.color} onChange={e => set('color', e.target.value)} className="input-field flex-1 font-mono text-sm" /></div></div>
-          <div className="col-span-2"><label className="block text-sm font-medium mb-1">Description</label><input value={form.description} onChange={e => set('description', e.target.value)} className="input-field" /></div>
-          <div className="flex items-center gap-2 col-span-1"><input type="checkbox" id="paid" checked={!!form.is_paid} onChange={e => set('is_paid', e.target.checked ? 1 : 0)} /><label htmlFor="paid" className="text-sm">Paid Leave</label></div>
-          <div className="flex items-center gap-2 col-span-1"><input type="checkbox" id="cf" checked={!!form.carry_forward} onChange={e => set('carry_forward', e.target.checked ? 1 : 0)} /><label htmlFor="cf" className="text-sm">Allow Carry Forward</label></div>
-          {form.carry_forward ? <div className="col-span-2"><label className="block text-sm font-medium mb-1">Max Carry Forward Days</label><input type="number" min="0" value={form.max_carry_forward} onChange={e => set('max_carry_forward', parseInt(e.target.value))} className="input-field" /></div> : null}
-          <div className="flex items-center gap-2 col-span-1"><input type="checkbox" id="active" checked={!!form.is_active} onChange={e => set('is_active', e.target.checked ? 1 : 0)} /><label htmlFor="active" className="text-sm">Active</label></div>
-          <div className="col-span-2 flex justify-end gap-3 pt-2"><button type="button" onClick={onClose} className="btn-secondary">Cancel</button><button type="submit" disabled={loading} className="btn-primary">{loading ? 'Saving...' : (type ? 'Update' : 'Create')}</button></div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Code * <span className="text-gray-400 font-normal">(short identifier)</span></label>
+              <input required value={form.code} onChange={e => set('code', e.target.value.toUpperCase())} className="input-field font-mono uppercase" placeholder="e.g. VL, CL, SL" disabled={!!type} maxLength={5} />
+              <p className="text-xs text-gray-400 mt-1">2–5 uppercase letters, cannot be changed later</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Full Name *</label>
+              <input required value={form.name} onChange={e => set('name', e.target.value)} className="input-field" placeholder="e.g. Vacation Leave" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Max Days / Year</label>
+              <input type="number" min="0" max="365" value={form.max_days_per_year} onChange={e => set('max_days_per_year', parseInt(e.target.value) || 0)} className="input-field" placeholder="0" />
+              <p className="text-xs text-gray-400 mt-1">
+                {form.max_days_per_year > 0
+                  ? `Each staff gets ${form.max_days_per_year} days of this leave per year. Requests beyond this will be blocked.`
+                  : 'Set to 0 for unlimited — no balance check (e.g. On Duty, LWP).'}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Badge Color</label>
+              <div className="flex gap-2">
+                <input type="color" value={form.color} onChange={e => set('color', e.target.value)} className="h-10 w-14 rounded-lg border border-gray-300 cursor-pointer p-1" />
+                <input value={form.color} onChange={e => set('color', e.target.value)} className="input-field flex-1 font-mono text-sm" placeholder="#3b82f6" />
+              </div>
+              <p className="text-xs text-gray-400 mt-1">Used for the leave type badge and balance card</p>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Description</label>
+            <input value={form.description} onChange={e => set('description', e.target.value)} className="input-field" placeholder="e.g. Annual paid vacation entitlement for all permanent staff" />
+            <p className="text-xs text-gray-400 mt-1">Shown on the leave type card to help staff understand when to use it</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 pt-1">
+            <label className="flex items-center gap-2.5 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors">
+              <input type="checkbox" checked={!!form.is_paid} onChange={e => set('is_paid', e.target.checked ? 1 : 0)} className="w-4 h-4 rounded" />
+              <div><p className="text-sm font-medium">Paid Leave</p><p className="text-xs text-gray-400">Salary not deducted during this leave</p></div>
+            </label>
+            <label className="flex items-center gap-2.5 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors">
+              <input type="checkbox" checked={!!form.carry_forward} onChange={e => set('carry_forward', e.target.checked ? 1 : 0)} className="w-4 h-4 rounded" />
+              <div><p className="text-sm font-medium">Carry Forward</p><p className="text-xs text-gray-400">Unused days roll over to next year</p></div>
+            </label>
+          </div>
+
+          {!!form.carry_forward && (
+            <div>
+              <label className="block text-sm font-medium mb-1">Max Carry Forward Days</label>
+              <input type="number" min="0" max="365" value={form.max_carry_forward} onChange={e => set('max_carry_forward', parseInt(e.target.value) || 0)} className="input-field w-32" />
+              <p className="text-xs text-gray-400 mt-1">Maximum unused days that can roll over (0 = no limit)</p>
+            </div>
+          )}
+
+          <label className="flex items-center gap-2.5 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors">
+            <input type="checkbox" checked={!!form.is_active} onChange={e => set('is_active', e.target.checked ? 1 : 0)} className="w-4 h-4 rounded" />
+            <div><p className="text-sm font-medium">Active</p><p className="text-xs text-gray-400">Inactive types are hidden from the apply leave form</p></div>
+          </label>
+
+          <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">
+            <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
+            <button type="submit" disabled={loading} className="btn-primary">{loading ? 'Saving...' : (type ? 'Update Leave Type' : 'Create Leave Type')}</button>
+          </div>
         </form>
       </div>
     </div>

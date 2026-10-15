@@ -7,7 +7,7 @@ router.use(authenticate);
 
 router.get('/', (req, res) => {
   const { department_id, search } = req.query;
-  let query = `SELECT f.*, u.name, u.email, u.phone, u.profile_photo, d.name as dept_name
+  let query = `SELECT f.*, u.name, u.email, u.phone, u.profile_photo, u.gender, d.name as dept_name
     FROM faculty f JOIN users u ON f.user_id = u.id LEFT JOIN departments d ON f.department_id = d.id WHERE u.is_active = 1`;
   const params = [];
   if (req.user.role === 'faculty') {
@@ -29,7 +29,7 @@ router.get('/stats/overview', authorize('admin', 'registrar', 'hod'), (req, res)
 });
 
 router.get('/:id', (req, res) => {
-  const faculty = db.prepare(`SELECT f.*, u.name, u.email, u.phone, d.name as dept_name
+  const faculty = db.prepare(`SELECT f.*, u.name, u.email, u.phone, u.gender, d.name as dept_name
     FROM faculty f JOIN users u ON f.user_id = u.id LEFT JOIN departments d ON f.department_id = d.id WHERE f.id = ?`).get(req.params.id);
   if (!faculty) return res.status(404).json({ error: 'Faculty not found.' });
   const courses = db.prepare(`SELECT c.*, ay.name as academic_year FROM courses c JOIN academic_years ay ON c.academic_year_id = ay.id WHERE c.faculty_id = ? ORDER BY ay.name, c.semester`).all(req.params.id);

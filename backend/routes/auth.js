@@ -72,7 +72,7 @@ router.post('/change-password', authenticate, (req, res) => {
 const { authorize } = require('../middleware/auth');
 
 router.get('/users', authenticate, authorize('admin'), (req, res) => {
-  const users = db.prepare('SELECT id, username, name, email, phone, role, department, designation, is_active, last_login, created_at FROM users ORDER BY role, name').all();
+  const users = db.prepare('SELECT id, username, name, email, phone, role, department, designation, gender, joining_date, employee_id, is_active, last_login, created_at FROM users ORDER BY role, name').all();
   res.json(users);
 });
 

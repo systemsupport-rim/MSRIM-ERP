@@ -119,10 +119,12 @@ export default function Faculty() {
                 <h3 className="font-semibold text-gray-900">{f.name}</h3>
                 <p className="text-gray-500 text-sm">{f.designation || '—'}</p>
                 <p className="text-gray-400 text-xs">{f.dept_name}</p>
-                <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
                   <span className="badge-blue text-xs">{f.employee_id}</span>
-                  <span className={`text-xs ${f.is_active === 0 ? 'badge-red' : 'badge-green'}`}>{f.is_active === 0 ? 'Inactive' : `${f.experience_years} yrs`}</span>
+                  {f.gender && <span className="text-xs bg-purple-50 text-purple-600 border border-purple-200 px-2 py-0.5 rounded-full capitalize">{f.gender}</span>}
+                  <span className={`text-xs ${f.is_active === 0 ? 'badge-red' : 'badge-green'}`}>{f.is_active === 0 ? 'Inactive' : `${f.experience_years} yrs exp`}</span>
                 </div>
+                {f.joining_date && <p className="text-xs text-gray-400 mt-1">Joined: {f.joining_date}</p>}
               </div>
             </div>
             {canManage && (
@@ -187,10 +189,15 @@ export default function Faculty() {
                 </div>
               </div>
 
+              {/* Designation */}
+              {s.designation && <p className="text-xs text-msrim-blue font-medium mt-2 truncate">{s.designation}</p>}
+
               {/* Email & phone */}
-              <div className="mt-3 space-y-1">
+              <div className="mt-2 space-y-1">
                 {s.email && <p className="text-xs text-gray-400 truncate">✉ {s.email}</p>}
                 {s.phone && <p className="text-xs text-gray-400">📞 {s.phone}</p>}
+                {s.employee_id && <p className="text-xs text-gray-400 font-mono">ID: {s.employee_id}</p>}
+                {s.joining_date && <p className="text-xs text-gray-400">Joined: {s.joining_date}</p>}
               </div>
 
               {/* Actions */}
@@ -317,8 +324,9 @@ function FacultyDetailModal({ faculty: initialFaculty, canManage, onClose }) {
           {tab === 'details' && !editing && (
             <div className="grid grid-cols-2 gap-4">
               {[['Employee ID', faculty.employee_id], ['Email', faculty.email], ['Phone', faculty.phone],
+                ['Gender', faculty.gender], ['Joining Date', faculty.joining_date],
                 ['Qualification', faculty.qualification], ['Specialization', faculty.specialization],
-                ['Experience', `${faculty.experience_years} years`], ['Joining Date', faculty.joining_date],
+                ['Experience', `${faculty.experience_years} years`],
                 ['Employment Type', faculty.employment_type]].map(([k, v]) => (
                 <div key={k}>
                   <p className="text-xs text-gray-400 uppercase tracking-wide">{k}</p>

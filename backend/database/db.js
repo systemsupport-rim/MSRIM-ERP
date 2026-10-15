@@ -286,13 +286,52 @@ function initializeDatabase() {
       amenities TEXT
     );
 
+    CREATE TABLE IF NOT EXISTS leave_types (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL,
+      max_days_per_year INTEGER DEFAULT 0,
+      is_paid INTEGER DEFAULT 1,
+      requires_approval INTEGER DEFAULT 1,
+      applicable_to TEXT DEFAULT 'all',
+      carry_forward INTEGER DEFAULT 0,
+      max_carry_forward INTEGER DEFAULT 0,
+      color TEXT DEFAULT '#3b82f6',
+      description TEXT,
+      is_active INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS leave_balances (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      leave_type_id INTEGER NOT NULL REFERENCES leave_types(id),
+      year INTEGER NOT NULL,
+      total_days INTEGER DEFAULT 0,
+      used_days REAL DEFAULT 0,
+      pending_days REAL DEFAULT 0,
+      carried_forward REAL DEFAULT 0,
+      encashed_days REAL DEFAULT 0,
+      UNIQUE(user_id, leave_type_id, year)
+    );
+
+    CREATE TABLE IF NOT EXISTS holiday_calendar (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      date TEXT NOT NULL UNIQUE,
+      type TEXT DEFAULT 'public' CHECK(type IN ('public','restricted','optional','institutional')),
+      description TEXT,
+      is_active INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
     CREATE TABLE IF NOT EXISTS leave_applications (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER REFERENCES users(id),
-      leave_type TEXT NOT NULL CHECK(leave_type IN ('sick','casual','earned','maternity','paternity','duty')),
+      user_id INTEGER NOT NULL REFERENCES users(id),
+      leave_type TEXT NOT NULL,
       from_date TEXT NOT NULL,
       to_date TEXT NOT NULL,
-      days INTEGER NOT NULL,
+      days REAL DEFAULT 1,
       reason TEXT,
       status TEXT DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected','cancelled')),
       approved_by INTEGER REFERENCES users(id),

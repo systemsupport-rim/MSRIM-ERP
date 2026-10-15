@@ -1,11 +1,184 @@
 const { db } = require('./db');
 
 function extendDatabase() {
-  // Migration: add designation column to users table
+  // Migration: add designation, gender, joining_date columns to users table
   const userCols = db.prepare("PRAGMA table_info(users)").all();
   if (!userCols.some(c => c.name === 'designation')) {
     db.exec("ALTER TABLE users ADD COLUMN designation TEXT");
     console.log('Migrated users table: added designation column.');
+  }
+  if (!userCols.some(c => c.name === 'gender')) {
+    db.exec("ALTER TABLE users ADD COLUMN gender TEXT");
+    console.log('Migrated users table: added gender column.');
+  }
+  if (!userCols.some(c => c.name === 'joining_date')) {
+    db.exec("ALTER TABLE users ADD COLUMN joining_date TEXT");
+    console.log('Migrated users table: added joining_date column.');
+  }
+  if (!userCols.some(c => c.name === 'employee_id')) {
+    db.exec("ALTER TABLE users ADD COLUMN employee_id TEXT");
+    console.log('Migrated users table: added employee_id column.');
+  }
+
+  // Seed/sync staff data from official MSRIM faculty & staff list
+  {
+    const staffData = [
+      { email:'shashidhar@msrim.org',     name:'Achakkagari Shashidhar',       phone:'9948574929',  department:'Business Analytics & Data Science',    designation:'Assistant Professor',                       employee_id:'T83',   gender:'male',   joining_date:'2026-09-07' },
+      { email:'ajaypagare@msrim.org',     name:'Ajay Pagare',                  phone:'7583055777',  department:'Operations & Supply Chain Mgmt',        designation:'Associate Professor',                       employee_id:'T81',   gender:'male',   joining_date:'2026-08-01' },
+      { email:'ajit.paul@digitali2o.com', name:'Ajit Paul',                    phone:'9987590134',  department:'HR & General Management',               designation:null,                                        employee_id:'VF504', gender:'male',   joining_date:'2026-02-10' },
+      { email:'akshatha@msrim.org',       name:'Akshatha M K',                 phone:'9886051203',  department:'Administration',                        designation:'Executive Assistant',                       employee_id:'202',   gender:'female', joining_date:'2024-08-01' },
+      { email:'anitas@msrim.org',         name:'Anita Singh',                  phone:'8217844013',  department:'HR & General Management',               designation:'Chairperson and Associate Professor',       employee_id:'49',    gender:'female', joining_date:'2006-07-24' },
+      { email:'anjana@msrim.org',         name:'Anjana Seshagiri',             phone:'9449837370',  department:'International Affairs',                 designation:'Head - Ramaiah Japan Center',               employee_id:'82',    gender:'female', joining_date:'2021-01-18' },
+      { email:'anjani@msrim.org',         name:'Anjani',                       phone:'9611830348',  department:'Administration',                        designation:'Watchman',                                  employee_id:'112',   gender:'male',   joining_date:'1995-10-01' },
+      { email:'aravindar@msrim.org',      name:'Aravinda Reddy M.N',           phone:'7337780557',  department:'Business Analytics & Data Science',     designation:'Chairperson and Associate Professor',       employee_id:'23',    gender:'male',   joining_date:'2012-04-26' },
+      { email:'aruljyothi@msrim.org',     name:'Arul Jyothi',                  phone:'9964664774',  department:'Marketing & International Business',    designation:'Senior Assistant Professor',                employee_id:'34',    gender:'female', joining_date:'2015-07-10' },
+      { email:'aruna@msrim.org',          name:'Aruna M',                      phone:'9886517316',  department:'Library',                               designation:'Library Assistant',                         employee_id:'179',   gender:'female', joining_date:'2003-07-30' },
+      { email:'arunprasad@msrim.org',     name:'Aruna S',                      phone:'9901322154',  department:'Administration',                        designation:'Office Assistant - Admin',                  employee_id:'126',   gender:'male',   joining_date:'2012-01-02' },
+      { email:'arunamk@msrim.org',        name:'Aruna Mohan Kumar',            phone:'8951801149',  department:'Accounts Department',                   designation:'Office Assistant - Accounts',               employee_id:'153',   gender:'female', joining_date:'2011-12-15' },
+      { email:'bhanumathi@msrim.org',     name:'Bhanumathi P.',                phone:'8050886607',  department:'Examination Department',                designation:'Chief of Examination',                      employee_id:'31',    gender:'female', joining_date:'2013-12-12' },
+      { email:'bharath@msrim.org',        name:'Bharath Kumar S A',            phone:'9980070323',  department:'Accounts Department',                   designation:'Manager - Accounts & Administration',       employee_id:'151',   gender:'male',   joining_date:'2006-01-03' },
+      { email:'bhavanesh@msrim.org',      name:'Bhavanesh Kumar B',            phone:'6363775784',  department:'Administration',                        designation:'Digital Marketing Executive',               employee_id:'201',   gender:'male',   joining_date:'2026-06-15' },
+      { email:'bikash@msrim.org',         name:'Bikash Ranjan Debata',         phone:'7022118841',  department:'Marketing & International Business',    designation:'Professor',                                 employee_id:'74',    gender:'male',   joining_date:'2024-09-14' },
+      { email:'chandan@msrim.org',        name:'Chandan K.N',                  phone:'9980488388',  department:'Admissions Department',                 designation:null,                                        employee_id:'149',   gender:'male',   joining_date:'2024-06-19' },
+      { email:'deepak@msrim.org',         name:'Deepak S',                     phone:'9945041396',  department:'Examination Department',                designation:'Assistant Registrar',                       employee_id:'162',   gender:'male',   joining_date:'2001-10-01' },
+      { email:'ektayadav@msrim.org',      name:'Ekta Yadav',                   phone:'8787288287',  department:'Finance, Banking & Insurance',          designation:'Assistant Professor',                       employee_id:'78',    gender:'female', joining_date:'2025-10-06' },
+      { email:'vijaykumar@msrim.org',     name:'G R Vijaya kumar',             phone:'9945091913',  department:'Examination Department',                designation:'Attender - Evaluation',                     employee_id:'116',   gender:'male',   joining_date:'2003-05-01' },
+      { email:'garimapande85@gmail.com',  name:'Garima Pande',                 phone:'8111840840',  department:'HR & General Management',               designation:null,                                        employee_id:'VF505', gender:'female', joining_date:'2026-02-10' },
+      { email:'geetharajaram@msrim.org',  name:'Geetha M Rajaram',             phone:'9448310254',  department:'Administration',                        designation:'Professor and Dean',                        employee_id:'T80',   gender:'female', joining_date:'2026-04-01' },
+      { email:'gifty@msrim.org',          name:'Gifty Malhotra',               phone:'8283823675',  department:'Business Analytics & Data Science',     designation:'Assistant Professor',                       employee_id:'59',    gender:'female', joining_date:'2023-02-01' },
+      { email:'janardhan@msrim.org',      name:'Janaradhan Rao A N',           phone:'9880021875',  department:'Library',                               designation:'Librarian',                                 employee_id:'176',   gender:'male',   joining_date:'1999-02-15' },
+      { email:'jeevitha@msrim.org',       name:'Jeevitha .R',                  phone:'9916089980',  department:'Placements & Corporate Relations',      designation:'Head Placements & Corporate Relations',     employee_id:'32',    gender:'female', joining_date:'2013-12-30' },
+      { email:'kiran@msrim.org',          name:'Kiran B M',                    phone:'9886061740',  department:'IT Department',                         designation:'Computer Lab Assistant',                    employee_id:'187',   gender:'male',   joining_date:'2006-10-12' },
+      { email:'kirankumarkv@msrim.org',   name:'Kiran Kumar K V',              phone:'7019483913',  department:'Finance, Banking & Insurance',          designation:'Adjunct Faculty',                           employee_id:'93',    gender:'male',   joining_date:'2024-01-01' },
+      { email:'kirronbindu@msrim.org',    name:'Kirron Bindu',                 phone:'9742051567',  department:'Finance, Banking & Insurance',          designation:'Adjunct Faculty',                           employee_id:'80',    gender:'male',   joining_date:'2021-01-05' },
+      { email:'kumuda@msrim.org',         name:'Kumuda P.R',                   phone:'9342299766',  department:'Finance, Banking & Insurance',          designation:'Associate Professor',                       employee_id:'20',    gender:'female', joining_date:'2011-02-07' },
+      { email:'lakshman@msrim.org',       name:'Lakshman R P',                 phone:'9916065717',  department:'Administration',                        designation:'Sweeper',                                   employee_id:'115',   gender:'male',   joining_date:'1999-10-01' },
+      { email:'mahadeva@msrim.org',       name:'Mahadeva S',                   phone:'9880587672',  department:'Administration',                        designation:'Driver',                                    employee_id:'119',   gender:'male',   joining_date:'2009-04-01' },
+      { email:'mallieswari@msrim.org',    name:'Mallieswari .R',               phone:'9886684746',  department:'Business Analytics & Data Science',     designation:'Assistant Professor',                       employee_id:'24',    gender:'female', joining_date:'2012-07-05' },
+      { email:'meghna@msrim.org',         name:'Meghna Verma',                 phone:'9845888372',  department:'Marketing & International Business',    designation:'Associate Professor',                       employee_id:'10',    gender:'female', joining_date:'2011-09-02' },
+      { email:'mohans@msrim.org',         name:'Mohan S',                      phone:'9739677768',  department:'Administration',                        designation:'Sweeper',                                   employee_id:'113',   gender:'male',   joining_date:'1995-08-01' },
+      { email:'mohan@msrim.org',          name:'Mohan Kumar B',                phone:'9980950028',  department:'Administration',                        designation:'Security Officer',                          employee_id:'117',   gender:'male',   joining_date:'2004-09-15' },
+      { email:'connect@shadowandsun.app', name:'NEERAJ KUMAR',                 phone:'7892731362',  department:'HR & General Management',               designation:null,                                        employee_id:'VF507', gender:'male',   joining_date:'2026-09-17' },
+      { email:'neeraja@msrim.org',        name:'Neeraja B',                    phone:'9980081483',  department:'Admissions Department',                 designation:null,                                        employee_id:'165',   gender:'female', joining_date:'2012-10-03' },
+      { email:'nethravathi@msrim.org',    name:'NETHRAVATHI V',                phone:'8618453349',  department:'Administration',                        designation:'Site Engineer',                             employee_id:'NT150', gender:'female', joining_date:'2026-06-01' },
+      { email:'niharika@msrim.org',       name:'Niharika Mishra',              phone:'9844401333',  department:'Marketing & International Business',    designation:'Chairperson and Senior Assistant Professor',employee_id:'30',    gender:'female', joining_date:'2013-11-29' },
+      { email:'padmaja@msrim.org',        name:'Padmaja V',                    phone:'9972599100',  department:'HR & General Management',               designation:'Professor',                                 employee_id:'13',    gender:'female', joining_date:'2009-10-21' },
+      { email:'padmakshi@msrim.org',      name:'Padmaskhi Lokesh',             phone:'9986000166',  department:'Administration',                        designation:null,                                        employee_id:'98',    gender:'female', joining_date:'2026-01-01' },
+      { email:'parameshwara@msrim.org',   name:'Parameshwara P',               phone:'9945938845',  department:'Placements & Corporate Relations',      designation:'Head Placements & Corporate Relations',     employee_id:'195',   gender:'male',   joining_date:'2026-08-10' },
+      { email:'parvathi@msrim.org',       name:'Parvathi .',                   phone:'9880946770',  department:'Administration',                        designation:'Office Assistant - Admin',                  employee_id:'152',   gender:'female', joining_date:'2009-05-07' },
+      { email:'piyalideb@msrim.org',      name:'Piyali Deb',                   phone:'8337000333',  department:'Admissions Department',                 designation:'Head Admissions',                           employee_id:'147',   gender:'female', joining_date:'2025-05-02' },
+      { email:'pp4663510@gmail.com',      name:'Prakash',                      phone:'9986162577',  department:'Administration',                        designation:'Driver',                                    employee_id:'121',   gender:'male',   joining_date:'2010-10-13' },
+      { email:'prakash@msrim.org',        name:'Prakash M',                    phone:'7795769881',  department:'Administration',                        designation:'Sweeper',                                   employee_id:'114',   gender:'male',   joining_date:'1995-10-05' },
+      { email:'prreeyashetty@msrim.org',  name:'Prreeya Shetty',               phone:'9900090112',  department:'Placements & Corporate Relations',      designation:'Placements – Senior Executive',        employee_id:'194',   gender:'female', joining_date:'2025-01-20' },
+      { email:'raghavendra@lawnest.in',   name:'Raghavendra S',                phone:'9686777322',  department:'HR & General Management',               designation:null,                                        employee_id:'VF506', gender:'male',   joining_date:'2026-09-04' },
+      { email:'raghavendra@msrim.org',    name:'Raghavendra R K',              phone:'9980730570',  department:'Administration',                        designation:'Manager Admin',                             employee_id:'102',   gender:'male',   joining_date:'2004-05-10' },
+      { email:'rajashekhar@msrim.org',    name:'Rajashekhar C',                phone:'9611799689',  department:'Administration',                        designation:'Driver',                                    employee_id:'139',   gender:'male',   joining_date:'2023-07-03' },
+      { email:'rakesh@msrim.org',         name:'Rakesh S P',                   phone:'9535085883',  department:'Examination Department',                designation:'Computer Lab Assistant',                    employee_id:'189',   gender:'male',   joining_date:'2012-09-15' },
+      { email:'ramesh@msrim.org',         name:'Ramesh M',                     phone:'9740471675',  department:'Library',                               designation:'Attender Library',                          employee_id:'118',   gender:'male',   joining_date:'1998-05-01' },
+      { email:'ranjitha@msrim.org',       name:'Ranjitha Bharadwaj',           phone:'9449281498',  department:'Admissions Department',                 designation:'Admissions Counselor',                      employee_id:'148',   gender:'female', joining_date:'2025-09-22' },
+      { email:'ravindra@msrim.org',       name:'Ravindra B N',                 phone:'8147905896',  department:'Placements & Corporate Relations',      designation:'Placement Executive',                       employee_id:'174',   gender:'male',   joining_date:'2015-10-01' },
+      { email:'reenaya@msrim.org',        name:'Reena Y A',                    phone:'9845415350',  department:'Operations & Supply Chain Mgmt',        designation:'Assistant Professor',                       employee_id:'79',    gender:'female', joining_date:'2025-11-10' },
+      { email:'rray@msrim.org',           name:'Ribhu Ray',                    phone:'9903759108',  department:'Operations & Supply Chain Mgmt',        designation:'Assistant Professor',                       employee_id:'73',    gender:'male',   joining_date:'2024-08-20' },
+      { email:'sadafanwar@msrim.org',     name:'Sadaf Anwar',                  phone:'9971986453',  department:'Finance, Banking & Insurance',          designation:'Associate Professor',                       employee_id:'57',    gender:'female', joining_date:'2022-12-16' },
+      { email:'sagar.m@msrim.org',        name:'Sagar M',                      phone:'9164754075',  department:'Finance, Banking & Insurance',          designation:'Associate Professor',                       employee_id:'76',    gender:'male',   joining_date:'2025-06-10' },
+      { email:'sailakshmi@msrim.org',     name:'Sai Lakshmi C',                phone:'9741666225',  department:'Administration',                        designation:'Receptionist',                              employee_id:'106',   gender:'female', joining_date:'2005-09-08' },
+      { email:'sathish@msrim.org',        name:'Sathish KN',                   phone:'9986527327',  department:'Library',                               designation:'Assistant Librarian',                       employee_id:'181',   gender:'male',   joining_date:'2013-07-23' },
+      { email:'savitha@msrim.org',        name:'Savitha V',                    phone:'7338296007',  department:'Administration',                        designation:null,                                        employee_id:'124',   gender:'female', joining_date:'2004-08-02' },
+      { email:'shivaprakash@msrim.org',   name:'Shiva Prakash G E',            phone:'9880238589',  department:'Examination Department',                designation:'Office Assistant - Evaluation',             employee_id:'123',   gender:'male',   joining_date:'2003-07-30' },
+      { email:'suma@msrim.org',           name:'Suma N',                       phone:'9731128489',  department:'Admissions Department',                 designation:'Admission Co-Ordinator',                    employee_id:'137',   gender:'female', joining_date:'2022-02-28' },
+      { email:'sushma@msrim.org',         name:'Sushma Vasanth',               phone:'9945344552',  department:'Accounts Department',                   designation:'Office Assistant - Accounts',               employee_id:'155',   gender:'female', joining_date:'2013-06-21' },
+      { email:'triveni@msrim.org',        name:'Triveni P',                    phone:'9845090480',  department:'Finance, Banking & Insurance',          designation:'Chairperson & Professor',                   employee_id:'19',    gender:'female', joining_date:'2011-02-07' },
+      { email:'yashaswini@msrim.org',     name:'Yashaswini Murthy B',          phone:'9986520131',  department:'HR & General Management',               designation:'Assistant Professor',                       employee_id:'33',    gender:'female', joining_date:'2015-07-01' },
+    ];
+
+    const updateUser = db.prepare(`
+      UPDATE users SET name=?, phone=?, department=?, designation=?, gender=?, joining_date=?, employee_id=?
+      WHERE email=?
+    `);
+    const updateFaculty = db.prepare(`
+      UPDATE faculty SET employee_id=?, designation=?, joining_date=? WHERE user_id=?
+    `);
+
+    let updated = 0;
+    for (const s of staffData) {
+      const u = db.prepare('SELECT id, role FROM users WHERE email = ?').get(s.email);
+      if (!u) continue;
+      updateUser.run(s.name, s.phone, s.department, s.designation, s.gender, s.joining_date, s.employee_id, s.email);
+      if (u.role === 'faculty') {
+        const fac = db.prepare('SELECT id FROM faculty WHERE user_id=?').get(u.id);
+        if (fac) updateFaculty.run(s.employee_id, s.designation, s.joining_date, u.id);
+      }
+      updated++;
+    }
+    if (updated > 0) console.log(`Synced ${updated} staff records from MSRIM official list.`);
+  }
+
+  // Seed all 13 standard leave types (idempotent — INSERT OR IGNORE)
+  {
+    const leaveTypes = [
+      { code:'CL',  name:'Casual Leave',             max_days:12,  paid:1, carry:0, carry_max:0,  color:'#3b82f6', desc:'For personal/urgent matters' },
+      { code:'SL',  name:'Sick Leave',                max_days:10,  paid:1, carry:0, carry_max:0,  color:'#ef4444', desc:'For illness or medical treatment' },
+      { code:'EL',  name:'Earned Leave',              max_days:15,  paid:1, carry:1, carry_max:15, color:'#10b981', desc:'Accrued based on service period' },
+      { code:'ML',  name:'Maternity Leave',           max_days:180, paid:1, carry:0, carry_max:0,  color:'#ec4899', desc:'For childbirth and post-natal care' },
+      { code:'PAL', name:'Paternity Leave',           max_days:15,  paid:1, carry:0, carry_max:0,  color:'#8b5cf6', desc:'For fathers at time of childbirth' },
+      { code:'OD',  name:'On Duty',                   max_days:0,   paid:1, carry:0, carry_max:0,  color:'#f59e0b', desc:'Official work outside campus' },
+      { code:'COP', name:'Compensatory Off',          max_days:0,   paid:1, carry:0, carry_max:0,  color:'#06b6d4', desc:'In lieu of working on holidays' },
+      { code:'LWP', name:'Leave Without Pay',         max_days:0,   paid:0, carry:0, carry_max:0,  color:'#6b7280', desc:'Unpaid leave when balance exhausted' },
+      { code:'RH',  name:'Restricted Holiday',        max_days:2,   paid:1, carry:0, carry_max:0,  color:'#f97316', desc:'Chosen from optional holiday list' },
+      { code:'STL', name:'Study Leave',               max_days:30,  paid:1, carry:0, carry_max:0,  color:'#7c3aed', desc:'For higher studies or research' },
+      { code:'VL',  name:'Vacation Leave',            max_days:21,  paid:1, carry:0, carry_max:0,  color:'#0ea5e9', desc:'Annual vacation period' },
+      { code:'SPL', name:'Special / Emergency Leave', max_days:3,   paid:1, carry:0, carry_max:0,  color:'#dc2626', desc:'For bereavement or emergencies' },
+      { code:'ACL', name:'Academic Conference Leave', max_days:0,   paid:1, carry:0, carry_max:0,  color:'#059669', desc:'For attending conferences, FDPs, workshops' },
+    ];
+    const insertLT = db.prepare('INSERT OR IGNORE INTO leave_types (code,name,max_days_per_year,is_paid,carry_forward,max_carry_forward,color,description) VALUES (?,?,?,?,?,?,?,?)');
+    let newTypes = 0;
+    for (const lt of leaveTypes) {
+      const r = insertLT.run(lt.code, lt.name, lt.max_days, lt.paid, lt.carry, lt.carry_max, lt.color, lt.desc);
+      if (r.changes) newTypes++;
+    }
+    if (newTypes > 0) console.log(`Seeded ${newTypes} new leave type(s).`);
+
+    // Ensure leave balances exist for all staff for current year
+    const year = new Date().getFullYear();
+    const staff = db.prepare("SELECT id FROM users WHERE role IN ('faculty','admin','hod','registrar','librarian','accounts','placement') AND is_active=1").all();
+    const types = db.prepare('SELECT * FROM leave_types WHERE is_active=1').all();
+    const balInsert = db.prepare('INSERT OR IGNORE INTO leave_balances (user_id,leave_type_id,year,total_days) VALUES (?,?,?,?)');
+    let newBal = 0;
+    for (const u of staff) {
+      for (const lt of types) {
+        const r = balInsert.run(u.id, lt.id, year, lt.max_days_per_year);
+        if (r.changes) newBal++;
+      }
+    }
+    if (newBal > 0) console.log(`Initialized ${newBal} missing leave balance(s) for ${year}.`);
+  }
+
+  // Migration: remove old leave_type CHECK constraint from leave_applications
+  {
+    const laSchema = db.prepare("SELECT sql FROM sqlite_master WHERE name='leave_applications' AND type='table'").get();
+    if (laSchema && laSchema.sql.includes("CHECK(leave_type IN")) {
+      db.exec(`PRAGMA foreign_keys = OFF`);
+      db.exec(`
+        CREATE TABLE leave_applications_v2 (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL REFERENCES users(id),
+          leave_type TEXT NOT NULL,
+          from_date TEXT NOT NULL,
+          to_date TEXT NOT NULL,
+          days REAL DEFAULT 1,
+          reason TEXT,
+          status TEXT DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected','cancelled')),
+          approved_by INTEGER REFERENCES users(id),
+          remarks TEXT,
+          created_at TEXT DEFAULT (datetime('now'))
+        );
+        INSERT INTO leave_applications_v2 SELECT id,user_id,leave_type,from_date,to_date,days,reason,status,approved_by,remarks,created_at FROM leave_applications;
+        DROP TABLE leave_applications;
+        ALTER TABLE leave_applications_v2 RENAME TO leave_applications;
+      `);
+      db.exec(`PRAGMA foreign_keys = ON`);
+      console.log('Migrated leave_applications: removed old leave_type CHECK constraint.');
+    }
   }
 
   // Migration: add 'parent' to users role enum if not already present

@@ -5,12 +5,22 @@ import toast from 'react-hot-toast';
 import { Search, Plus, X, Edit2, UserX, UserCheck, Trash2, Users, Building2, Save } from 'lucide-react';
 
 const ROLE_COLORS = {
-  registrar: 'bg-purple-100 text-purple-700',
-  accounts:  'bg-indigo-100 text-indigo-700',
-  placement: 'bg-orange-100 text-orange-700',
-  librarian: 'bg-pink-100 text-pink-700',
-  hod:       'bg-blue-100 text-blue-700',
-  admin:     'bg-red-100 text-red-700',
+  registrar: 'bg-purple-100 text-purple-700 border-purple-200',
+  accounts:  'bg-indigo-100 text-indigo-700 border-indigo-200',
+  placement: 'bg-orange-100 text-orange-700 border-orange-200',
+  librarian: 'bg-pink-100 text-pink-700 border-pink-200',
+  hod:       'bg-blue-100 text-blue-700 border-blue-200',
+  admin:     'bg-red-100 text-red-700 border-red-200',
+};
+
+const ROLE_AVATAR = {
+  registrar: 'bg-purple-600',
+  accounts:  'bg-indigo-600',
+  placement: 'bg-orange-500',
+  librarian: 'bg-pink-600',
+  hod:       'bg-blue-700',
+  admin:     'bg-red-600',
+  faculty:   'bg-msrim-blue',
 };
 
 export default function Faculty() {
@@ -159,7 +169,7 @@ export default function Faculty() {
             <div key={s.id} className={`card hover:shadow-md transition-shadow ${!s.is_active ? 'opacity-60' : ''}`}>
               {/* Card header */}
               <div className="flex items-start gap-4">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0 ${s.is_active ? 'bg-msrim-blue' : 'bg-gray-400'}`}>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0 ${s.is_active ? (ROLE_AVATAR[s.role] || 'bg-gray-500') : 'bg-gray-400'}`}>
                   {s.name?.charAt(0)}
                 </div>
                 <div className="flex-1 min-w-0">

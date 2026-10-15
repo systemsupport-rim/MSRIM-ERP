@@ -139,52 +139,72 @@ export default function Faculty() {
       </div>
       )}
 
-      {/* Staff tab */}
+      {/* Staff tab — card grid matching Faculty layout */}
       {tab === 'staff' && (
-        <div className="card p-0 overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="table-th">Name</th>
-                <th className="table-th">Username</th>
-                <th className="table-th">Department</th>
-                <th className="table-th">Role</th>
-                <th className="table-th">Email</th>
-                <th className="table-th">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {loading ? (
-                <tr><td colSpan={6} className="py-10 text-center"><div className="w-6 h-6 border-2 border-msrim-blue border-t-transparent rounded-full animate-spin mx-auto" /></td></tr>
-              ) : filteredStaff.map(s => (
-                <tr key={s.id} className={`hover:bg-gray-50 ${!s.is_active ? 'opacity-50' : ''}`}>
-                  <td className="table-td">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-msrim-blue flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                        {s.name?.charAt(0)}
-                      </div>
-                      <span className="font-medium text-sm">{s.name}</span>
-                    </div>
-                  </td>
-                  <td className="table-td font-mono text-xs text-gray-500">{s.username}</td>
-                  <td className="table-td text-sm text-gray-600">{s.department || '—'}</td>
-                  <td className="table-td">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {loading ? (
+            <div className="col-span-3 text-center py-12">
+              <div className="w-8 h-8 border-4 border-msrim-blue border-t-transparent rounded-full animate-spin mx-auto" />
+            </div>
+          ) : filteredStaff.map(s => (
+            <div key={s.id} className={`card hover:shadow-md transition-shadow ${!s.is_active ? 'opacity-60' : ''}`}>
+              {/* Card header */}
+              <div className="flex items-start gap-4">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0 ${s.is_active ? 'bg-msrim-blue' : 'bg-gray-400'}`}>
+                  {s.name?.charAt(0)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-900 truncate">{s.name}</h3>
+                  <p className="text-gray-500 text-sm truncate">{s.department || '—'}</p>
+                  <p className="text-gray-400 text-xs font-mono mt-0.5">{s.username}</p>
+                  <div className="flex items-center gap-2 mt-2 flex-wrap">
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize border ${ROLE_COLORS[s.role] || 'bg-gray-100 text-gray-600 border-gray-200'}`}>
                       {s.role}
                     </span>
-                  </td>
-                  <td className="table-td text-xs text-gray-500">{s.email}</td>
-                  <td className="table-td">
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${s.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
                       {s.is_active ? 'Active' : 'Inactive'}
                     </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                </div>
+              </div>
+
+              {/* Email & phone */}
+              <div className="mt-3 space-y-1">
+                {s.email && <p className="text-xs text-gray-400 truncate">✉ {s.email}</p>}
+                {s.phone && <p className="text-xs text-gray-400">📞 {s.phone}</p>}
+              </div>
+
+              {/* Actions */}
+              {canManage && (
+                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+                  <button onClick={async () => {
+                    const action = s.is_active ? 'deactivate' : 'activate';
+                    if (!window.confirm(`${s.is_active ? 'Deactivate' : 'Activate'} ${s.name}?`)) return;
+                    try {
+                      await api.put(`/auth/users/${s.id}/toggle-active`);
+                      toast.success(`Account ${action}d`);
+                      fetchAll();
+                    } catch (e) { toast.error(e.response?.data?.error || 'Failed'); }
+                  }} className={`flex-1 flex items-center justify-center gap-1 py-1.5 text-xs rounded-lg border font-medium transition-colors
+                    ${s.is_active ? 'border-yellow-300 text-yellow-700 hover:bg-yellow-50' : 'border-green-300 text-green-700 hover:bg-green-50'}`}>
+                    {s.is_active ? <><UserX className="w-3 h-3" />Deactivate</> : <><UserCheck className="w-3 h-3" />Activate</>}
+                  </button>
+                  <button onClick={async () => {
+                    const pwd = window.prompt(`Reset password for ${s.name}:`);
+                    if (!pwd) return;
+                    try {
+                      await api.put(`/auth/users/${s.id}/reset-password`, { password: pwd });
+                      toast.success('Password reset');
+                    } catch (e) { toast.error(e.response?.data?.error || 'Failed'); }
+                  }} className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg border border-blue-300 text-blue-700 hover:bg-blue-50 font-medium transition-colors">
+                    🔑 Reset
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
           {!loading && filteredStaff.length === 0 && (
-            <p className="text-center py-10 text-gray-400">No administration staff found</p>
+            <div className="col-span-3 card text-center py-12 text-gray-400">No administration staff found</div>
           )}
         </div>
       )}

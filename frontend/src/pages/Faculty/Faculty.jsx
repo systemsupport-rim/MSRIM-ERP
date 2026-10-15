@@ -33,8 +33,9 @@ export default function Faculty() {
   const [deptFilter, setDeptFilter] = useState('');
   const [selected, setSelected]       = useState(null);
   const [showAdd, setShowAdd]         = useState(false);
-  const [editFaculty, setEditFaculty] = useState(null);
-  const [editStaff, setEditStaff]     = useState(null);
+  const [editFaculty, setEditFaculty]     = useState(null);
+  const [editStaff, setEditStaff]         = useState(null);
+  const [selectedStaff, setSelectedStaff] = useState(null);
   const canManage = ['admin', 'registrar'].includes(user.role);
 
   useEffect(() => { fetchAll(); }, [search]);
@@ -170,7 +171,7 @@ export default function Faculty() {
           ) : filteredStaff.map(s => (
             <div key={s.id} className={`card hover:shadow-md transition-shadow ${!s.is_active ? 'opacity-60' : ''}`}>
               {/* Card header */}
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-4 cursor-pointer" onClick={() => setSelectedStaff(s)}>
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0 ${s.is_active ? (ROLE_AVATAR[s.role] || 'bg-gray-500') : 'bg-gray-400'}`}>
                   {s.name?.charAt(0)}
                 </div>
@@ -243,7 +244,8 @@ export default function Faculty() {
       )}
       {showAdd && <AddFacultyModal onClose={() => { setShowAdd(false); fetchAll(); }} />}
       {editFaculty && <EditFacultyModal faculty={editFaculty} onClose={() => { setEditFaculty(null); fetchAll(); }} />}
-      {editStaff   && <EditStaffModal   staff={editStaff}     onClose={() => { setEditStaff(null);   fetchAll(); }} />}
+      {editStaff      && <EditStaffModal    staff={editStaff}      onClose={() => { setEditStaff(null);      fetchAll(); }} />}
+      {selectedStaff  && <StaffDetailModal  staff={selectedStaff}  onClose={() => { setSelectedStaff(null); fetchAll(); }} canManage={canManage} onEdit={s => { setSelectedStaff(null); setEditStaff(s); }} />}
     </div>
   );
 }
@@ -668,6 +670,54 @@ function EditStaffModal({ staff: s, onClose }) {
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+// ── Staff Detail Modal ────────────────────────────────────────────────────────
+function StaffDetailModal({ staff: s, onClose, canManage, onEdit }) {
+  const fields = [
+    ['Employee ID',  s.employee_id],
+    ['Email',        s.email],
+    ['Phone',        s.phone],
+    ['Department',   s.department],
+    ['Designation',  s.designation],
+    ['Gender',       s.gender],
+    ['Joining Date', s.joining_date],
+    ['Role',         s.role],
+    ['Username',     s.username],
+    ['Status',       s.is_active ? 'Active' : 'Inactive'],
+  ];
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b">
+          <div className="flex items-center gap-4">
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg ${ROLE_AVATAR[s.role] || 'bg-gray-500'}`}>
+              {s.name?.charAt(0)}
+            </div>
+            <div>
+              <h2 className="font-bold text-xl">{s.name}</h2>
+              <p className="text-sm text-gray-500">{s.designation || s.role} · {s.department || '—'}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {canManage && (
+              <button onClick={() => onEdit(s)} className="btn-secondary p-2" title="Edit"><Edit2 className="w-4 h-4" /></button>
+            )}
+            <button onClick={onClose}><X className="w-5 h-5" /></button>
+          </div>
+        </div>
+        <div className="p-6 grid grid-cols-2 gap-4">
+          {fields.map(([label, value]) => value ? (
+            <div key={label}>
+              <p className="text-xs text-gray-400 uppercase tracking-wide">{label}</p>
+              <p className="text-sm font-medium text-gray-800 mt-0.5 capitalize">{value}</p>
+            </div>
+          ) : null)}
+        </div>
       </div>
     </div>
   );

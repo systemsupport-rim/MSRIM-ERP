@@ -18,8 +18,9 @@ const allGroups = [
     iconColor: 'text-blue-600',
     headingColor: 'text-blue-700',
     items: [
-      { to: '/students',   icon: GraduationCap,  label: 'Students',        desc: 'Manage student records & profiles',   roles: ['admin','registrar','hod','faculty','student'] },
-      { to: '/faculty',    icon: Users,          label: 'Faculty',          desc: 'Faculty directory & management',      roles: ['admin','registrar','hod','faculty'] },
+      { to: '/students',   icon: GraduationCap,  label: 'Students',              desc: 'Manage student records & profiles',     roles: ['admin','registrar','hod','faculty','student'] },
+      { to: '/staff',      icon: Users,          label: 'Administration Staff',  desc: 'Admin staff directory & management',    roles: ['admin','registrar'] },
+      { to: '/faculty',    icon: GraduationCap,  label: 'Faculty',               desc: 'Faculty directory & management',        roles: ['admin','registrar','hod','faculty'] },
       { to: '/courses',    icon: BookOpen,       label: 'Course Catalogue', desc: 'Browse & manage courses',             roles: 'all' },
       { to: '/attendance', icon: ClipboardCheck, label: 'Attendance',       desc: 'Track & analyse attendance',          roles: 'all' },
       { to: '/timetable',  icon: CalendarDays,   label: 'Timetable',        desc: 'Class schedules & timetables',        roles: 'all' },

@@ -72,7 +72,7 @@ router.post('/change-password', authenticate, (req, res) => {
 const { authorize } = require('../middleware/auth');
 
 router.get('/users', authenticate, authorize('admin'), (req, res) => {
-  const users = db.prepare('SELECT id, username, name, email, phone, role, department, is_active, last_login, created_at FROM users ORDER BY role, name').all();
+  const users = db.prepare('SELECT id, username, name, email, phone, role, department, designation, is_active, last_login, created_at FROM users ORDER BY role, name').all();
   res.json(users);
 });
 
@@ -101,20 +101,20 @@ router.put('/users/:id/reset-password', authenticate, authorize('admin'), (req, 
 });
 
 router.put('/users/:id/profile', authenticate, authorize('admin','registrar'), (req, res) => {
-  const { name, email, phone, department } = req.body;
+  const { name, email, phone, department, designation } = req.body;
   const u = db.prepare('SELECT id FROM users WHERE id = ?').get(req.params.id);
   if (!u) return res.status(404).json({ error: 'User not found.' });
   const sets = []; const vals = [];
-  if (name       !== undefined) { sets.push('name=?');       vals.push(name); }
-  if (email      !== undefined) { sets.push('email=?');      vals.push(email); }
-  if (phone      !== undefined) { sets.push('phone=?');      vals.push(phone); }
-  if (department !== undefined) { sets.push('department=?'); vals.push(department); }
+  if (name        !== undefined) { sets.push('name=?');        vals.push(name); }
+  if (email       !== undefined) { sets.push('email=?');       vals.push(email); }
+  if (phone       !== undefined) { sets.push('phone=?');       vals.push(phone); }
+  if (department  !== undefined) { sets.push('department=?');  vals.push(department); }
+  if (designation !== undefined) { sets.push('designation=?'); vals.push(designation); }
   if (sets.length === 0) return res.status(400).json({ error: 'Nothing to update.' });
   vals.push(req.params.id);
   db.prepare(`UPDATE users SET ${sets.join(',')} WHERE id=?`).run(...vals);
 
-  // If user has a faculty record, update designation too
-  const { designation } = req.body;
+  // Also sync designation to faculty record if one exists
   if (designation !== undefined) {
     const fac = db.prepare('SELECT id FROM faculty WHERE user_id=?').get(req.params.id);
     if (fac) db.prepare('UPDATE faculty SET designation=? WHERE id=?').run(designation, fac.id);

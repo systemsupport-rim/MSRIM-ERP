@@ -1,6 +1,13 @@
 const { db } = require('./db');
 
 function extendDatabase() {
+  // Migration: add designation column to users table
+  const userCols = db.prepare("PRAGMA table_info(users)").all();
+  if (!userCols.some(c => c.name === 'designation')) {
+    db.exec("ALTER TABLE users ADD COLUMN designation TEXT");
+    console.log('Migrated users table: added designation column.');
+  }
+
   // Migration: add 'parent' to users role enum if not already present
   const userSchema = db.prepare("SELECT sql FROM sqlite_master WHERE name = 'users' AND type = 'table'").get();
   if (userSchema && !userSchema.sql.includes("'parent'")) {

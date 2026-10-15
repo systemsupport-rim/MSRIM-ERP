@@ -44,6 +44,8 @@ app.use('/api/calendar', require('./routes/calendar'));
 
 // HR & Staff
 app.use('/api/hr', require('./routes/hr'));
+app.use('/api/leaves', require('./routes/leaves'));
+app.use('/api/staff-attendance', require('./routes/staff_attendance'));
 
 // Campus Services
 app.use('/api/helpdesk', require('./routes/helpdesk'));

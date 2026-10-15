@@ -40,6 +40,8 @@ import Alumni from './pages/Alumni/Alumni';
 import Accreditation from './pages/Accreditation/Accreditation';
 import Intelligence from './pages/Intelligence/Intelligence';
 import AdminConsole from './pages/AdminConsole/AdminConsole';
+import LeaveManagement from './pages/LeaveManagement/LeaveManagement';
+import StaffAttendance from './pages/StaffAttendance/StaffAttendance';
 
 function ProtectedRoute({ children, roles }) {
   const { user } = useAuth();
@@ -106,6 +108,8 @@ function AppRoutes() {
         <Route path="/accreditation" element={<ProtectedRoute roles={['admin','registrar','hod']}><Accreditation /></ProtectedRoute>} />
         <Route path="/intelligence" element={<ProtectedRoute roles={['admin','registrar','hod','faculty']}><Intelligence /></ProtectedRoute>} />
         <Route path="/admin-console" element={<AdminConsole />} />
+        <Route path="/leave-management" element={<LeaveManagement />} />
+        <Route path="/staff-attendance" element={<StaffAttendance />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" />} />
     </Routes>

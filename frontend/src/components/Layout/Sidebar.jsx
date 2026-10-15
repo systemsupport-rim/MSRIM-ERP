@@ -2,15 +2,17 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   LayoutDashboard, UserCircle, Calendar, Bell, Megaphone,
-  ChevronLeft, Building2
+  ChevronLeft, Building2, CalendarDays, ClipboardCheck
 } from 'lucide-react';
 
 const mainItems = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/profile',   icon: UserCircle,      label: 'My Profile' },
-  { to: '/calendar',  icon: Calendar,        label: 'Calendar' },
-  { to: '/notices',   icon: Bell,            label: 'Notice Board' },
-  { to: '/feed',      icon: Megaphone,       label: 'Feed & Booths' },
+  { to: '/dashboard',        icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/profile',          icon: UserCircle,      label: 'My Profile' },
+  { to: '/calendar',         icon: Calendar,        label: 'Calendar' },
+  { to: '/notices',          icon: Bell,            label: 'Notice Board' },
+  { to: '/feed',             icon: Megaphone,       label: 'Feed & Booths' },
+  { to: '/leave-management', icon: CalendarDays,    label: 'Leave Management' },
+  { to: '/staff-attendance', icon: ClipboardCheck,  label: 'Staff Attendance' },
 ];
 
 export default function Sidebar({ isOpen, onToggle }) {

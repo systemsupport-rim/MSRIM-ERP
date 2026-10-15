@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Students from './pages/Students/Students';
 import Faculty from './pages/Faculty/Faculty';
+import Staff from './pages/Staff/Staff';
 import Courses from './pages/Courses/Courses';
 import Attendance from './pages/Attendance/Attendance';
 import Examinations from './pages/Examinations/Examinations';
@@ -66,6 +67,7 @@ function AppRoutes() {
         {/* Academic */}
         <Route path="/students" element={<Students />} />
         <Route path="/faculty" element={<Faculty />} />
+        <Route path="/staff" element={<Staff />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="/timetable" element={<Timetable />} />
         <Route path="/attendance" element={<Attendance />} />

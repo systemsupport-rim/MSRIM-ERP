@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   LayoutDashboard, UserCircle, Calendar, Bell, Megaphone,
-  ChevronLeft, Building2, CalendarDays, ClipboardCheck
+  ChevronLeft, Building2, CalendarDays, ClipboardCheck, GraduationCap, Users
 } from 'lucide-react';
 
 const mainItems = [
@@ -11,6 +11,8 @@ const mainItems = [
   { to: '/calendar',         icon: Calendar,        label: 'Calendar' },
   { to: '/notices',          icon: Bell,            label: 'Notice Board' },
   { to: '/feed',             icon: Megaphone,       label: 'Feed & Booths' },
+  { to: '/faculty',          icon: GraduationCap,   label: 'Faculty' },
+  { to: '/staff',            icon: Users,           label: 'Administration Staff' },
   { to: '/leave-management', icon: CalendarDays,    label: 'Leave Management' },
   { to: '/staff-attendance', icon: ClipboardCheck,  label: 'Staff Attendance' },
 ];

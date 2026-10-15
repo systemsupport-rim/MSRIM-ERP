@@ -1,0 +1,16 @@
+node_modules/
+backend/database/*.db
+backend/database/*.db-shm
+backend/database/*.db-wal
+dist/
+.env
+*.log
+
+# Screenshots and test artifacts
+ss_*.png
+test-results.json
+take_attendance.js
+seed_attendance.js
+seed_data.js
+test-app.mjs
+take_screenshots.js

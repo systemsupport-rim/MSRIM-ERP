@@ -1,0 +1,14 @@
+{
+  "name": "msrim-digital-campus-erp",
+  "version": "1.0.0",
+  "description": "MSRIM Digital Campus - Complete ERP System",
+  "scripts": {
+    "start:backend": "cd backend && node server.js",
+    "start:frontend": "cd frontend && npm run dev",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "dev": "start cmd /k \"cd backend && npm start\" && cd frontend && npm run dev"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.1"
+  }
+}

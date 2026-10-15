@@ -177,7 +177,7 @@ export default function Header({ onMenuClick }) {
                     className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200 rounded-lg transition-colors">
                     <UserCircle className="w-3.5 h-3.5" /> My Profile
                   </button>
-                  <button onClick={() => { navigate('/admin-console'); setDropdownOpen(false); }}
+                  <button onClick={() => { window.open('/admin-console', '_blank'); setDropdownOpen(false); }}
                     className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-msrim-blue hover:bg-blue-50 rounded-lg transition-colors border border-msrim-blue/20">
                     <ExternalLink className="w-3.5 h-3.5" /> Admin Console
                   </button>

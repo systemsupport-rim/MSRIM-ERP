@@ -7,7 +7,7 @@ import {
   Briefcase, Library, BedDouble, Building, HelpCircle, Heart,
   Zap, Banknote, ShoppingCart, Network, BadgeCheck, Sparkles,
   Layers, Brain, BarChart3, HardDrive, Shield, LayoutDashboard,
-  ArrowLeft, Plus, Trash2, RotateCcw, Settings2, X, Check, KeyRound
+  ArrowLeft, Plus, Trash2, RotateCcw, Settings2, X, Check, KeyRound, Edit2
 } from 'lucide-react';
 
 const allGroups = [
@@ -195,7 +195,7 @@ export default function AdminConsole() {
             <h2 className={`text-sm font-bold uppercase tracking-widest mb-3 ${headingColor}`}>{group}</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
               {shown.map(item => (
-                <div key={item.to} className={`group relative flex flex-col items-start gap-3 p-4 rounded-2xl border h-28 ${color} transition-all duration-150 hover:shadow-md hover:-translate-y-0.5`}>
+                <div key={item.to} className={`group relative flex flex-col items-start gap-2 p-4 rounded-2xl border ${color} transition-all duration-150 hover:shadow-md hover:-translate-y-0.5`}>
                   {/* Action buttons — always visible in manage mode, on hover otherwise */}
                   <div className={`absolute top-2 right-2 flex gap-1 ${manageMode ? 'flex' : 'hidden group-hover:flex'}`}>
                     <button onClick={() => navigate(item.to)}
@@ -209,16 +209,25 @@ export default function AdminConsole() {
                       <Trash2 className="w-3 h-3" />
                     </button>
                   </div>
-                  {/* Card body — clickable */}
+
+                  {/* Card body — clickable to open */}
                   <button onClick={() => navigate(item.to)} className="flex flex-col items-start gap-2 w-full text-left">
                     <div className={`p-2 rounded-xl ${iconBg} ${iconColor}`}>
                       <item.icon className="w-5 h-5" />
                     </div>
-                    <div className="min-w-0 pr-10">
+                    <div className="min-w-0 pr-8">
                       <p className="text-sm font-semibold text-gray-800 truncate">{item.label}</p>
                       <p className="text-xs text-gray-500 leading-tight line-clamp-1">{item.desc}</p>
                     </div>
                   </button>
+
+                  {/* Edit button — always visible at bottom */}
+                  <div className="w-full pt-2 border-t border-black/5 mt-auto">
+                    <button onClick={() => navigate(item.to)}
+                      className={`w-full flex items-center justify-center gap-1.5 py-1 text-xs font-medium rounded-lg transition-colors ${iconColor} hover:bg-black/5`}>
+                      <Edit2 className="w-3 h-3" /> Edit
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

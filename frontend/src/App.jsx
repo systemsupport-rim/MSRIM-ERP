@@ -39,6 +39,7 @@ import Procurement from './pages/Procurement/Procurement';
 import Alumni from './pages/Alumni/Alumni';
 import Accreditation from './pages/Accreditation/Accreditation';
 import Intelligence from './pages/Intelligence/Intelligence';
+import AdminConsole from './pages/AdminConsole/AdminConsole';
 
 function ProtectedRoute({ children, roles }) {
   const { user } = useAuth();
@@ -104,6 +105,7 @@ function AppRoutes() {
         <Route path="/alumni" element={<Alumni />} />
         <Route path="/accreditation" element={<ProtectedRoute roles={['admin','registrar','hod']}><Accreditation /></ProtectedRoute>} />
         <Route path="/intelligence" element={<ProtectedRoute roles={['admin','registrar','hod','faculty']}><Intelligence /></ProtectedRoute>} />
+        <Route path="/admin-console" element={<AdminConsole />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" />} />
     </Routes>

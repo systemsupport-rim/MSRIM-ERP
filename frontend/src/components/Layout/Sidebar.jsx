@@ -1,21 +1,214 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   LayoutDashboard, UserCircle, Calendar, Bell, Megaphone,
-  ChevronLeft, Building2, CalendarDays, ClipboardCheck, GraduationCap, Users
+  ChevronLeft, Building2, Users, GraduationCap, BookOpen,
+  ClipboardCheck, ClipboardList, CalendarDays, BookMarked,
+  Star, UserCheck, FileText, Map, Award, DollarSign, Users2,
+  Briefcase, Library, BedDouble, Building, HelpCircle, Heart,
+  Zap, Banknote, ShoppingCart, Network, BadgeCheck, Sparkles,
+  Layers, Brain, BarChart3, HardDrive, Shield, KeyRound, ArrowLeft
 } from 'lucide-react';
 
 const mainItems = [
-  { to: '/dashboard',        icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/profile',          icon: UserCircle,      label: 'My Profile' },
-  { to: '/calendar',         icon: Calendar,        label: 'Calendar' },
-  { to: '/notices',          icon: Bell,            label: 'Notice Board' },
-  { to: '/feed',             icon: Megaphone,       label: 'Feed & Booths' },
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/profile',   icon: UserCircle,      label: 'My Profile' },
+  { to: '/calendar',  icon: Calendar,        label: 'Calendar' },
+  { to: '/notices',   icon: Bell,            label: 'Notice Board' },
+  { to: '/feed',      icon: Megaphone,       label: 'Feed & Booths' },
+];
+
+// Context nav shown when inside a specific module
+const moduleNavMap = [
+  {
+    match: ['/students'],
+    label: 'Students',
+    back: '/admin-console',
+    items: [
+      { to: '/students',   icon: GraduationCap, label: 'All Students' },
+      { to: '/attendance', icon: ClipboardCheck, label: 'Attendance' },
+      { to: '/mentor',     icon: UserCheck,      label: 'Mentor-Mentee' },
+    ],
+  },
+  {
+    match: ['/faculty'],
+    label: 'Faculty',
+    back: '/admin-console',
+    items: [
+      { to: '/faculty', icon: GraduationCap, label: 'All Faculty' },
+      { to: '/hr/portfolios', icon: Star,    label: 'Staff Portfolio' },
+    ],
+  },
+  {
+    match: ['/staff'],
+    label: 'Administration Staff',
+    back: '/admin-console',
+    items: [
+      { to: '/staff',           icon: Users,         label: 'All Staff' },
+      { to: '/staff-attendance',icon: ClipboardCheck, label: 'Staff Attendance' },
+    ],
+  },
+  {
+    match: ['/courses', '/timetable', '/lms', '/obe', '/mentor'],
+    label: 'Academic',
+    back: '/admin-console',
+    items: [
+      { to: '/courses',    icon: BookOpen,      label: 'Course Catalogue' },
+      { to: '/timetable',  icon: CalendarDays,  label: 'Timetable' },
+      { to: '/lms',        icon: BookMarked,    label: 'LMS' },
+      { to: '/obe',        icon: Star,          label: 'OBE / Outcomes' },
+      { to: '/mentor',     icon: UserCheck,     label: 'Mentor-Mentee' },
+    ],
+  },
+  {
+    match: ['/examinations', '/exams'],
+    label: 'Examinations',
+    back: '/admin-console',
+    items: [
+      { to: '/examinations',          icon: FileText,      label: 'Examinations' },
+      { to: '/exams/hall-tickets',    icon: ClipboardList, label: 'Hall Tickets' },
+      { to: '/exams/question-papers', icon: FileText,      label: 'Question Papers' },
+      { to: '/exams/seating',         icon: Map,           label: 'Seating Plan' },
+      { to: '/exams/grading',         icon: Award,         label: 'Grading Schema' },
+      { to: '/exams/certificates',    icon: Award,         label: 'Certificates' },
+    ],
+  },
+  {
+    match: ['/fees'],
+    label: 'Fee Management',
+    back: '/admin-console',
+    items: [
+      { to: '/fees', icon: DollarSign, label: 'Fee Management' },
+    ],
+  },
+  {
+    match: ['/admissions'],
+    label: 'Admissions',
+    back: '/admin-console',
+    items: [
+      { to: '/admissions', icon: Users2, label: 'Admissions' },
+    ],
+  },
+  {
+    match: ['/hr'],
+    label: 'HR Management',
+    back: '/admin-console',
+    items: [
+      { to: '/hr',            icon: Users,         label: 'HR Management' },
+      { to: '/hr/leaves',     icon: ClipboardList, label: 'Leave Approval' },
+      { to: '/hr/portfolios', icon: Star,          label: 'Staff Portfolio' },
+    ],
+  },
+  {
+    match: ['/leave-management'],
+    label: 'Leave Management',
+    back: '/admin-console',
+    items: [
+      { to: '/leave-management', icon: CalendarDays, label: 'Leave Management' },
+      { to: '/hr/leaves',        icon: ClipboardList,label: 'Leave Approval' },
+    ],
+  },
+  {
+    match: ['/staff-attendance'],
+    label: 'Staff Attendance',
+    back: '/admin-console',
+    items: [
+      { to: '/staff-attendance', icon: ClipboardCheck, label: 'Staff Attendance' },
+    ],
+  },
+  {
+    match: ['/parents'],
+    label: 'Parents',
+    back: '/admin-console',
+    items: [
+      { to: '/parents', icon: Users2, label: 'Parent Mgmt' },
+    ],
+  },
+  {
+    match: ['/placements'],
+    label: 'Placements',
+    back: '/admin-console',
+    items: [
+      { to: '/placements', icon: Briefcase, label: 'Placements' },
+    ],
+  },
+  {
+    match: ['/library'],
+    label: 'Library',
+    back: '/admin-console',
+    items: [
+      { to: '/library', icon: Library, label: 'Library' },
+    ],
+  },
+  {
+    match: ['/hostel'],
+    label: 'Hostel',
+    back: '/admin-console',
+    items: [
+      { to: '/hostel', icon: BedDouble, label: 'Hostel' },
+    ],
+  },
+  {
+    match: ['/infrastructure'],
+    label: 'Infrastructure',
+    back: '/admin-console',
+    items: [
+      { to: '/infrastructure', icon: Building, label: 'Infrastructure' },
+    ],
+  },
+  {
+    match: ['/helpdesk'],
+    label: 'Help Center',
+    back: '/admin-console',
+    items: [
+      { to: '/helpdesk', icon: HelpCircle, label: 'Help Center' },
+    ],
+  },
+  {
+    match: ['/feedback'],
+    label: 'IQAC / Feedback',
+    back: '/admin-console',
+    items: [
+      { to: '/feedback', icon: Heart, label: 'IQAC / Feedback' },
+    ],
+  },
+  {
+    match: ['/workflow', '/finance', '/procurement', '/alumni', '/accreditation', '/intelligence'],
+    label: 'Bright Process Hub',
+    back: '/admin-console',
+    items: [
+      { to: '/workflow',      icon: Zap,          label: 'Process Automation' },
+      { to: '/finance',       icon: Banknote,     label: 'Finance & Budget' },
+      { to: '/procurement',   icon: ShoppingCart, label: 'Procurement' },
+      { to: '/alumni',        icon: Network,      label: 'Alumni Connect' },
+      { to: '/accreditation', icon: BadgeCheck,   label: 'Accreditation & NAAC' },
+      { to: '/intelligence',  icon: Sparkles,     label: 'AI Command Center' },
+    ],
+  },
+  {
+    match: ['/structure', '/analytics', '/reports', '/drive', '/roles', '/admin-privileges'],
+    label: 'Admin Console',
+    back: '/admin-console',
+    items: [
+      { to: '/structure',        icon: Layers,    label: 'Structure' },
+      { to: '/analytics',        icon: Brain,     label: 'Analytics / BI' },
+      { to: '/reports',          icon: BarChart3, label: 'Reports & Logs' },
+      { to: '/drive',            icon: HardDrive, label: 'Drive' },
+      { to: '/roles',            icon: Shield,    label: 'Roles & Privileges' },
+      { to: '/admin-privileges', icon: KeyRound,  label: 'Admin Privileges' },
+    ],
+  },
 ];
 
 export default function Sidebar({ isOpen, onToggle }) {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
+  const location  = useLocation();
+  const path      = location.pathname;
+
+  const moduleNav = moduleNavMap.find(m =>
+    m.match.some(prefix => path === prefix || path.startsWith(prefix + '/'))
+  );
 
   return (
     <aside className={`${isOpen ? 'w-64' : 'w-0 overflow-hidden'} transition-all duration-300 bg-msrim-blue-dark flex flex-col flex-shrink-0`}>
@@ -50,10 +243,10 @@ export default function Sidebar({ isOpen, onToggle }) {
         </div>
       </div>
 
-      {/* Navigation — Main only */}
       <nav className="flex-1 overflow-y-auto py-3">
+        {/* Main nav — always visible */}
         <p className="px-4 pb-1.5 text-xs font-semibold uppercase tracking-widest text-blue-300">Main</p>
-        <div className="space-y-0.5 px-2">
+        <div className="space-y-0.5 px-2 mb-4">
           {mainItems.map(item => (
             <NavLink key={item.to} to={item.to}
               className={({ isActive }) => `sidebar-link text-xs py-2 ${isActive ? 'active' : ''}`}>
@@ -62,6 +255,28 @@ export default function Sidebar({ isOpen, onToggle }) {
             </NavLink>
           ))}
         </div>
+
+        {/* Module-specific nav */}
+        {moduleNav && (
+          <div className="border-t border-white/10 pt-3">
+            <div className="flex items-center gap-2 px-4 pb-1.5">
+              <button onClick={() => navigate(moduleNav.back)}
+                className="text-blue-400 hover:text-white transition-colors">
+                <ArrowLeft className="w-3 h-3" />
+              </button>
+              <p className="text-xs font-semibold uppercase tracking-widest text-blue-300 truncate">{moduleNav.label}</p>
+            </div>
+            <div className="space-y-0.5 px-2">
+              {moduleNav.items.map(item => (
+                <NavLink key={item.to} to={item.to}
+                  className={({ isActive }) => `sidebar-link text-xs py-2 ${isActive ? 'active' : ''}`}>
+                  <item.icon className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="truncate">{item.label}</span>
+                </NavLink>
+              ))}
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Footer */}

@@ -6,12 +6,13 @@ import {
   ClipboardList, Shield, Layers, HardDrive, HelpCircle,
   BookMarked, Star, Users2, Megaphone, UserCircle, CalendarDays,
   Zap, Banknote, ShoppingCart, Network, BadgeCheck, Sparkles,
-  Settings
+  Settings, X, ArrowRight
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, NavLink } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import api from '../../utils/api';
 
 // All module groups — mirrors former sidebar groups (Academic → end)
 const moduleGroups = [
@@ -95,6 +96,142 @@ const roleColors = {
   placement: 'bg-orange-100 text-orange-800',
 };
 
+// ── Global Search ─────────────────────────────────────────────────────────────
+function GlobalSearch() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [query, setQuery]       = useState('');
+  const [results, setResults]   = useState([]);
+  const [loading, setLoading]   = useState(false);
+  const [open, setOpen]         = useState(false);
+  const searchRef               = useRef(null);
+  const debounceRef             = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (searchRef.current && !searchRef.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Keyboard shortcut Ctrl+K
+  useEffect(() => {
+    function onKey(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        searchRef.current?.querySelector('input')?.focus();
+        setOpen(true);
+      }
+      if (e.key === 'Escape') setOpen(false);
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
+  async function doSearch(q) {
+    if (!q.trim() || q.length < 2) { setResults([]); setLoading(false); return; }
+    setLoading(true);
+    try {
+      const r = await api.get('/search', { params: { q } });
+      setResults(r.data || []);
+    } catch { setResults([]); }
+    finally { setLoading(false); }
+  }
+
+  function onChange(e) {
+    const q = e.target.value;
+    setQuery(q);
+    setOpen(true);
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => doSearch(q), 300);
+  }
+
+  function goTo(path) {
+    navigate(path);
+    setQuery('');
+    setResults([]);
+    setOpen(false);
+  }
+
+  const ICON_MAP = {
+    student: GraduationCap, faculty: Users, staff: Users,
+    course: BookOpen, notice: Bell, placement: Briefcase,
+    library: Library, fee: DollarSign, module: LayoutDashboard,
+  };
+
+  return (
+    <div ref={searchRef} className="relative hidden md:block">
+      <div className={`flex items-center gap-2 rounded-lg px-3 py-1.5 w-72 transition-all ${open && query ? 'bg-white border border-msrim-blue shadow-sm' : 'bg-gray-100'}`}>
+        <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
+        <input
+          type="text"
+          value={query}
+          onChange={onChange}
+          onFocus={() => { setOpen(true); if (query.length >= 2) doSearch(query); }}
+          placeholder="Search students, faculty, notices…"
+          className="bg-transparent text-sm outline-none text-gray-600 w-full placeholder:text-gray-400"
+        />
+        {query ? (
+          <button onClick={() => { setQuery(''); setResults([]); setOpen(false); }} className="text-gray-400 hover:text-gray-600">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        ) : (
+          <kbd className="hidden lg:block text-xs text-gray-400 bg-gray-200 px-1.5 py-0.5 rounded font-mono">⌘K</kbd>
+        )}
+      </div>
+
+      {/* Results dropdown */}
+      {open && query.length >= 2 && (
+        <div className="absolute top-full left-0 mt-1.5 w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
+          {loading ? (
+            <div className="flex items-center gap-2 px-4 py-3 text-sm text-gray-500">
+              <div className="w-4 h-4 border-2 border-msrim-blue border-t-transparent rounded-full animate-spin" />
+              Searching…
+            </div>
+          ) : results.length === 0 ? (
+            <div className="px-4 py-6 text-center text-sm text-gray-400">
+              <Search className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+              No results for "<strong>{query}</strong>"
+            </div>
+          ) : (
+            <div className="py-1 max-h-96 overflow-y-auto">
+              {/* Group results by type */}
+              {Object.entries(
+                results.reduce((acc, r) => { (acc[r.type] = acc[r.type] || []).push(r); return acc; }, {})
+              ).map(([type, items]) => {
+                const Icon = ICON_MAP[type] || LayoutDashboard;
+                return (
+                  <div key={type}>
+                    <p className="px-4 pt-3 pb-1 text-xs font-semibold uppercase tracking-widest text-gray-400 capitalize">{type}s</p>
+                    {items.slice(0, 5).map((item, i) => (
+                      <button key={i} onClick={() => goTo(item.path)}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left">
+                        <div className="w-8 h-8 rounded-lg bg-msrim-blue/10 flex items-center justify-center flex-shrink-0">
+                          <Icon className="w-4 h-4 text-msrim-blue" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-800 truncate">{item.title}</p>
+                          {item.subtitle && <p className="text-xs text-gray-400 truncate">{item.subtitle}</p>}
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-gray-300 flex-shrink-0" />
+                      </button>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          <div className="border-t border-gray-100 px-4 py-2 flex items-center justify-between bg-gray-50">
+            <span className="text-xs text-gray-400">{results.length} result{results.length !== 1 ? 's' : ''}</span>
+            <span className="text-xs text-gray-400">↑↓ navigate · Enter to open · Esc to close</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Header({ onMenuClick }) {
   const { user, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -123,10 +260,7 @@ export default function Header({ onMenuClick }) {
         <button onClick={onMenuClick} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500">
           <Menu className="w-5 h-5" />
         </button>
-        <div className="hidden md:flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-1.5 w-64">
-          <Search className="w-4 h-4 text-gray-400" />
-          <input type="text" placeholder="Search..." className="bg-transparent text-sm outline-none text-gray-600 w-full" />
-        </div>
+        <GlobalSearch />
       </div>
 
       <div className="flex items-center gap-3">

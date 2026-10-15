@@ -42,6 +42,9 @@ app.use('/api/notices', require('./routes/notices'));
 app.use('/api/feed', require('./routes/feed'));
 app.use('/api/calendar', require('./routes/calendar'));
 
+// Global Search
+app.use('/api/search', require('./routes/search'));
+
 // HR & Staff
 app.use('/api/hr', require('./routes/hr'));
 app.use('/api/leaves', require('./routes/leaves'));

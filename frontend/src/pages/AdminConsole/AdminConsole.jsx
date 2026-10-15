@@ -108,19 +108,19 @@ export default function AdminConsole() {
 
   return (
     <div className="space-y-8 fade-in pb-10">
+      {/* Back button */}
+      <button
+        onClick={() => window.close()}
+        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 shadow-sm transition-all"
+      >
+        <ArrowLeft className="w-4 h-4" /> Back to ERP
+      </button>
+
       {/* Hero */}
       <div className="bg-gradient-to-r from-msrim-blue to-msrim-blue-light rounded-2xl p-6 text-white">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 mb-1">
-            <LayoutDashboard className="w-6 h-6" />
-            <h1 className="text-2xl font-bold">Admin Console</h1>
-          </div>
-          <button
-            onClick={() => window.close()}
-            className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl text-sm font-medium transition-colors"
-          >
-            <X className="w-4 h-4" /> Close &amp; Return
-          </button>
+        <div className="flex items-center gap-3 mb-1">
+          <LayoutDashboard className="w-6 h-6" />
+          <h1 className="text-2xl font-bold">Admin Console</h1>
         </div>
         <p className="text-blue-100 text-sm mt-1">
           All {visibleGroups.reduce((n, g) => n + g.items.length, 0)} modules available to your role — {user?.role}

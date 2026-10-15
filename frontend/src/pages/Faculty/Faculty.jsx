@@ -2,45 +2,95 @@ import { useState, useEffect } from 'react';
 import api from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
-import { Search, Plus, X, Edit2, UserX, UserCheck, Trash2 } from 'lucide-react';
+import { Search, Plus, X, Edit2, UserX, UserCheck, Trash2, Users, Building2 } from 'lucide-react';
+
+const ROLE_COLORS = {
+  registrar: 'bg-purple-100 text-purple-700',
+  accounts:  'bg-indigo-100 text-indigo-700',
+  placement: 'bg-orange-100 text-orange-700',
+  librarian: 'bg-pink-100 text-pink-700',
+  hod:       'bg-blue-100 text-blue-700',
+  admin:     'bg-red-100 text-red-700',
+};
 
 export default function Faculty() {
   const { user } = useAuth();
+  const [tab, setTab]         = useState('faculty');
   const [faculty, setFaculty] = useState([]);
+  const [staff, setStaff]     = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [search, setSearch]   = useState('');
+  const [deptFilter, setDeptFilter] = useState('');
   const [selected, setSelected] = useState(null);
-  const [showAdd, setShowAdd] = useState(false);
+  const [showAdd, setShowAdd]   = useState(false);
   const canManage = ['admin', 'registrar'].includes(user.role);
 
-  useEffect(() => { fetchFaculty(); }, [search]);
+  useEffect(() => { fetchAll(); }, [search]);
 
-  async function fetchFaculty() {
+  async function fetchAll() {
     setLoading(true);
     try {
       const params = {}; if (search) params.search = search;
-      const res = await api.get('/faculty', { params });
-      setFaculty(res.data);
+      const [fRes, uRes] = await Promise.all([
+        api.get('/faculty', { params }),
+        canManage ? api.get('/auth/users') : Promise.resolve({ data: [] }),
+      ]);
+      setFaculty(fRes.data);
+      // Staff = all non-student, non-faculty users (admin staff, accounts, library, placement, registrar)
+      setStaff(uRes.data.filter(u =>
+        !['student','faculty'].includes(u.role) &&
+        (search ? u.name?.toLowerCase().includes(search.toLowerCase()) || u.department?.toLowerCase().includes(search.toLowerCase()) : true)
+      ));
     } finally { setLoading(false); }
   }
 
+  const depts = [...new Set(staff.map(s => s.department).filter(Boolean))].sort();
+  const filteredStaff = deptFilter ? staff.filter(s => s.department === deptFilter) : staff;
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold">Faculty</h1>
-          <p className="text-gray-500 text-sm mt-1">{faculty.length} faculty members</p>
+          <h1 className="text-2xl font-bold">Faculty & Staff</h1>
+          <p className="text-gray-500 text-sm mt-1">
+            {tab === 'faculty' ? `${faculty.length} faculty members` : `${filteredStaff.length} administration staff`}
+          </p>
         </div>
-        {canManage && (
+        {canManage && tab === 'faculty' && (
           <button className="btn-primary" onClick={() => setShowAdd(true)}><Plus className="w-4 h-4" /> Add Faculty</button>
         )}
       </div>
 
-      <div className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2 max-w-sm">
-        <Search className="w-4 h-4 text-gray-400" />
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search faculty..." className="bg-transparent text-sm outline-none w-full" />
+      {/* Tabs */}
+      <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
+        <button onClick={() => setTab('faculty')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab==='faculty'?'bg-white text-msrim-blue shadow-sm':'text-gray-500'}`}>
+          <Users className="w-4 h-4" /> Faculty <span className="bg-msrim-blue/10 text-msrim-blue text-xs px-1.5 py-0.5 rounded-full">{faculty.length}</span>
+        </button>
+        <button onClick={() => setTab('staff')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab==='staff'?'bg-white text-msrim-blue shadow-sm':'text-gray-500'}`}>
+          <Building2 className="w-4 h-4" /> Administration Staff <span className="bg-msrim-blue/10 text-msrim-blue text-xs px-1.5 py-0.5 rounded-full">{staff.length}</span>
+        </button>
       </div>
 
+      {/* Search + dept filter */}
+      <div className="flex flex-wrap gap-3">
+        <div className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2 flex-1 min-w-48 max-w-sm">
+          <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder={tab === 'faculty' ? 'Search faculty...' : 'Search staff or department...'}
+            className="bg-transparent text-sm outline-none w-full" />
+        </div>
+        {tab === 'staff' && (
+          <select value={deptFilter} onChange={e => setDeptFilter(e.target.value)} className="select-field w-56">
+            <option value="">All Departments</option>
+            {depts.map(d => <option key={d} value={d}>{d}</option>)}
+          </select>
+        )}
+      </div>
+
+      {/* Faculty tab */}
+      {tab === 'faculty' && (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {loading ? (
           <div className="col-span-3 text-center py-12"><div className="w-8 h-8 border-4 border-msrim-blue border-t-transparent rounded-full animate-spin mx-auto" /></div>
@@ -65,7 +115,7 @@ export default function Faculty() {
                 <button onClick={async () => {
                   const action = f.is_active === 0 ? 'activate' : 'deactivate';
                   if (!window.confirm(`${action === 'activate' ? 'Activate' : 'Deactivate'} ${f.name}?`)) return;
-                  try { await api.put(`/faculty/${f.id}/${action}`); toast.success(`Faculty ${action}d`); fetchFaculty(); }
+                  try { await api.put(`/faculty/${f.id}/${action}`); toast.success(`Faculty ${action}d`); fetchAll(); }
                   catch (e) { toast.error(e.response?.data?.error || 'Failed'); }
                 }} className={`flex-1 flex items-center justify-center gap-1 py-1.5 text-xs rounded-lg border font-medium transition-colors
                   ${f.is_active === 0 ? 'border-green-300 text-green-700 hover:bg-green-50' : 'border-yellow-300 text-yellow-700 hover:bg-yellow-50'}`}>
@@ -75,7 +125,7 @@ export default function Faculty() {
                 {user.role === 'admin' && (
                   <button onClick={async () => {
                     if (!window.confirm(`Permanently remove ${f.name}?`)) return;
-                    try { await api.delete(`/faculty/${f.id}`); toast.success('Faculty removed'); fetchFaculty(); }
+                    try { await api.delete(`/faculty/${f.id}`); toast.success('Faculty removed'); fetchAll(); }
                     catch (e) { toast.error(e.response?.data?.error || 'Failed'); }
                   }} className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg border border-red-300 text-red-600 hover:bg-red-50 font-medium transition-colors">
                     <Trash2 className="w-3 h-3" /> Remove
@@ -87,15 +137,66 @@ export default function Faculty() {
         ))}
         {!loading && !faculty.length && <div className="col-span-3 card text-center py-12 text-gray-400">No faculty found</div>}
       </div>
+      )}
+
+      {/* Staff tab */}
+      {tab === 'staff' && (
+        <div className="card p-0 overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="table-th">Name</th>
+                <th className="table-th">Username</th>
+                <th className="table-th">Department</th>
+                <th className="table-th">Role</th>
+                <th className="table-th">Email</th>
+                <th className="table-th">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {loading ? (
+                <tr><td colSpan={6} className="py-10 text-center"><div className="w-6 h-6 border-2 border-msrim-blue border-t-transparent rounded-full animate-spin mx-auto" /></td></tr>
+              ) : filteredStaff.map(s => (
+                <tr key={s.id} className={`hover:bg-gray-50 ${!s.is_active ? 'opacity-50' : ''}`}>
+                  <td className="table-td">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-msrim-blue flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        {s.name?.charAt(0)}
+                      </div>
+                      <span className="font-medium text-sm">{s.name}</span>
+                    </div>
+                  </td>
+                  <td className="table-td font-mono text-xs text-gray-500">{s.username}</td>
+                  <td className="table-td text-sm text-gray-600">{s.department || '—'}</td>
+                  <td className="table-td">
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize border ${ROLE_COLORS[s.role] || 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+                      {s.role}
+                    </span>
+                  </td>
+                  <td className="table-td text-xs text-gray-500">{s.email}</td>
+                  <td className="table-td">
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${s.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
+                      {s.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {!loading && filteredStaff.length === 0 && (
+            <p className="text-center py-10 text-gray-400">No administration staff found</p>
+          )}
+        </div>
+      )}
 
       {selected && (
         <FacultyDetailModal
           faculty={selected}
           canManage={canManage}
-          onClose={() => { setSelected(null); fetchFaculty(); }}
+          onClose={() => { setSelected(null); fetchAll(); }}
         />
       )}
-      {showAdd && <AddFacultyModal onClose={() => { setShowAdd(false); fetchFaculty(); }} />}
+      {showAdd && <AddFacultyModal onClose={() => { setShowAdd(false); fetchAll(); }} />}
     </div>
   );
 }

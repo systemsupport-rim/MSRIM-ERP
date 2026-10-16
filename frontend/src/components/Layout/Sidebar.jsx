@@ -50,7 +50,6 @@ const moduleNavMap = [
     ],
   },
   {
-  {
     match: ['/obe'],
     label: 'OBE / Outcomes',
     back: '/admin-console',

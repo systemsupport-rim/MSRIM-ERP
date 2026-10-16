@@ -22,7 +22,7 @@ export default function AttendanceV2() {
   useEffect(() => {
     api.get('/students').catch(() => ({ data: [] }));
     api.get('/auth/users').then(r => {
-      const all = r.data.filter(u => ['faculty','staff','registrar','hod','accounts','librarian','placement'].includes(u.role));
+      const all = r.data.filter(u => ['faculty','staff','registrar','hod','accounts','librarian','placement'].includes(u.role) && u.is_active);
       setStaff(all);
       setDepts([...new Set(all.map(u => u.department).filter(Boolean))].sort());
     }).catch(() => {});

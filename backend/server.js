@@ -101,7 +101,15 @@ app.use('/api/alumni', require('./routes/alumni'));
 // Accreditation & Quality Management (NAAC / SAP QM equivalent)
 app.use('/api/accreditation', require('./routes/accreditation'));
 
-app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Date().toISOString(), name: 'MSRIM Digital Campus ERP', version: '3.0', modules: 30 }));
+// Phase 3-7 new modules
+app.use('/api/curriculum', require('./routes/curriculum'));
+app.use('/api/cms', require('./routes/cms'));
+app.use('/api/notification-templates', require('./routes/notification_templates'));
+app.use('/api/venues', require('./routes/venues'));
+app.use('/api/audience', require('./routes/audience'));
+app.use('/api/institution', require('./routes/institution'));
+
+app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Date().toISOString(), name: 'MSRIM Digital Campus ERP', version: '3.0', modules: 52 }));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

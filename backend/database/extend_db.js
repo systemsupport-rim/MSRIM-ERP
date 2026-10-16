@@ -1496,6 +1496,194 @@ function seedExtendedData() {
 
   console.log('Extended seed data created.');
 
+  // ── Phases 3-7: All remaining module tables ─────────────────────────────────
+  const allTbls = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(t => t.name);
+
+  if (!allTbls.includes('curriculum_map')) {
+    db.exec(`CREATE TABLE curriculum_map (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      program_id INTEGER NOT NULL REFERENCES programs(id),
+      course_id  INTEGER NOT NULL REFERENCES courses(id),
+      semester   INTEGER NOT NULL,
+      is_mandatory INTEGER DEFAULT 1,
+      credits    INTEGER DEFAULT 3,
+      created_by INTEGER REFERENCES users(id),
+      created_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(program_id, course_id, semester)
+    )`);
+    console.log('Created curriculum_map table.');
+  }
+
+  if (!allTbls.includes('cms_content')) {
+    db.exec(`CREATE TABLE cms_content (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title   TEXT NOT NULL,
+      slug    TEXT UNIQUE,
+      content TEXT,
+      category TEXT DEFAULT 'general' CHECK(category IN ('general','announcement','policy','banner','faq','other')),
+      status  TEXT DEFAULT 'draft' CHECK(status IN ('draft','published','archived')),
+      created_by INTEGER REFERENCES users(id),
+      updated_by INTEGER REFERENCES users(id),
+      published_at TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    )`);
+    console.log('Created cms_content table.');
+  }
+
+  if (!allTbls.includes('notification_templates')) {
+    db.exec(`CREATE TABLE notification_templates (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name      TEXT NOT NULL,
+      type      TEXT DEFAULT 'email' CHECK(type IN ('email','sms','push','in-app')),
+      event_key TEXT,
+      subject   TEXT,
+      body      TEXT NOT NULL,
+      variables TEXT DEFAULT '[]',
+      is_active INTEGER DEFAULT 1,
+      created_by INTEGER REFERENCES users(id),
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    )`);
+    console.log('Created notification_templates table.');
+  }
+
+  if (!allTbls.includes('venues')) {
+    db.exec(`CREATE TABLE venues (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name     TEXT NOT NULL,
+      type     TEXT DEFAULT 'hall' CHECK(type IN ('hall','seminar-room','lab','auditorium','conference-room','sports','other')),
+      capacity INTEGER DEFAULT 50,
+      location TEXT,
+      features TEXT DEFAULT '[]',
+      is_active INTEGER DEFAULT 1,
+      created_by INTEGER REFERENCES users(id),
+      created_at TEXT DEFAULT (datetime('now'))
+    )`);
+    console.log('Created venues table.');
+  }
+
+  if (!allTbls.includes('campus_bookings')) {
+    db.exec(`CREATE TABLE campus_bookings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      venue_id    INTEGER NOT NULL REFERENCES venues(id),
+      booked_by   INTEGER REFERENCES users(id),
+      title       TEXT NOT NULL,
+      date        TEXT NOT NULL,
+      start_time  TEXT NOT NULL,
+      end_time    TEXT NOT NULL,
+      purpose     TEXT,
+      status      TEXT DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected','cancelled')),
+      approved_by INTEGER REFERENCES users(id),
+      created_at  TEXT DEFAULT (datetime('now'))
+    )`);
+    console.log('Created campus_bookings table.');
+  }
+
+  if (!allTbls.includes('audience_groups')) {
+    db.exec(`CREATE TABLE audience_groups (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name        TEXT NOT NULL,
+      description TEXT,
+      type        TEXT DEFAULT 'custom' CHECK(type IN ('custom','role-based','program-based','department-based')),
+      criteria    TEXT DEFAULT '{}',
+      member_count INTEGER DEFAULT 0,
+      is_active   INTEGER DEFAULT 1,
+      created_by  INTEGER REFERENCES users(id),
+      created_at  TEXT DEFAULT (datetime('now'))
+    )`);
+    console.log('Created audience_groups table.');
+  }
+
+  if (!allTbls.includes('hostel_fee_structure')) {
+    db.exec(`CREATE TABLE hostel_fee_structure (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      room_type       TEXT NOT NULL,
+      academic_year_id INTEGER REFERENCES academic_years(id),
+      amount          REAL NOT NULL DEFAULT 0,
+      frequency       TEXT DEFAULT 'annual' CHECK(frequency IN ('monthly','quarterly','annual','one-time')),
+      description     TEXT,
+      is_active       INTEGER DEFAULT 1,
+      created_by      INTEGER REFERENCES users(id),
+      created_at      TEXT DEFAULT (datetime('now')),
+      UNIQUE(room_type, academic_year_id)
+    )`);
+    console.log('Created hostel_fee_structure table.');
+  }
+
+  if (!allTbls.includes('system_settings')) {
+    db.exec(`CREATE TABLE system_settings (
+      id       INTEGER PRIMARY KEY AUTOINCREMENT,
+      category TEXT NOT NULL,
+      key      TEXT NOT NULL,
+      value    TEXT,
+      label    TEXT,
+      type     TEXT DEFAULT 'text',
+      updated_by INTEGER REFERENCES users(id),
+      updated_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(category, key)
+    )`);
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('institution','name','MS Ramaiah Institute of Management','Institution Name');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('institution','short_name','MSRIM','Short Name');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('institution','address','Gnanagangothri Campus, MSR Nagar, MSRIT Post, Bengaluru - 560054','Address');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('institution','phone','+91-80-23600822','Phone');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('institution','email','info@msrim.in','Email');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('institution','website','https://msrim.in','Website');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('institution','affiliation','Bangalore University','Affiliation');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('institution','accreditation','AICTE Approved, NAAC Accredited','Accreditation');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('sso','enabled','0','SSO Enabled');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('sso','provider','','Provider (google/microsoft/ldap)');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('sso','client_id','','Client ID');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('sso','tenant_id','','Tenant ID');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('integrations','zoom_api_key','','Zoom API Key');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('integrations','zoom_secret','','Zoom API Secret');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('integrations','extraaedge_key','','Extraaedge API Key');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('integrations','leadsquared_host','','LeadSquared Host');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('integrations','leadsquared_key','','LeadSquared Access Key');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('integrations','salesforce_instance','','Salesforce Instance URL');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('integrations','npf_api_key','','No Paper Forms API Key');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('integrations','seb_config','','SEB Configuration Hash');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('biometric','device_ip','','Biometric Device IP');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('biometric','device_port','4370','Biometric Device Port');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('biometric','enabled','0','Biometric Sync Enabled');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('feed','max_posts_per_day','10','Max Posts Per Day');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('feed','moderation_enabled','1','Post Moderation Enabled');
+    db.prepare("INSERT OR IGNORE INTO system_settings (category,key,value,label) VALUES (?,?,?,?)").run('feed','allow_student_posts','1','Allow Student Posts');
+    console.log('Created system_settings table with defaults.');
+  }
+
+  if (!allTbls.includes('biometric_records')) {
+    db.exec(`CREATE TABLE biometric_records (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id    INTEGER NOT NULL REFERENCES users(id),
+      date       TEXT NOT NULL,
+      punch_in   TEXT,
+      punch_out  TEXT,
+      source     TEXT DEFAULT 'biometric' CHECK(source IN ('biometric','manual','mobile')),
+      device_id  TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(user_id, date)
+    )`);
+    console.log('Created biometric_records table.');
+  }
+
+  if (!allTbls.includes('hr_pay_scales')) {
+    db.exec(`CREATE TABLE hr_pay_scales (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      designation  TEXT NOT NULL,
+      level        TEXT,
+      basic_min    REAL DEFAULT 0,
+      basic_max    REAL DEFAULT 0,
+      grade_pay    REAL DEFAULT 0,
+      da_percent   REAL DEFAULT 0,
+      hra_percent  REAL DEFAULT 0,
+      is_active    INTEGER DEFAULT 1,
+      created_by   INTEGER REFERENCES users(id),
+      created_at   TEXT DEFAULT (datetime('now'))
+    )`);
+    console.log('Created hr_pay_scales table.');
+  }
+
   // ── Phase 2: Admissions new tables ──────────────────────────────────────────
   const allTables2 = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(t => t.name);
 

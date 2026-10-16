@@ -51,6 +51,28 @@ import MarksEntry from './pages/Examinations/MarksEntry';
 import BacklogManagement from './pages/Examinations/BacklogManagement';
 import YearResults from './pages/Examinations/YearResults';
 import ResultDeclaration from './pages/Examinations/ResultDeclaration';
+// Phase 3 – HR
+import AttendanceV2 from './pages/HR/AttendanceV2';
+import HRReports from './pages/HR/HRReports';
+import HRMasterData from './pages/HR/HRMasterData';
+// Phase 4 – Core Data
+import AcademicManagement from './pages/AcademicManagement/AcademicManagement';
+import Curriculum from './pages/Curriculum/Curriculum';
+import CMS from './pages/CMS/CMS';
+import NotificationTemplates from './pages/NotificationTemplates/NotificationTemplates';
+// Phase 5 – Campus
+import HostelFee from './pages/Hostel/HostelFee';
+import VenueAdministration from './pages/Venues/VenueAdministration';
+import AttendanceConsole from './pages/Attendance/AttendanceConsole';
+import AudienceManagement from './pages/Audience/AudienceManagement';
+// Phase 6 – System
+import OBESettings from './pages/OBE/OBESettings';
+import InstitutionSettings from './pages/Settings/InstitutionSettings';
+import SSOConfig from './pages/Settings/SSOConfig';
+import BiometricManagement from './pages/Settings/BiometricManagement';
+import FeedSettings from './pages/Settings/FeedSettings';
+// Phase 7 – Integrations
+import Integrations from './pages/Integrations/Integrations';
 
 function ProtectedRoute({ children, roles }) {
   const { user } = useAuth();
@@ -130,6 +152,28 @@ function AppRoutes() {
         <Route path="/leave-management" element={<LeaveManagement />} />
         <Route path="/staff-attendance" element={<StaffAttendance />} />
         <Route path="/admin-privileges" element={<ProtectedRoute roles={['admin']}><AdminPrivileges /></ProtectedRoute>} />
+        {/* Phase 3 – HR */}
+        <Route path="/hr/attendance-v2" element={<ProtectedRoute roles={['admin','registrar','hod']}><AttendanceV2 /></ProtectedRoute>} />
+        <Route path="/hr/reports" element={<ProtectedRoute roles={['admin','registrar','hod']}><HRReports /></ProtectedRoute>} />
+        <Route path="/hr/master-data" element={<ProtectedRoute roles={['admin','registrar']}><HRMasterData /></ProtectedRoute>} />
+        {/* Phase 4 – Core Data */}
+        <Route path="/academic-management" element={<ProtectedRoute roles={['admin','registrar','hod']}><AcademicManagement /></ProtectedRoute>} />
+        <Route path="/curriculum" element={<ProtectedRoute roles={['admin','registrar','hod','faculty']}><Curriculum /></ProtectedRoute>} />
+        <Route path="/cms" element={<ProtectedRoute roles={['admin','registrar']}><CMS /></ProtectedRoute>} />
+        <Route path="/notification-templates" element={<ProtectedRoute roles={['admin','registrar']}><NotificationTemplates /></ProtectedRoute>} />
+        {/* Phase 5 – Campus */}
+        <Route path="/hostel/fee" element={<ProtectedRoute roles={['admin','registrar','accounts']}><HostelFee /></ProtectedRoute>} />
+        <Route path="/venues" element={<VenueAdministration />} />
+        <Route path="/attendance-console" element={<ProtectedRoute roles={['admin','registrar','hod','faculty']}><AttendanceConsole /></ProtectedRoute>} />
+        <Route path="/audience" element={<ProtectedRoute roles={['admin','registrar','hod']}><AudienceManagement /></ProtectedRoute>} />
+        {/* Phase 6 – System */}
+        <Route path="/obe/settings" element={<ProtectedRoute roles={['admin','registrar']}><OBESettings /></ProtectedRoute>} />
+        <Route path="/institution-settings" element={<ProtectedRoute roles={['admin']}><InstitutionSettings /></ProtectedRoute>} />
+        <Route path="/sso-config" element={<ProtectedRoute roles={['admin']}><SSOConfig /></ProtectedRoute>} />
+        <Route path="/biometric" element={<ProtectedRoute roles={['admin','registrar']}><BiometricManagement /></ProtectedRoute>} />
+        <Route path="/feed-settings" element={<ProtectedRoute roles={['admin']}><FeedSettings /></ProtectedRoute>} />
+        {/* Phase 7 – Integrations */}
+        <Route path="/integrations" element={<ProtectedRoute roles={['admin']}><Integrations /></ProtectedRoute>} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" />} />
     </Routes>

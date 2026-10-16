@@ -8,7 +8,8 @@ import {
   Zap, Banknote, ShoppingCart, Network, BadgeCheck, Sparkles,
   Layers, Brain, BarChart3, HardDrive, Shield, LayoutDashboard,
   ArrowLeft, Plus, Trash2, RotateCcw, Settings2, X, Check, KeyRound, Edit2,
-  MessageSquare, Send
+  MessageSquare, Send, BarChart2, Cpu, Bell, Globe, MapPin, Video,
+  Megaphone, BookMarked as BookIcon, Target
 } from 'lucide-react';
 
 const allGroups = [
@@ -53,37 +54,18 @@ const allGroups = [
     ]
   },
   {
-    group: 'Finance & HR',
+    group: 'Finance & Admissions',
     color: 'bg-emerald-50 border-emerald-100',
     iconBg: 'bg-emerald-100',
     iconColor: 'text-emerald-600',
     headingColor: 'text-emerald-700',
     items: [
-      { to: '/fees',                    icon: DollarSign,    label: 'Fee Management',      desc: 'Fee collection & receipts',             roles: ['admin','registrar','accounts','student'] },
-      { to: '/admissions/enquiries',   icon: MessageSquare, label: 'Enquiry Management',  desc: 'Track prospective student enquiries',   roles: ['admin','registrar','hod'] },
-      { to: '/admissions/applications',icon: Send,          label: 'Applications',        desc: 'Full admissions pipeline & offer letters', roles: ['admin','registrar','hod'] },
-      { to: '/admissions',             icon: Users2,        label: 'Admission Mgmt',      desc: 'Admissions overview & admit students',  roles: ['admin','registrar','hod'] },
-      { to: '/admissions/settings',    icon: Settings2,     label: 'Admission Settings',  desc: 'Intake targets, dates & fees',          roles: ['admin','registrar'] },
-      { to: '/hr',            icon: Users,         label: 'HR Management',   desc: 'Staff records & HR operations',       roles: ['admin','registrar','hod','faculty'] },
-      { to: '/leave-management', icon: CalendarDays,  label: 'Leave Management', desc: 'Apply, track & manage all staff leave', roles: 'all' },
-      { to: '/hr/leaves',        icon: ClipboardList, label: 'Leave Approval',   desc: 'Leave requests & approvals',            roles: ['admin','registrar','hod','faculty'] },
-      { to: '/hr/portfolios', icon: Star,          label: 'Staff Portfolio', desc: 'Faculty achievements & portfolios',   roles: ['admin','hod','faculty'] },
-      { to: '/parents',       icon: Users2,        label: 'Parent Mgmt',     desc: 'Parent portal & communication',       roles: ['admin','registrar'] },
-    ]
-  },
-  {
-    group: 'Campus Life',
-    color: 'bg-orange-50 border-orange-100',
-    iconBg: 'bg-orange-100',
-    iconColor: 'text-orange-600',
-    headingColor: 'text-orange-700',
-    items: [
-      { to: '/placements',     icon: Briefcase,  label: 'Placements',      desc: 'Campus drives & job placements',    roles: 'all' },
-      { to: '/library',        icon: Library,    label: 'Library',         desc: 'Books, issues & digital resources', roles: 'all' },
-      { to: '/hostel',         icon: BedDouble,  label: 'Hostel',          desc: 'Hostel allotment & facilities',     roles: ['admin','registrar','student'] },
-      { to: '/infrastructure', icon: Building,   label: 'Infrastructure',  desc: 'Campus facilities & assets',        roles: 'all' },
-      { to: '/helpdesk',       icon: HelpCircle, label: 'Help Center',     desc: 'Raise & track support tickets',     roles: 'all' },
-      { to: '/feedback',       icon: Heart,      label: 'IQAC / Feedback', desc: 'Feedback collection & IQAC',        roles: 'all' },
+      { to: '/fees',                    icon: DollarSign,    label: 'Fee Management',      desc: 'Fee collection & receipts',                roles: ['admin','registrar','accounts','student'] },
+      { to: '/admissions/enquiries',    icon: MessageSquare, label: 'Enquiry Management',  desc: 'Track prospective student enquiries',      roles: ['admin','registrar','hod'] },
+      { to: '/admissions/applications', icon: Send,          label: 'Applications',        desc: 'Full admissions pipeline & offer letters', roles: ['admin','registrar','hod'] },
+      { to: '/admissions',              icon: Users2,        label: 'Admission Mgmt',      desc: 'Admissions overview & admit students',     roles: ['admin','registrar','hod'] },
+      { to: '/admissions/settings',     icon: Settings2,     label: 'Admission Settings',  desc: 'Intake targets, dates & fees',             roles: ['admin','registrar'] },
+      { to: '/parents',                 icon: Users2,        label: 'Parent Mgmt',         desc: 'Parent portal & communication',            roles: ['admin','registrar'] },
     ]
   },
   {
@@ -102,13 +84,86 @@ const allGroups = [
     ]
   },
   {
+    group: 'HR Management',
+    color: 'bg-teal-50 border-teal-100',
+    iconBg: 'bg-teal-100',
+    iconColor: 'text-teal-600',
+    headingColor: 'text-teal-700',
+    items: [
+      { to: '/hr',                icon: Users,        label: 'HR Management',       desc: 'Staff records & HR operations',           roles: ['admin','registrar','hod','faculty'] },
+      { to: '/hr/attendance-v2',  icon: ClipboardCheck,label:'Attendance V2',       desc: 'Monthly attendance grid & bulk marking',  roles: ['admin','registrar','hod'] },
+      { to: '/hr/reports',        icon: BarChart3,    label: 'HR Reports',          desc: 'Attendance, leave & workforce analytics', roles: ['admin','registrar','hod'] },
+      { to: '/hr/master-data',    icon: Layers,       label: 'HR Master Data',      desc: 'Pay scales, designations & configuration',roles: ['admin','registrar'] },
+      { to: '/leave-management',  icon: CalendarDays, label: 'Leave Management',    desc: 'Apply, track & manage all staff leave',   roles: 'all' },
+      { to: '/hr/leaves',         icon: ClipboardList,label: 'Leave Approval',      desc: 'Leave requests & approvals',              roles: ['admin','registrar','hod','faculty'] },
+      { to: '/staff-attendance',  icon: ClipboardCheck,label:'Staff Attendance',    desc: 'Daily staff attendance tracking',         roles: ['admin','registrar','hod'] },
+      { to: '/hr/portfolios',     icon: Star,         label: 'Staff Portfolio',     desc: 'Faculty achievements & portfolios',       roles: ['admin','hod','faculty'] },
+      { to: '/biometric',         icon: Cpu,          label: 'Biometric Mgmt',      desc: 'Biometric device & punch records',        roles: ['admin','registrar'] },
+    ]
+  },
+  {
+    group: 'Core Data',
+    color: 'bg-cyan-50 border-cyan-100',
+    iconBg: 'bg-cyan-100',
+    iconColor: 'text-cyan-600',
+    headingColor: 'text-cyan-700',
+    items: [
+      { to: '/academic-management',       icon: BookOpen,    label: 'Academic Management',        desc: 'Programs, depts & academic years',         roles: ['admin','registrar','hod'] },
+      { to: '/curriculum',                icon: Layers,      label: 'Curriculum',                 desc: 'Program-wise course curriculum mapping',   roles: ['admin','registrar','hod','faculty'] },
+      { to: '/cms',                       icon: FileText,    label: 'Content Management',         desc: 'Announcements, policies & banners',        roles: ['admin','registrar'] },
+      { to: '/notification-templates',    icon: Bell,        label: 'Notification Templates',     desc: 'Email, SMS & push notification templates', roles: ['admin','registrar'] },
+      { to: '/structure',                 icon: Layers,      label: 'Structure',                  desc: 'Dept, program & semester config',          roles: ['admin','registrar','hod'] },
+    ]
+  },
+  {
+    group: 'Campus Life',
+    color: 'bg-orange-50 border-orange-100',
+    iconBg: 'bg-orange-100',
+    iconColor: 'text-orange-600',
+    headingColor: 'text-orange-700',
+    items: [
+      { to: '/placements',        icon: Briefcase,   label: 'Placements',      desc: 'Campus drives & job placements',    roles: 'all' },
+      { to: '/library',           icon: Library,     label: 'Library',         desc: 'Books, issues & digital resources', roles: 'all' },
+      { to: '/hostel',            icon: BedDouble,   label: 'Hostel',          desc: 'Hostel allotment & facilities',     roles: ['admin','registrar','student'] },
+      { to: '/hostel/fee',        icon: DollarSign,  label: 'Hostel Fee',      desc: 'Hostel fee structure by room type', roles: ['admin','registrar','accounts'] },
+      { to: '/infrastructure',    icon: Building,    label: 'Infrastructure',  desc: 'Campus facilities & assets',        roles: 'all' },
+      { to: '/venues',            icon: MapPin,      label: 'Venue Admin',     desc: 'Manage venues & booking requests',  roles: 'all' },
+      { to: '/attendance-console',icon: BarChart3,   label: 'Attendance Console',desc:'Consolidated attendance dashboard',roles: ['admin','registrar','hod','faculty'] },
+      { to: '/helpdesk',          icon: HelpCircle,  label: 'Help Center',     desc: 'Raise & track support tickets',     roles: 'all' },
+      { to: '/feedback',          icon: Heart,       label: 'IQAC / Feedback', desc: 'Feedback collection & IQAC',        roles: 'all' },
+    ]
+  },
+  {
+    group: 'System Settings',
+    color: 'bg-slate-50 border-slate-100',
+    iconBg: 'bg-slate-100',
+    iconColor: 'text-slate-600',
+    headingColor: 'text-slate-700',
+    items: [
+      { to: '/institution-settings', icon: Building,   label: 'Institution Settings', desc: 'Institution profile & contact',         roles: ['admin'] },
+      { to: '/obe/settings',         icon: Star,       label: 'OBE Access Settings',  desc: 'Configure OBE access by role',          roles: ['admin','registrar'] },
+      { to: '/sso-config',           icon: Shield,     label: 'SSO Configuration',    desc: 'Google / Microsoft / LDAP SSO',         roles: ['admin'] },
+      { to: '/feed-settings',        icon: Megaphone,  label: 'Feed Settings',        desc: 'Post moderation & feed rules',          roles: ['admin'] },
+      { to: '/audience',             icon: Users2,     label: 'Audience Groups',      desc: 'Targeted notification groups',          roles: ['admin','registrar','hod'] },
+    ]
+  },
+  {
+    group: 'Integrations',
+    color: 'bg-indigo-50 border-indigo-100',
+    iconBg: 'bg-indigo-100',
+    iconColor: 'text-indigo-600',
+    headingColor: 'text-indigo-700',
+    items: [
+      { to: '/integrations', icon: Globe, label: 'All Integrations', desc: 'Zoom, Extraaedge, NPF, LeadSquared, Salesforce, SEB', roles: ['admin'] },
+    ]
+  },
+  {
     group: 'Admin Console',
     color: 'bg-red-50 border-red-100',
     iconBg: 'bg-red-100',
     iconColor: 'text-red-600',
     headingColor: 'text-red-700',
     items: [
-      { to: '/structure',          icon: Layers,    label: 'Structure',           desc: 'Dept, program & semester config',          roles: ['admin','registrar','hod'] },
       { to: '/analytics',          icon: Brain,     label: 'Analytics / BI',      desc: 'BI dashboards & data insights',            roles: ['admin','registrar','hod'] },
       { to: '/reports',            icon: BarChart3, label: 'Reports & Logs',      desc: 'Detailed reports & audit logs',            roles: ['admin','registrar','hod'] },
       { to: '/drive',              icon: HardDrive, label: 'Drive',               desc: 'File storage & document sharing',          roles: 'all' },

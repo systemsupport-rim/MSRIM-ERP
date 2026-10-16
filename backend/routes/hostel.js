@@ -58,4 +58,23 @@ router.get('/stats', (req, res) => {
   res.json({ totalRooms: totalRooms.c, totalCapacity: totalCapacity.c || 0, currentHostellers: occupied.c, available: (totalCapacity.c || 0) - occupied.c, byBlock });
 });
 
+// Hostel Fee Structure
+router.get('/fee-structure', (req, res) => {
+  const fees = db.prepare(`SELECT hf.*, ay.name as academic_year_name
+    FROM hostel_fee_structure hf LEFT JOIN academic_years ay ON hf.academic_year_id = ay.id
+    ORDER BY ay.name DESC, hf.room_type`).all();
+  res.json(fees);
+});
+
+router.post('/fee-structure', authorize('admin','registrar','accounts'), (req, res) => {
+  const { room_type, academic_year_id, amount, frequency, description } = req.body;
+  try {
+    db.prepare(`INSERT INTO hostel_fee_structure (room_type,academic_year_id,amount,frequency,description,created_by)
+      VALUES (?,?,?,?,?,?)
+      ON CONFLICT(room_type,academic_year_id) DO UPDATE SET amount=excluded.amount,frequency=excluded.frequency,description=excluded.description`)
+      .run(room_type, academic_year_id||null, amount||0, frequency||'annual', description||'', req.user.id);
+    res.json({ message: 'Fee structure saved.' });
+  } catch(e) { res.status(400).json({ error: e.message }); }
+});
+
 module.exports = router;

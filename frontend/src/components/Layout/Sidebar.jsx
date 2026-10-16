@@ -104,9 +104,12 @@ const moduleNavMap = [
     label: 'HR Management',
     back: '/admin-console',
     items: [
-      { to: '/hr',            icon: Users,         label: 'HR Management' },
-      { to: '/hr/leaves',     icon: ClipboardList, label: 'Leave Approval' },
-      { to: '/hr/portfolios', icon: Star,          label: 'Staff Portfolio' },
+      { to: '/hr',                icon: Users,         label: 'HR Management' },
+      { to: '/hr/attendance-v2',  icon: ClipboardCheck,label: 'Attendance V2' },
+      { to: '/hr/reports',        icon: BarChart3,     label: 'HR Reports' },
+      { to: '/hr/master-data',    icon: Layers,        label: 'Master Data' },
+      { to: '/hr/leaves',         icon: ClipboardList, label: 'Leave Approval' },
+      { to: '/hr/portfolios',     icon: Star,          label: 'Staff Portfolio' },
     ],
   },
   {
@@ -155,7 +158,8 @@ const moduleNavMap = [
     label: 'Hostel',
     back: '/admin-console',
     items: [
-      { to: '/hostel', icon: BedDouble, label: 'Hostel' },
+      { to: '/hostel',     icon: BedDouble,  label: 'Hostel Allotment' },
+      { to: '/hostel/fee', icon: DollarSign, label: 'Hostel Fee' },
     ],
   },
   {
@@ -193,6 +197,89 @@ const moduleNavMap = [
       { to: '/alumni',        icon: Network,      label: 'Alumni Connect' },
       { to: '/accreditation', icon: BadgeCheck,   label: 'Accreditation & NAAC' },
       { to: '/intelligence',  icon: Sparkles,     label: 'AI Command Center' },
+    ],
+  },
+  {
+    match: ['/curriculum'],
+    label: 'Curriculum',
+    back: '/admin-console',
+    items: [
+      { to: '/curriculum',         icon: Layers,    label: 'Curriculum Map' },
+      { to: '/academic-management',icon: BookOpen,  label: 'Academic Mgmt' },
+    ],
+  },
+  {
+    match: ['/academic-management'],
+    label: 'Academic Management',
+    back: '/admin-console',
+    items: [
+      { to: '/academic-management', icon: BookOpen,  label: 'Academic Mgmt' },
+      { to: '/curriculum',          icon: Layers,    label: 'Curriculum' },
+      { to: '/timetable',           icon: CalendarDays, label: 'Timetable' },
+    ],
+  },
+  {
+    match: ['/cms'],
+    label: 'Content Management',
+    back: '/admin-console',
+    items: [
+      { to: '/cms',                    icon: FileText,      label: 'CMS' },
+      { to: '/notification-templates', icon: ClipboardList, label: 'Notification Templates' },
+    ],
+  },
+  {
+    match: ['/notification-templates'],
+    label: 'Notification Templates',
+    back: '/admin-console',
+    items: [
+      { to: '/notification-templates', icon: ClipboardList, label: 'Templates' },
+      { to: '/cms',                    icon: FileText,      label: 'CMS' },
+    ],
+  },
+  {
+    match: ['/venues'],
+    label: 'Venue Administration',
+    back: '/admin-console',
+    items: [
+      { to: '/venues', icon: MapPin, label: 'Venues & Bookings' },
+    ],
+  },
+  {
+    match: ['/audience'],
+    label: 'Audience Management',
+    back: '/admin-console',
+    items: [
+      { to: '/audience', icon: Users, label: 'Audience Groups' },
+    ],
+  },
+  {
+    match: ['/attendance-console'],
+    label: 'Attendance Console',
+    back: '/admin-console',
+    items: [
+      { to: '/attendance-console', icon: ClipboardCheck, label: 'Attendance Console' },
+      { to: '/attendance',         icon: ClipboardCheck, label: 'Student Attendance' },
+      { to: '/staff-attendance',   icon: ClipboardCheck, label: 'Staff Attendance' },
+    ],
+  },
+  {
+    match: ['/institution-settings', '/sso-config', '/feed-settings', '/biometric', '/obe/settings'],
+    label: 'System Settings',
+    back: '/admin-console',
+    items: [
+      { to: '/institution-settings', icon: Building2,   label: 'Institution' },
+      { to: '/obe/settings',         icon: Star,        label: 'OBE Access' },
+      { to: '/sso-config',           icon: Shield,      label: 'SSO Config' },
+      { to: '/biometric',            icon: ClipboardCheck, label: 'Biometric' },
+      { to: '/feed-settings',        icon: Star,        label: 'Feed Settings' },
+    ],
+  },
+  {
+    match: ['/integrations'],
+    label: 'Integrations',
+    back: '/admin-console',
+    items: [
+      { to: '/integrations', icon: Network, label: 'All Integrations' },
     ],
   },
   {

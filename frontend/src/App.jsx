@@ -31,6 +31,7 @@ import Parents from './pages/Parents/Parents';
 import Structure from './pages/Structure/Structure';
 import Analytics from './pages/Analytics/Analytics';
 import OBE from './pages/OBE/OBE';
+import OBEDashboard from './pages/OBE/OBEDashboard';
 import ExamsEnhanced from './pages/Examinations/ExamsEnhanced';
 import RolesPrivileges from './pages/Roles/Roles';
 import Timetable from './pages/Timetable/Timetable';
@@ -101,7 +102,8 @@ function AppRoutes() {
         <Route path="/timetable" element={<Timetable />} />
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/lms" element={<LMS />} />
-        <Route path="/obe" element={<OBE />} />
+        <Route path="/obe" element={<OBEDashboard />} />
+        <Route path="/obe/outcomes" element={<OBE />} />
         <Route path="/mentor" element={<MentorMentee />} />
         {/* Examinations */}
         <Route path="/examinations" element={<Examinations />} />

@@ -50,14 +50,24 @@ const moduleNavMap = [
     ],
   },
   {
-    match: ['/courses', '/timetable', '/lms', '/obe', '/mentor'],
+  {
+    match: ['/obe'],
+    label: 'OBE / Outcomes',
+    back: '/admin-console',
+    items: [
+      { to: '/obe',          icon: Star,    label: 'OBE Dashboard' },
+      { to: '/obe/outcomes', icon: Star,    label: 'CO / PO Setup' },
+      { to: '/obe/settings', icon: Shield,  label: 'Access Settings' },
+    ],
+  },
+  {
+    match: ['/courses', '/timetable', '/lms', '/mentor'],
     label: 'Academic',
     back: '/admin-console',
     items: [
       { to: '/courses',    icon: BookOpen,      label: 'Course Catalogue' },
       { to: '/timetable',  icon: CalendarDays,  label: 'Timetable' },
       { to: '/lms',        icon: BookMarked,    label: 'LMS' },
-      { to: '/obe',        icon: Star,          label: 'OBE / Outcomes' },
       { to: '/mentor',     icon: UserCheck,     label: 'Mentor-Mentee' },
     ],
   },

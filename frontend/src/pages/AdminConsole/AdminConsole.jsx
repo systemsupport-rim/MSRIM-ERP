@@ -28,7 +28,8 @@ const allGroups = [
       { to: '/staff-attendance', icon: ClipboardList,  label: 'Staff Attendance', desc: 'Daily staff attendance tracking',  roles: ['admin','registrar','hod'] },
       { to: '/timetable',        icon: CalendarDays,   label: 'Timetable',        desc: 'Class schedules & timetables',     roles: 'all' },
       { to: '/lms',        icon: BookMarked,     label: 'LMS',              desc: 'Learning management system',          roles: 'all' },
-      { to: '/obe',        icon: Star,           label: 'OBE / Outcomes',   desc: 'Outcome-based education tracking',    roles: ['admin','hod','faculty','student','registrar'] },
+      { to: '/obe',          icon: Star, label: 'OBE Dashboard',  desc: 'CO/PO attainment charts & analysis',  roles: ['admin','hod','faculty','student','registrar'] },
+      { to: '/obe/outcomes', icon: Star, label: 'OBE Setup',      desc: 'Define COs, POs & CO-PO mapping',     roles: ['admin','hod','faculty','registrar'] },
       { to: '/mentor',     icon: UserCheck,      label: 'Mentor-Mentee',    desc: 'Mentorship assignments & tracking',   roles: ['admin','hod','faculty','student','registrar'] },
     ]
   },

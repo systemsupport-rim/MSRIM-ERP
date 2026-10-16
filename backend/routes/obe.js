@@ -115,10 +115,112 @@ router.post('/mapping', authorize('faculty','admin','hod'), (req, res) => {
 
 router.get('/attainment', (req, res) => {
   const { program_id, academic_year_id } = req.query;
-  const attainment = db.prepare(`SELECT ca.*, co.code as co_code, co.description, c.name as course_name, ay.name as academic_year
+  const parts = [];
+  const params = [];
+  if (program_id)       { parts.push('c.program_id = ?');        params.push(program_id); }
+  if (academic_year_id) { parts.push('ca.academic_year_id = ?'); params.push(academic_year_id); }
+  const where = parts.length ? 'AND ' + parts.join(' AND ') : '';
+  const attainment = db.prepare(`SELECT ca.*, co.code as co_code, co.description, co.bloom_level,
+    c.name as course_name, c.code as course_code, ay.name as academic_year
     FROM co_attainment ca JOIN course_outcomes co ON ca.co_id = co.id JOIN courses c ON co.course_id = c.id
-    LEFT JOIN academic_years ay ON ca.academic_year_id = ay.id WHERE 1=1 ${program_id ? 'AND c.program_id = ?' : ''} ${academic_year_id ? 'AND ca.academic_year_id = ?' : ''} ORDER BY c.name, co.code`).all(...[program_id, academic_year_id].filter(Boolean));
+    LEFT JOIN academic_years ay ON ca.academic_year_id = ay.id
+    WHERE 1=1 ${where} ORDER BY c.name, co.code`).all(...params);
   res.json(attainment);
+});
+
+router.post('/attainment', authorize('faculty','admin','hod','registrar'), (req, res) => {
+  const { co_id, academic_year_id, direct_attainment, indirect_attainment, target } = req.body;
+  const direct  = parseFloat(direct_attainment)   || 0;
+  const indirect= parseFloat(indirect_attainment) || 0;
+  const final_attainment = parseFloat((direct * 0.8 + indirect * 0.2).toFixed(2));
+  try {
+    const existing = db.prepare('SELECT id FROM co_attainment WHERE co_id=? AND (academic_year_id=? OR (academic_year_id IS NULL AND ? IS NULL))').get(co_id, academic_year_id||null, academic_year_id||null);
+    if (existing) {
+      db.prepare('UPDATE co_attainment SET direct_attainment=?,indirect_attainment=?,final_attainment=?,target=? WHERE id=?').run(direct, indirect, final_attainment, target||60, existing.id);
+    } else {
+      db.prepare('INSERT INTO co_attainment (co_id,academic_year_id,direct_attainment,indirect_attainment,final_attainment,target) VALUES (?,?,?,?,?,?)').run(co_id, academic_year_id||null, direct, indirect, final_attainment, target||60);
+    }
+    res.json({ message: 'Attainment saved.', final_attainment });
+  } catch(e) { res.status(400).json({ error: e.message }); }
+});
+
+router.put('/attainment/:id', authorize('faculty','admin','hod','registrar'), (req, res) => {
+  const { direct_attainment, indirect_attainment, target } = req.body;
+  const direct  = parseFloat(direct_attainment)   || 0;
+  const indirect= parseFloat(indirect_attainment) || 0;
+  const final_attainment = parseFloat((direct * 0.8 + indirect * 0.2).toFixed(2));
+  db.prepare('UPDATE co_attainment SET direct_attainment=?,indirect_attainment=?,final_attainment=?,target=? WHERE id=?')
+    .run(direct, indirect, final_attainment, target||60, req.params.id);
+  res.json({ message: 'Updated.', final_attainment });
+});
+
+// Auto-calculate CO attainment from exam results
+router.post('/attainment/auto-calculate', authorize('admin','hod','registrar'), (req, res) => {
+  const { program_id, academic_year_id } = req.body;
+  const cos = db.prepare(`SELECT co.*, c.program_id FROM course_outcomes co JOIN courses c ON co.course_id=c.id ${program_id ? 'WHERE c.program_id=?' : ''}`).all(...(program_id ? [program_id] : []));
+  let calculated = 0;
+  cos.forEach(co => {
+    const exams = db.prepare(`SELECT e.id, e.total_marks, e.passing_marks FROM examinations e WHERE e.course_id=? ${academic_year_id ? 'AND e.academic_year_id=?' : ''}`).all(...[co.course_id, ...(academic_year_id ? [academic_year_id] : [])]);
+    if (!exams.length) return;
+    let totalStudents = 0, metThreshold = 0;
+    exams.forEach(exam => {
+      const results = db.prepare('SELECT marks_obtained FROM results WHERE examination_id=?').all(exam.id);
+      const threshold = exam.total_marks * 0.6;
+      results.forEach(r => { totalStudents++; if (r.marks_obtained >= threshold) metThreshold++; });
+    });
+    if (totalStudents === 0) return;
+    const direct = parseFloat(((metThreshold / totalStudents) * 100).toFixed(2));
+    const final  = parseFloat((direct * 0.8).toFixed(2));
+    const ex = db.prepare('SELECT id FROM co_attainment WHERE co_id=? AND (academic_year_id=? OR (academic_year_id IS NULL AND ? IS NULL))').get(co.id, academic_year_id||null, academic_year_id||null);
+    if (ex) {
+      db.prepare('UPDATE co_attainment SET direct_attainment=?,final_attainment=? WHERE id=?').run(direct, final, ex.id);
+    } else {
+      db.prepare('INSERT INTO co_attainment (co_id,academic_year_id,direct_attainment,indirect_attainment,final_attainment,target) VALUES (?,?,?,0,?,60)').run(co.id, academic_year_id||null, direct, final);
+    }
+    calculated++;
+  });
+  res.json({ message: `Auto-calculated attainment for ${calculated} COs.`, calculated });
+});
+
+// PO Attainment — derived from CO attainment × CO-PO mapping
+router.get('/po-attainment', (req, res) => {
+  const { program_id, academic_year_id } = req.query;
+  const pos = db.prepare(`SELECT * FROM program_outcomes ${program_id ? 'WHERE program_id=?' : ''} ORDER BY code`).all(...(program_id ? [program_id] : []));
+  const parts = []; const params = [];
+  if (program_id)       { parts.push('c.program_id=?');          params.push(program_id); }
+  if (academic_year_id) { parts.push('ca.academic_year_id=?');   params.push(academic_year_id); }
+  const where = parts.length ? 'AND ' + parts.join(' AND ') : '';
+  const mappedCOs = db.prepare(`SELECT m.po_id, m.strength, ca.final_attainment
+    FROM co_po_mapping m
+    JOIN co_attainment ca ON ca.co_id = m.co_id
+    JOIN course_outcomes co ON co.id = m.co_id
+    JOIN courses c ON c.id = co.course_id
+    WHERE ca.final_attainment > 0 ${where}`).all(...params);
+
+  const poAttainment = pos.map(po => {
+    const linked = mappedCOs.filter(m => m.po_id === po.id);
+    if (!linked.length) return { ...po, attainment: 0, level: 0, co_count: 0 };
+    const weighted = linked.reduce((sum, m) => sum + m.final_attainment * m.strength, 0);
+    const totalWeight = linked.reduce((sum, m) => sum + m.strength, 0);
+    const attainment = totalWeight > 0 ? parseFloat((weighted / totalWeight).toFixed(2)) : 0;
+    const level = attainment >= 70 ? 3 : attainment >= 60 ? 2 : attainment > 0 ? 1 : 0;
+    return { ...po, attainment, level, co_count: linked.length };
+  });
+  res.json(poAttainment);
+});
+
+// OBE Dashboard summary
+router.get('/dashboard', (req, res) => {
+  const { program_id, academic_year_id } = req.query;
+  const totalCOs    = db.prepare('SELECT COUNT(*) as c FROM course_outcomes').get();
+  const totalPOs    = db.prepare(`SELECT COUNT(*) as c FROM program_outcomes ${program_id?'WHERE program_id=?':''}`).get(...(program_id?[program_id]:[]));
+  const mappedCOs   = db.prepare('SELECT COUNT(DISTINCT co_id) as c FROM co_po_mapping').get();
+  const attainRows  = db.prepare(`SELECT ca.final_attainment, ca.target FROM co_attainment ca JOIN course_outcomes co ON ca.co_id=co.id JOIN courses c ON co.course_id=c.id WHERE 1=1 ${program_id?'AND c.program_id=?':''} ${academic_year_id?'AND ca.academic_year_id=?':''}`).all(...[program_id,academic_year_id].filter(Boolean));
+  const avgAttainment = attainRows.length ? (attainRows.reduce((s,r)=>s+r.final_attainment,0)/attainRows.length).toFixed(1) : 0;
+  const metTarget   = attainRows.filter(r => r.final_attainment >= r.target).length;
+  const bloomDist   = db.prepare("SELECT bloom_level, COUNT(*) as count FROM course_outcomes GROUP BY bloom_level ORDER BY CASE bloom_level WHEN 'Remembering' THEN 1 WHEN 'Understanding' THEN 2 WHEN 'Applying' THEN 3 WHEN 'Analysing' THEN 4 WHEN 'Evaluating' THEN 5 WHEN 'Creating' THEN 6 END").all();
+  const coursesWithCOs = db.prepare('SELECT COUNT(DISTINCT course_id) as c FROM course_outcomes').get();
+  res.json({ totalCOs: totalCOs.c, totalPOs: totalPOs.c, mappedCOs: mappedCOs.c, avgAttainment: parseFloat(avgAttainment), metTarget, totalWithAttainment: attainRows.length, bloomDist, coursesWithCOs: coursesWithCOs.c });
 });
 
 module.exports = router;

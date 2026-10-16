@@ -358,7 +358,7 @@ function initializeDatabase() {
 }
 
 function seedData() {
-  const adminExists = db.prepare('SELECT id FROM users WHERE username = ?').get('admin');
+  const adminExists = db.prepare("SELECT id FROM users WHERE role = 'admin'").get();
   if (adminExists) return;
 
   const hash = (pwd) => bcrypt.hashSync(pwd, 10);
@@ -431,7 +431,7 @@ function seedData() {
     insertCourse.run(code, name, prog, sem, cred, type, getFacId(eid), 1);
   });
 
-  const adminId = db.prepare('SELECT id FROM users WHERE username = ?').get('admin').id;
+  const adminId = db.prepare("SELECT id FROM users WHERE role = 'admin'").get().id;
   const stuRecords = db.prepare('SELECT id FROM students').all();
   const courseRecords = db.prepare('SELECT id FROM courses WHERE semester = 1').all();
   const insertAtt = db.prepare('INSERT OR IGNORE INTO attendance (student_id, course_id, date, status, marked_by) VALUES (?, ?, ?, ?, ?)');

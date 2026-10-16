@@ -1495,6 +1495,71 @@ function seedExtendedData() {
   } catch (e) { console.log('NAAC indicator seed skipped:', e.message); }
 
   console.log('Extended seed data created.');
+
+  // ── Phase 1: question_papers column additions ───────────────────────────────
+  try {
+    const qpCols = db.prepare("PRAGMA table_info(question_papers)").all().map(c => c.name);
+    if (!qpCols.includes('review_remarks')) {
+      db.exec("ALTER TABLE question_papers ADD COLUMN review_remarks TEXT");
+      console.log('Migrated question_papers: added review_remarks.');
+    }
+  } catch(e) { console.log('QP migration skipped:', e.message); }
+
+  // ── Phase 1: Examination new tables ─────────────────────────────────────────
+  const examTables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(t => t.name);
+
+  if (!examTables.includes('answer_sheets')) {
+    db.exec(`CREATE TABLE answer_sheets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      examination_id INTEGER NOT NULL REFERENCES examinations(id),
+      student_id INTEGER NOT NULL REFERENCES students(id),
+      answer_sheet_number TEXT UNIQUE,
+      masked_number TEXT,
+      evaluator_id INTEGER REFERENCES faculty(id),
+      marks_awarded REAL,
+      remarks TEXT,
+      status TEXT DEFAULT 'pending' CHECK(status IN ('pending','assigned','evaluated','moderated','finalized')),
+      submitted_at TEXT DEFAULT (datetime('now')),
+      evaluated_at TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    )`);
+    console.log('Created answer_sheets table.');
+  }
+
+  if (!examTables.includes('backlog_registrations')) {
+    db.exec(`CREATE TABLE backlog_registrations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      student_id INTEGER NOT NULL REFERENCES students(id),
+      examination_id INTEGER NOT NULL REFERENCES examinations(id),
+      attempt_number INTEGER DEFAULT 1,
+      registration_date TEXT DEFAULT (datetime('now')),
+      fee_paid REAL DEFAULT 0,
+      status TEXT DEFAULT 'registered' CHECK(status IN ('registered','appeared','passed','failed','cancelled')),
+      remarks TEXT,
+      registered_by INTEGER REFERENCES users(id),
+      created_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(student_id, examination_id, attempt_number)
+    )`);
+    console.log('Created backlog_registrations table.');
+  }
+
+  if (!examTables.includes('result_declarations')) {
+    db.exec(`CREATE TABLE result_declarations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      academic_year_id INTEGER REFERENCES academic_years(id),
+      program_id INTEGER REFERENCES programs(id),
+      semester INTEGER,
+      exam_type TEXT,
+      title TEXT NOT NULL,
+      declared_by INTEGER REFERENCES users(id),
+      declared_at TEXT,
+      published_at TEXT,
+      status TEXT DEFAULT 'draft' CHECK(status IN ('draft','declared','published','withheld')),
+      remarks TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    )`);
+    console.log('Created result_declarations table.');
+  }
 }
 
 module.exports = { extendDatabase };

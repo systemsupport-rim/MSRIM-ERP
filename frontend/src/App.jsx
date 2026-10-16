@@ -44,6 +44,10 @@ import AdminConsole from './pages/AdminConsole/AdminConsole';
 import LeaveManagement from './pages/LeaveManagement/LeaveManagement';
 import StaffAttendance from './pages/StaffAttendance/StaffAttendance';
 import AdminPrivileges from './pages/AdminPrivileges/AdminPrivileges';
+import MarksEntry from './pages/Examinations/MarksEntry';
+import BacklogManagement from './pages/Examinations/BacklogManagement';
+import YearResults from './pages/Examinations/YearResults';
+import ResultDeclaration from './pages/Examinations/ResultDeclaration';
 
 function ProtectedRoute({ children, roles }) {
   const { user } = useAuth();
@@ -81,6 +85,12 @@ function AppRoutes() {
         <Route path="/exams/seating" element={<ExamsEnhanced tab="seating" />} />
         <Route path="/exams/grading" element={<ExamsEnhanced tab="grading" />} />
         <Route path="/exams/certificates" element={<ExamsEnhanced tab="certificates" />} />
+        <Route path="/exams/qp-review" element={<ExamsEnhanced tab="qp-review" />} />
+        <Route path="/exams/answer-sheets" element={<ExamsEnhanced tab="answer-sheets" />} />
+        <Route path="/exams/marks" element={<ProtectedRoute roles={['admin','registrar','faculty','hod']}><MarksEntry /></ProtectedRoute>} />
+        <Route path="/exams/backlogs" element={<ProtectedRoute roles={['admin','registrar','faculty','hod']}><BacklogManagement /></ProtectedRoute>} />
+        <Route path="/exams/year-results" element={<YearResults />} />
+        <Route path="/exams/result-declaration" element={<ProtectedRoute roles={['admin','registrar','hod']}><ResultDeclaration /></ProtectedRoute>} />
         {/* Finance */}
         <Route path="/fees" element={<Fees />} />
         {/* Admissions */}

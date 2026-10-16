@@ -14,6 +14,9 @@ import Fees from './pages/Fees/Fees';
 import Library from './pages/Library/Library';
 import Placements from './pages/Placements/Placements';
 import PlacementPOD from './pages/Placements/PlacementPOD';
+import CompanyManagement from './pages/Placements/CompanyManagement';
+import JobManagement from './pages/Placements/JobManagement';
+import PlacementReports from './pages/Placements/PlacementReports';
 import Notices from './pages/Notices/Notices';
 import Reports from './pages/Reports/Reports';
 import Profile from './pages/Profile';
@@ -130,6 +133,9 @@ function AppRoutes() {
         <Route path="/library" element={<Library />} />
         <Route path="/placements" element={<Placements />} />
         <Route path="/placements/pod" element={<PlacementPOD />} />
+        <Route path="/placements/companies" element={<CompanyManagement />} />
+        <Route path="/placements/jobs" element={<JobManagement />} />
+        <Route path="/placements/reports" element={<PlacementReports />} />
         <Route path="/hostel" element={<Hostel />} />
         <Route path="/infrastructure" element={<Infrastructure />} />
         <Route path="/helpdesk" element={<Helpdesk />} />

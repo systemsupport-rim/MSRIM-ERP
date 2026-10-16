@@ -151,8 +151,11 @@ const moduleNavMap = [
     label: 'Placements',
     back: '/admin-console',
     items: [
-      { to: '/placements', icon: Briefcase, label: 'Placements' },
+      { to: '/placements', icon: Briefcase, label: 'Placement Drives' },
       { to: '/placements/pod', icon: Zap, label: 'RIM Placement Mgmt' },
+      { to: '/placements/companies', icon: Building2, label: 'Companies' },
+      { to: '/placements/jobs', icon: FileText, label: 'Jobs & Internships' },
+      { to: '/placements/reports', icon: BarChart3, label: 'Reports & Analytics' },
     ],
   },
   {

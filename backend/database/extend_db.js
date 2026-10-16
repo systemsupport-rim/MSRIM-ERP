@@ -1818,6 +1818,264 @@ function seedExtendedData() {
     )`);
     console.log('Created result_declarations table.');
   }
+
+  // ── Placement Management System v2 ──────────────────────────────────────────
+
+  // Company Profiles
+  db.exec(`CREATE TABLE IF NOT EXISTS company_profiles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    sector TEXT,
+    website TEXT,
+    description TEXT,
+    logo_url TEXT,
+    hr_name TEXT,
+    hr_email TEXT,
+    hr_phone TEXT,
+    address TEXT,
+    city TEXT,
+    state TEXT,
+    country TEXT DEFAULT 'India',
+    employee_count TEXT,
+    founded_year INTEGER,
+    mou_signed INTEGER DEFAULT 0,
+    mou_date TEXT,
+    mou_expiry TEXT,
+    is_active INTEGER DEFAULT 1,
+    recruiter_user_id INTEGER REFERENCES users(id),
+    created_by INTEGER REFERENCES users(id),
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+
+  // Job / Internship Postings
+  db.exec(`CREATE TABLE IF NOT EXISTS job_postings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company_id INTEGER REFERENCES company_profiles(id),
+    title TEXT NOT NULL,
+    job_role TEXT,
+    description TEXT,
+    requirements TEXT,
+    skills_required TEXT,
+    location TEXT,
+    type TEXT DEFAULT 'fulltime',
+    package_min REAL,
+    package_max REAL,
+    package_lpa REAL,
+    stipend_monthly REAL,
+    duration_months INTEGER,
+    openings INTEGER DEFAULT 1,
+    min_cgpa REAL DEFAULT 0,
+    max_backlogs INTEGER DEFAULT 0,
+    allowed_branches TEXT DEFAULT '[]',
+    allowed_batches TEXT DEFAULT '[]',
+    drive_date TEXT,
+    last_apply_date TEXT,
+    ppt_date TEXT,
+    ppt_venue TEXT,
+    bond_years INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'draft',
+    approval_status TEXT DEFAULT 'pending',
+    approved_by INTEGER REFERENCES users(id),
+    approved_at TEXT,
+    published_at TEXT,
+    created_by INTEGER REFERENCES users(id),
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+
+  // Hiring Rounds (aptitude, GD, technical, HR, final)
+  db.exec(`CREATE TABLE IF NOT EXISTS hiring_rounds (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id INTEGER REFERENCES job_postings(id),
+    round_number INTEGER NOT NULL,
+    round_name TEXT NOT NULL,
+    round_type TEXT DEFAULT 'interview',
+    scheduled_date TEXT,
+    venue TEXT,
+    duration_minutes INTEGER DEFAULT 60,
+    is_eliminatory INTEGER DEFAULT 1,
+    instructions TEXT,
+    status TEXT DEFAULT 'upcoming',
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+
+  // Student results per round
+  db.exec(`CREATE TABLE IF NOT EXISTS round_results (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    round_id INTEGER REFERENCES hiring_rounds(id),
+    job_id INTEGER REFERENCES job_postings(id),
+    student_id INTEGER REFERENCES students(id),
+    status TEXT DEFAULT 'pending',
+    score REAL,
+    max_score REAL,
+    feedback TEXT,
+    strengths TEXT,
+    weaknesses TEXT,
+    interviewer TEXT,
+    interviewed_at TEXT,
+    created_at TEXT DEFAULT (datetime('now')),
+    UNIQUE(round_id, student_id)
+  )`);
+
+  // Student Job Applications (enhanced)
+  db.exec(`CREATE TABLE IF NOT EXISTS job_applications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id INTEGER REFERENCES job_postings(id),
+    student_id INTEGER REFERENCES students(id),
+    applied_at TEXT DEFAULT (datetime('now')),
+    current_round INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'applied',
+    offer_extended INTEGER DEFAULT 0,
+    offer_accepted INTEGER DEFAULT 0,
+    remarks TEXT,
+    UNIQUE(job_id, student_id)
+  )`);
+
+  // Placement Offer Letters (separate from admissions offer_letters)
+  db.exec(`CREATE TABLE IF NOT EXISTS placement_offers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id INTEGER REFERENCES job_postings(id),
+    student_id INTEGER REFERENCES students(id),
+    company_id INTEGER REFERENCES company_profiles(id),
+    offer_date TEXT,
+    joining_date TEXT,
+    package_lpa REAL,
+    designation TEXT,
+    location TEXT,
+    status TEXT DEFAULT 'issued',
+    letter_url TEXT,
+    remarks TEXT,
+    issued_by INTEGER REFERENCES users(id),
+    created_at TEXT DEFAULT (datetime('now')),
+    UNIQUE(job_id, student_id)
+  )`);
+
+  // Placement Assessments
+  db.exec(`CREATE TABLE IF NOT EXISTS placement_assessments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id INTEGER REFERENCES job_postings(id),
+    round_id INTEGER REFERENCES hiring_rounds(id),
+    title TEXT NOT NULL,
+    type TEXT DEFAULT 'aptitude',
+    description TEXT,
+    total_questions INTEGER DEFAULT 0,
+    duration_minutes INTEGER DEFAULT 60,
+    pass_percentage REAL DEFAULT 60,
+    scheduled_at TEXT,
+    status TEXT DEFAULT 'draft',
+    created_by INTEGER REFERENCES users(id),
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+
+  db.exec(`CREATE TABLE IF NOT EXISTS assessment_questions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    assessment_id INTEGER REFERENCES placement_assessments(id),
+    question TEXT NOT NULL,
+    option_a TEXT,
+    option_b TEXT,
+    option_c TEXT,
+    option_d TEXT,
+    correct_option TEXT,
+    marks INTEGER DEFAULT 1,
+    type TEXT DEFAULT 'mcq',
+    topic TEXT,
+    difficulty TEXT DEFAULT 'medium'
+  )`);
+
+  db.exec(`CREATE TABLE IF NOT EXISTS student_assessment_results (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    assessment_id INTEGER REFERENCES placement_assessments(id),
+    student_id INTEGER REFERENCES students(id),
+    score REAL DEFAULT 0,
+    total_marks INTEGER DEFAULT 0,
+    percentage REAL DEFAULT 0,
+    status TEXT DEFAULT 'pending',
+    answers TEXT DEFAULT '{}',
+    submitted_at TEXT,
+    created_at TEXT DEFAULT (datetime('now')),
+    UNIQUE(assessment_id, student_id)
+  )`);
+
+  // Student Skills
+  db.exec(`CREATE TABLE IF NOT EXISTS student_skills (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER REFERENCES students(id),
+    skill_name TEXT NOT NULL,
+    proficiency TEXT DEFAULT 'intermediate',
+    category TEXT DEFAULT 'technical',
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+
+  // Student Certifications
+  db.exec(`CREATE TABLE IF NOT EXISTS student_certifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER REFERENCES students(id),
+    cert_name TEXT NOT NULL,
+    issuer TEXT,
+    issue_date TEXT,
+    expiry_date TEXT,
+    credential_id TEXT,
+    cert_url TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+
+  // Placement Documents
+  db.exec(`CREATE TABLE IF NOT EXISTS placement_documents (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER REFERENCES students(id),
+    doc_type TEXT NOT NULL,
+    file_name TEXT,
+    file_url TEXT,
+    verified INTEGER DEFAULT 0,
+    uploaded_at TEXT DEFAULT (datetime('now'))
+  )`);
+
+  // Placement Notifications
+  db.exec(`CREATE TABLE IF NOT EXISTS placement_notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    recipient_type TEXT DEFAULT 'all_students',
+    recipient_id INTEGER,
+    title TEXT NOT NULL,
+    message TEXT,
+    channel TEXT DEFAULT 'in_app',
+    is_read INTEGER DEFAULT 0,
+    job_id INTEGER REFERENCES job_postings(id),
+    created_by INTEGER REFERENCES users(id),
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+
+  // Audit Logs
+  db.exec(`CREATE TABLE IF NOT EXISTS placement_audit_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER REFERENCES users(id),
+    action TEXT NOT NULL,
+    entity TEXT,
+    entity_id INTEGER,
+    description TEXT,
+    ip_address TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+
+  // Add recruiter_user_id to company_profiles if missing (idempotent)
+  const cpCols = db.prepare("PRAGMA table_info(company_profiles)").all().map(c => c.name);
+  if (!cpCols.includes('employee_count')) {
+    try { db.exec("ALTER TABLE company_profiles ADD COLUMN employee_count TEXT"); } catch(_) {}
+  }
+
+  // Seed sample companies if empty
+  const compCount = db.prepare("SELECT COUNT(*) as c FROM company_profiles").get();
+  if (compCount.c === 0) {
+    const ins = db.prepare(`INSERT INTO company_profiles (name,sector,website,hr_name,hr_email,hr_phone,city,mou_signed,is_active)
+      VALUES (?,?,?,?,?,?,?,1,1)`);
+    ins.run('Deloitte','Consulting','https://deloitte.com','Priya Kapoor','priya.k@deloitte.com','9876540001','Bengaluru');
+    ins.run('KPMG India','Consulting','https://kpmg.com/in','Rajan Menon','rajan.m@kpmg.com','9876540002','Mumbai');
+    ins.run('Amazon India','E-Commerce / Tech','https://amazon.in','Sneha Das','sneha.d@amazon.in','9876540003','Bengaluru');
+    ins.run('Infosys BPM','IT Services','https://infosysbpm.com','Arun Kumar','arun.k@infosys.com','9876540004','Bengaluru');
+    ins.run('Wipro Technologies','IT Services','https://wipro.com','Kavya Nair','kavya.n@wipro.com','9876540005','Bengaluru');
+    ins.run('Accenture','Consulting / IT','https://accenture.com','Rahul Sharma','rahul.s@accenture.com','9876540006','Mumbai');
+    ins.run('McKinsey & Co.','Strategy Consulting','https://mckinsey.com','Divya Rao','divya.r@mckinsey.com','9876540007','Delhi');
+    ins.run('EY GDS','Accounting / Advisory','https://ey.com','Suresh Patel','suresh.p@ey.com','9876540008','Bengaluru');
+    console.log('Seeded 8 company profiles.');
+  }
 }
 
 module.exports = { extendDatabase };

@@ -37,6 +37,12 @@ app.use('/api/library', require('./routes/library'));
 // Placements
 app.use('/api/placements', require('./routes/placements'));
 
+// Placement Management System v2
+app.use('/api/companies', require('./routes/companies'));
+app.use('/api/jobs', require('./routes/jobs'));
+app.use('/api/assessments', require('./routes/assessments'));
+app.use('/api/student-placement', require('./routes/student_placement'));
+
 // Communication
 app.use('/api/notices', require('./routes/notices'));
 app.use('/api/feed', require('./routes/feed'));

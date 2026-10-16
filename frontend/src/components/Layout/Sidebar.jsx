@@ -8,7 +8,7 @@ import {
   Briefcase, Library, BedDouble, Building, HelpCircle, Heart,
   Zap, Banknote, ShoppingCart, Network, BadgeCheck, Sparkles,
   Layers, Brain, BarChart3, HardDrive, Shield, KeyRound, ArrowLeft,
-  MessageSquare, Send, Settings2
+  MessageSquare, Send, Settings2, MapPin
 } from 'lucide-react';
 
 const mainItems = [

@@ -376,7 +376,7 @@ function seedData() {
 
   const insertUser = db.prepare(`INSERT OR IGNORE INTO users (username, password, role, name, email, phone, department) VALUES (?, ?, ?, ?, ?, ?, ?)`);
 
-  insertUser.run('admin', hash('Admin@123'), 'admin', 'System Administrator', 'admin@msrim.in', '9900000001', 'Administration');
+  insertUser.run('systemsupport@msrim.org', hash('support@2026'), 'admin', 'System Administrator', 'systemsupport@msrim.org', '9886061740', 'IT Department');
   insertUser.run('registrar', hash('Reg@123'), 'registrar', 'Dr. Rajesh Kumar', 'registrar@msrim.in', '9900000002', 'Administration');
   insertUser.run('hod.mgt', hash('Hod@123'), 'hod', 'Dr. Priya Sharma', 'hod.mgt@msrim.in', '9900000003', 'Management Studies');
   insertUser.run('librarian', hash('Lib@123'), 'librarian', 'Mrs. Sunita Rao', 'librarian@msrim.in', '9900000004', 'Library');

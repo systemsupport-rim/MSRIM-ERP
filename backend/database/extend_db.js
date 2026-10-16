@@ -2,9 +2,11 @@ const { db } = require('./db');
 
 function extendDatabase() {
   // Remove legacy seeded users — no-op on fresh install, cleans existing DBs
-  db.exec("PRAGMA foreign_keys = OFF");
-  db.exec("DELETE FROM users WHERE username IN ('hod.mgt','faculty1','faculty2','faculty3','faculty4','placement','registrar','librarian')");
-  db.exec("PRAGMA foreign_keys = ON");
+  try {
+    db.exec("PRAGMA foreign_keys = OFF");
+    db.exec("DELETE FROM users WHERE username IN ('hod.mgt','faculty1','faculty2','faculty3','faculty4','placement','registrar','librarian')");
+    db.exec("PRAGMA foreign_keys = ON");
+  } catch (_) { /* already removed or db locked during migration — safe to skip */ }
 
   // Migration: add designation, gender, joining_date columns to users table
   const userCols = db.prepare("PRAGMA table_info(users)").all();

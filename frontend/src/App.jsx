@@ -13,6 +13,7 @@ import Examinations from './pages/Examinations/Examinations';
 import Fees from './pages/Fees/Fees';
 import Library from './pages/Library/Library';
 import Placements from './pages/Placements/Placements';
+import PlacementPOD from './pages/Placements/PlacementPOD';
 import Notices from './pages/Notices/Notices';
 import Reports from './pages/Reports/Reports';
 import Profile from './pages/Profile';
@@ -128,6 +129,7 @@ function AppRoutes() {
         {/* Campus */}
         <Route path="/library" element={<Library />} />
         <Route path="/placements" element={<Placements />} />
+        <Route path="/placements/pod" element={<PlacementPOD />} />
         <Route path="/hostel" element={<Hostel />} />
         <Route path="/infrastructure" element={<Infrastructure />} />
         <Route path="/helpdesk" element={<Helpdesk />} />

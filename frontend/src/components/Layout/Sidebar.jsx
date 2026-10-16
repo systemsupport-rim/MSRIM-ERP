@@ -152,6 +152,7 @@ const moduleNavMap = [
     back: '/admin-console',
     items: [
       { to: '/placements', icon: Briefcase, label: 'Placements' },
+      { to: '/placements/pod', icon: Zap, label: 'RIM Placement Mgmt' },
     ],
   },
   {

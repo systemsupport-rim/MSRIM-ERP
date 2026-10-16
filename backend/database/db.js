@@ -377,16 +377,7 @@ function seedData() {
   const insertUser = db.prepare(`INSERT OR IGNORE INTO users (username, password, role, name, email, phone, department) VALUES (?, ?, ?, ?, ?, ?, ?)`);
 
   insertUser.run('systemsupport@msrim.org', hash('support@2026'), 'admin', 'System Administrator', 'systemsupport@msrim.org', '9886061740', 'IT Department');
-  insertUser.run('registrar', hash('Reg@123'), 'registrar', 'Dr. Rajesh Kumar', 'registrar@msrim.in', '9900000002', 'Administration');
-  insertUser.run('hod.mgt', hash('Hod@123'), 'hod', 'Dr. Priya Sharma', 'hod.mgt@msrim.in', '9900000003', 'Management Studies');
-  insertUser.run('librarian', hash('Lib@123'), 'librarian', 'Mrs. Sunita Rao', 'librarian@msrim.in', '9900000004', 'Library');
   insertUser.run('accounts', hash('Acc@123'), 'accounts', 'Mr. Suresh Nair', 'accounts@msrim.in', '9900000005', 'Accounts');
-  insertUser.run('placement', hash('Plc@123'), 'placement', 'Mr. Anand Krishnan', 'placement@msrim.in', '9900000006', 'Placement Cell');
-
-  insertUser.run('faculty1', hash('Fac@123'), 'faculty', 'Dr. Meera Iyer', 'meera.iyer@msrim.in', '9900000010', 'Management Studies');
-  insertUser.run('faculty2', hash('Fac@123'), 'faculty', 'Prof. Ravi Shankar', 'ravi.s@msrim.in', '9900000011', 'Management Studies');
-  insertUser.run('faculty3', hash('Fac@123'), 'faculty', 'Dr. Kavitha Murthy', 'kavitha.m@msrim.in', '9900000012', 'Management Studies');
-  insertUser.run('faculty4', hash('Fac@123'), 'faculty', 'Prof. Sunil Verma', 'sunil.v@msrim.in', '9900000013', 'Management Studies');
 
   const stuData = [
     ['student1', 'Aditya Sharma', 'aditya.s@student.msrim.in', '9900001001'],

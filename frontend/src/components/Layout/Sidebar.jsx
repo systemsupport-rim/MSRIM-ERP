@@ -7,7 +7,8 @@ import {
   Star, UserCheck, FileText, Map, Award, DollarSign, Users2,
   Briefcase, Library, BedDouble, Building, HelpCircle, Heart,
   Zap, Banknote, ShoppingCart, Network, BadgeCheck, Sparkles,
-  Layers, Brain, BarChart3, HardDrive, Shield, KeyRound, ArrowLeft
+  Layers, Brain, BarChart3, HardDrive, Shield, KeyRound, ArrowLeft,
+  MessageSquare, Send, Settings2
 } from 'lucide-react';
 
 const mainItems = [
@@ -92,7 +93,10 @@ const moduleNavMap = [
     label: 'Admissions',
     back: '/admin-console',
     items: [
-      { to: '/admissions', icon: Users2, label: 'Admissions' },
+      { to: '/admissions/enquiries',    icon: MessageSquare, label: 'Enquiry Mgmt' },
+      { to: '/admissions/applications', icon: Send,          label: 'Applications' },
+      { to: '/admissions',              icon: Users2,        label: 'Admission Mgmt' },
+      { to: '/admissions/settings',     icon: Settings2,     label: 'Settings' },
     ],
   },
   {

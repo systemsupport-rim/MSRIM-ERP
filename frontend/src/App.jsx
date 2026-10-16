@@ -44,6 +44,9 @@ import AdminConsole from './pages/AdminConsole/AdminConsole';
 import LeaveManagement from './pages/LeaveManagement/LeaveManagement';
 import StaffAttendance from './pages/StaffAttendance/StaffAttendance';
 import AdminPrivileges from './pages/AdminPrivileges/AdminPrivileges';
+import AdmissionEnquiries from './pages/Admissions/AdmissionEnquiries';
+import AdmissionApplications from './pages/Admissions/AdmissionApplications';
+import AdmissionSettings from './pages/Admissions/AdmissionSettings';
 import MarksEntry from './pages/Examinations/MarksEntry';
 import BacklogManagement from './pages/Examinations/BacklogManagement';
 import YearResults from './pages/Examinations/YearResults';
@@ -95,6 +98,9 @@ function AppRoutes() {
         <Route path="/fees" element={<Fees />} />
         {/* Admissions */}
         <Route path="/admissions" element={<ProtectedRoute roles={['admin','registrar','hod']}><Admissions /></ProtectedRoute>} />
+        <Route path="/admissions/enquiries" element={<ProtectedRoute roles={['admin','registrar','hod']}><AdmissionEnquiries /></ProtectedRoute>} />
+        <Route path="/admissions/applications" element={<ProtectedRoute roles={['admin','registrar','hod']}><AdmissionApplications /></ProtectedRoute>} />
+        <Route path="/admissions/settings" element={<ProtectedRoute roles={['admin','registrar']}><AdmissionSettings /></ProtectedRoute>} />
         {/* Campus */}
         <Route path="/library" element={<Library />} />
         <Route path="/placements" element={<Placements />} />

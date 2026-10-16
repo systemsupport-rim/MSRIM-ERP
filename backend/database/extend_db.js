@@ -1496,6 +1496,69 @@ function seedExtendedData() {
 
   console.log('Extended seed data created.');
 
+  // ── Phase 2: Admissions new tables ──────────────────────────────────────────
+  const allTables2 = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map(t => t.name);
+
+  if (!allTables2.includes('admission_enquiries')) {
+    db.exec(`CREATE TABLE admission_enquiries (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      email TEXT,
+      phone TEXT,
+      source TEXT DEFAULT 'walk-in' CHECK(source IN ('walk-in','website','referral','agent','social-media','email','phone','fair','other')),
+      program_id INTEGER REFERENCES programs(id),
+      batch_year INTEGER,
+      status TEXT DEFAULT 'new' CHECK(status IN ('new','contacted','interested','not-interested','converted','lost')),
+      assigned_to INTEGER REFERENCES users(id),
+      follow_up_date TEXT,
+      notes TEXT,
+      converted_to_id INTEGER REFERENCES admissions(id),
+      converted_at TEXT,
+      created_by INTEGER REFERENCES users(id),
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    )`);
+    console.log('Created admission_enquiries table.');
+  }
+
+  if (!allTables2.includes('admission_settings')) {
+    db.exec(`CREATE TABLE admission_settings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      academic_year_id INTEGER REFERENCES academic_years(id),
+      program_id INTEGER REFERENCES programs(id),
+      intake_target INTEGER DEFAULT 60,
+      last_date TEXT,
+      fee_amount REAL DEFAULT 0,
+      settings_json TEXT DEFAULT '{}',
+      updated_by INTEGER REFERENCES users(id),
+      updated_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(academic_year_id, program_id)
+    )`);
+    console.log('Created admission_settings table.');
+  }
+
+  if (!allTables2.includes('offer_letters')) {
+    db.exec(`CREATE TABLE offer_letters (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      admission_id INTEGER NOT NULL REFERENCES admissions(id),
+      issued_by INTEGER REFERENCES users(id),
+      issued_at TEXT DEFAULT (datetime('now')),
+      accepted INTEGER DEFAULT 0,
+      accepted_at TEXT,
+      remarks TEXT
+    )`);
+    console.log('Created offer_letters table.');
+  }
+
+  // add source + notes columns to admissions if missing
+  try {
+    const admCols = db.prepare("PRAGMA table_info(admissions)").all().map(c => c.name);
+    if (!admCols.includes('source'))       { db.exec("ALTER TABLE admissions ADD COLUMN source TEXT DEFAULT 'direct'"); }
+    if (!admCols.includes('enquiry_id'))   { db.exec("ALTER TABLE admissions ADD COLUMN enquiry_id INTEGER REFERENCES admission_enquiries(id)"); }
+    if (!admCols.includes('offer_issued')) { db.exec("ALTER TABLE admissions ADD COLUMN offer_issued INTEGER DEFAULT 0"); }
+    if (!admCols.includes('fee_initiated')){ db.exec("ALTER TABLE admissions ADD COLUMN fee_initiated INTEGER DEFAULT 0"); }
+  } catch(e) { console.log('Admissions column migration skipped:', e.message); }
+
   // ── Phase 1: question_papers column additions ───────────────────────────────
   try {
     const qpCols = db.prepare("PRAGMA table_info(question_papers)").all().map(c => c.name);

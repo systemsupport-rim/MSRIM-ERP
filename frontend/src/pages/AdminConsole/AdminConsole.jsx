@@ -7,7 +7,8 @@ import {
   Briefcase, Library, BedDouble, Building, HelpCircle, Heart,
   Zap, Banknote, ShoppingCart, Network, BadgeCheck, Sparkles,
   Layers, Brain, BarChart3, HardDrive, Shield, LayoutDashboard,
-  ArrowLeft, Plus, Trash2, RotateCcw, Settings2, X, Check, KeyRound, Edit2
+  ArrowLeft, Plus, Trash2, RotateCcw, Settings2, X, Check, KeyRound, Edit2,
+  MessageSquare, Send
 } from 'lucide-react';
 
 const allGroups = [
@@ -58,8 +59,11 @@ const allGroups = [
     iconColor: 'text-emerald-600',
     headingColor: 'text-emerald-700',
     items: [
-      { to: '/fees',          icon: DollarSign,    label: 'Fee Management',  desc: 'Fee collection & receipts',           roles: ['admin','registrar','accounts','student'] },
-      { to: '/admissions',    icon: Users2,        label: 'Admissions',      desc: 'Student admissions pipeline',         roles: ['admin','registrar','hod'] },
+      { to: '/fees',                    icon: DollarSign,    label: 'Fee Management',      desc: 'Fee collection & receipts',             roles: ['admin','registrar','accounts','student'] },
+      { to: '/admissions/enquiries',   icon: MessageSquare, label: 'Enquiry Management',  desc: 'Track prospective student enquiries',   roles: ['admin','registrar','hod'] },
+      { to: '/admissions/applications',icon: Send,          label: 'Applications',        desc: 'Full admissions pipeline & offer letters', roles: ['admin','registrar','hod'] },
+      { to: '/admissions',             icon: Users2,        label: 'Admission Mgmt',      desc: 'Admissions overview & admit students',  roles: ['admin','registrar','hod'] },
+      { to: '/admissions/settings',    icon: Settings2,     label: 'Admission Settings',  desc: 'Intake targets, dates & fees',          roles: ['admin','registrar'] },
       { to: '/hr',            icon: Users,         label: 'HR Management',   desc: 'Staff records & HR operations',       roles: ['admin','registrar','hod','faculty'] },
       { to: '/leave-management', icon: CalendarDays,  label: 'Leave Management', desc: 'Apply, track & manage all staff leave', roles: 'all' },
       { to: '/hr/leaves',        icon: ClipboardList, label: 'Leave Approval',   desc: 'Leave requests & approvals',            roles: ['admin','registrar','hod','faculty'] },

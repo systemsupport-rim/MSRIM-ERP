@@ -8,16 +8,11 @@ import {
 } from 'recharts';
 import {
   ArrowLeft, BarChart2, Zap, MessageSquare, FileText,
-  CheckCircle, XCircle, ChevronRight, ChevronLeft, Upload,
-  TrendingUp, Users, Briefcase, Award, Star, RefreshCw,
+  CheckCircle, XCircle, ChevronRight, ChevronLeft, ChevronDown, ChevronUp,
+  Upload, TrendingUp, Users, Briefcase, Award, Star, RefreshCw,
+  Home, CalendarDays, Network, ScrollText, Inbox, MessagesSquare,
+  UserCircle2, Settings, Shield, GraduationCap,
 } from 'lucide-react';
-
-const TABS = [
-  { id: 'analytics', label: 'Analytics', icon: BarChart2 },
-  { id: 'match',     label: 'Job Match AI', icon: Zap },
-  { id: 'coach',     label: 'Interview Coach', icon: MessageSquare },
-  { id: 'resume',    label: 'Resume Analyser', icon: FileText },
-];
 
 const PIE_COLORS = ['#1a56db', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444'];
 
@@ -68,61 +63,129 @@ const INTERVIEW_QB = {
 
 const ROLES = Object.keys(INTERVIEW_QB);
 
-function matchColor(score) {
-  if (score >= 80) return 'text-green-700 bg-green-50 border-green-200';
-  if (score >= 65) return 'text-yellow-700 bg-yellow-50 border-yellow-200';
-  return 'text-red-700 bg-red-50 border-red-200';
+function Badge({ count, color = 'bg-msrim-blue' }) {
+  if (!count) return null;
+  return (
+    <span className={`ml-auto text-xs text-white font-semibold px-2 py-0.5 rounded-full ${color} min-w-[22px] text-center`}>
+      {count}
+    </span>
+  );
 }
 
-function matchBar(score) {
-  if (score >= 80) return 'bg-green-500';
-  if (score >= 65) return 'bg-yellow-400';
-  return 'bg-red-400';
+// ── POD Sidebar ───────────────────────────────────────────────────────────────
+function PodSidebar({ active, setActive, counts }) {
+  const [networkOpen, setNetworkOpen] = useState(true);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const networkTotal = (counts.jobs || 0) + (counts.certificates || 0) +
+    (counts.messages || 0) + (counts.forums || 0) + (counts.people || 0);
+
+  function NavItem({ id, icon: Icon, label, badge, badgeColor, onClick, indent }) {
+    const isActive = active === id;
+    return (
+      <button
+        onClick={() => { onClick ? onClick() : setActive(id); }}
+        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors
+          ${indent ? 'pl-9' : ''}
+          ${isActive ? 'bg-blue-50 text-msrim-blue font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+      >
+        <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-msrim-blue' : 'text-gray-400'}`} />
+        <span className="flex-1 text-left">{label}</span>
+        {badge ? <Badge count={badge} color={badgeColor || 'bg-msrim-blue'} /> : null}
+      </button>
+    );
+  }
+
+  return (
+    <div className="w-56 flex-shrink-0 bg-white rounded-2xl border border-gray-100 shadow-sm p-3 flex flex-col gap-1 self-start sticky top-6">
+
+      {/* Main nav */}
+      <NavItem id="home"   icon={Home}          label="Home" />
+      <NavItem id="events" icon={CalendarDays}   label="Events"     badge={counts.events} />
+
+      {/* My Network group */}
+      <button
+        onClick={() => setNetworkOpen(o => !o)}
+        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors
+          ${['jobs','certificates','messages','forums','people'].includes(active) ? 'bg-blue-50 text-msrim-blue font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+      >
+        <Network className="w-4 h-4 flex-shrink-0 text-gray-400" />
+        <span className="flex-1 text-left">My Network</span>
+        <Badge count={networkTotal} />
+        {networkOpen ? <ChevronUp className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+      </button>
+
+      {networkOpen && (
+        <div className="flex flex-col gap-0.5 mt-0.5">
+          <NavItem id="jobs"         icon={Briefcase}       label="Jobs"         badge={counts.jobs}         indent />
+          <NavItem id="certificates" icon={ScrollText}       label="Certificates" badge={counts.certificates} indent />
+          <NavItem id="messages"     icon={Inbox}            label="Messages"     badge={counts.messages}     badgeColor="bg-sky-500" indent />
+          <NavItem id="forums"       icon={MessagesSquare}   label="Forums"       badge={counts.forums}       badgeColor="bg-purple-500" indent />
+          <NavItem id="people"       icon={Users}            label="People"       badge={counts.people}       badgeColor="bg-green-500" indent />
+        </div>
+      )}
+
+      {/* Divider */}
+      <div className="border-t border-gray-100 my-2" />
+
+      {/* Admin Consoles */}
+      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest px-3 mb-1">Admin Consoles</p>
+      <NavItem id="console"  icon={Shield}    label="Placement Console" badge={counts.console} />
+      <button
+        onClick={() => setSettingsOpen(o => !o)}
+        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+      >
+        <Settings className="w-4 h-4 text-gray-400" />
+        <span className="flex-1 text-left">Settings</span>
+        {settingsOpen ? <ChevronUp className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+      </button>
+      {settingsOpen && (
+        <div className="flex flex-col gap-0.5 pl-6">
+          <NavItem id="resume" icon={FileText}       label="Resume Analyser" indent />
+          <NavItem id="coach"  icon={MessageSquare}  label="Interview Coach" indent />
+        </div>
+      )}
+
+      {/* Footer */}
+      <div className="mt-auto pt-3 border-t border-gray-100">
+        <p className="text-xs text-gray-400 text-center">Powered by RIM.IT</p>
+      </div>
+    </div>
+  );
 }
 
-// ── Analytics Tab ─────────────────────────────────────────────────────────────
-function AnalyticsTab() {
+// ── Analytics (Home) ──────────────────────────────────────────────────────────
+function HomeView() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     api.get('/placements/pod/analytics').then(r => setData(r.data)).finally(() => setLoading(false));
   }, []);
-
   if (loading) return <div className="py-20 text-center text-gray-400">Loading analytics…</div>;
   if (!data) return null;
-
   const { overall, byCompany, statusBreakdown, typeBreakdown, monthly } = data;
   const placed = overall.total_selected || 0;
   const applied = overall.students_applied || 0;
   const rate = applied > 0 ? Math.round((placed / applied) * 100) : 0;
-
   return (
     <div className="space-y-6">
-      {/* KPI row */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {[
-          { label: 'Total Drives', value: overall.total_drives, icon: Briefcase, color: 'text-msrim-blue' },
-          { label: 'Students Applied', value: overall.students_applied, icon: Users, color: 'text-sky-600' },
-          { label: 'Students Placed', value: placed, icon: CheckCircle, color: 'text-green-600' },
-          { label: 'Placement Rate', value: rate + '%', icon: TrendingUp, color: 'text-purple-600' },
-          { label: 'Avg Package', value: overall.avg_pkg ? '₹' + overall.avg_pkg + ' L' : '—', icon: Award, color: 'text-msrim-orange' },
+          { label: 'Total Drives',     value: overall.total_drives,  icon: Briefcase,  color: 'text-msrim-blue'   },
+          { label: 'Students Applied', value: applied,               icon: Users,      color: 'text-sky-600'      },
+          { label: 'Students Placed',  value: placed,                icon: CheckCircle,color: 'text-green-600'    },
+          { label: 'Placement Rate',   value: rate + '%',            icon: TrendingUp, color: 'text-purple-600'   },
+          { label: 'Avg Package',      value: overall.avg_pkg ? '₹' + overall.avg_pkg + ' L' : '—', icon: Award, color: 'text-msrim-orange' },
         ].map(({ label, value, icon: Icon, color }) => (
           <div key={label} className="card flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0`}>
+            <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0">
               <Icon className={`w-5 h-5 ${color}`} />
             </div>
-            <div>
-              <p className="text-xs text-gray-500">{label}</p>
-              <p className={`text-xl font-bold ${color}`}>{value ?? '—'}</p>
-            </div>
+            <div><p className="text-xs text-gray-500">{label}</p><p className={`text-xl font-bold ${color}`}>{value ?? '—'}</p></div>
           </div>
         ))}
       </div>
-
-      {/* Charts row 1 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Company-wise bar */}
         <div className="card">
           <h3 className="font-semibold text-gray-700 mb-4">Top Companies by Selections</h3>
           {byCompany.length ? (
@@ -138,8 +201,6 @@ function AnalyticsTab() {
             </ResponsiveContainer>
           ) : <p className="text-gray-400 text-sm py-8 text-center">No placement data yet</p>}
         </div>
-
-        {/* Application status pie */}
         <div className="card">
           <h3 className="font-semibold text-gray-700 mb-4">Application Status Breakdown</h3>
           {statusBreakdown.length ? (
@@ -148,17 +209,13 @@ function AnalyticsTab() {
                 <Pie data={statusBreakdown} dataKey="count" nameKey="status" cx="50%" cy="50%" outerRadius={80} label={({ status, percent }) => `${status} ${(percent*100).toFixed(0)}%`} labelLine={false}>
                   {statusBreakdown.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />)}
                 </Pie>
-                <Tooltip />
-                <Legend />
+                <Tooltip /><Legend />
               </PieChart>
             </ResponsiveContainer>
           ) : <p className="text-gray-400 text-sm py-8 text-center">No applications yet</p>}
         </div>
       </div>
-
-      {/* Charts row 2 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Monthly trend */}
         <div className="card">
           <h3 className="font-semibold text-gray-700 mb-4">Monthly Drive Trend</h3>
           {monthly.length ? (
@@ -174,8 +231,6 @@ function AnalyticsTab() {
             </ResponsiveContainer>
           ) : <p className="text-gray-400 text-sm py-8 text-center">No trend data yet</p>}
         </div>
-
-        {/* Type breakdown */}
         <div className="card">
           <h3 className="font-semibold text-gray-700 mb-4">Drive Type Breakdown</h3>
           <div className="space-y-4 mt-2">
@@ -186,8 +241,7 @@ function AnalyticsTab() {
                   <span className="text-sm text-gray-500">{t.count} drives{t.avg_pkg ? ` · ₹${t.avg_pkg}L avg` : ''}</span>
                 </div>
                 <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div className="h-2 bg-msrim-blue rounded-full transition-all"
-                    style={{ width: `${Math.min(100, (t.count / (overall.total_drives || 1)) * 100)}%` }} />
+                  <div className="h-2 bg-msrim-blue rounded-full" style={{ width: `${Math.min(100, (t.count / (overall.total_drives || 1)) * 100)}%` }} />
                 </div>
               </div>
             )) : <p className="text-gray-400 text-sm py-8 text-center">No data yet</p>}
@@ -198,31 +252,57 @@ function AnalyticsTab() {
   );
 }
 
-// ── Job Match Tab ─────────────────────────────────────────────────────────────
-function JobMatchTab() {
+// ── Events ────────────────────────────────────────────────────────────────────
+function EventsView() {
+  const [drives, setDrives] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => { api.get('/placements').then(r => setDrives(r.data)).finally(() => setLoading(false)); }, []);
+  if (loading) return <div className="py-20 text-center text-gray-400">Loading events…</div>;
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold text-gray-900">Placement Events</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {drives.map(d => (
+          <div key={d.id} className="card hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <h3 className="font-bold text-gray-900">{d.company_name}</h3>
+                <p className="text-gray-500 text-sm">{d.job_role}</p>
+              </div>
+              <span className={`text-xs px-2 py-1 rounded-full font-medium ${d.status==='upcoming'?'bg-blue-100 text-blue-700':d.status==='completed'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-500'}`}>{d.status}</span>
+            </div>
+            {d.package_lpa && <p className="text-green-600 font-semibold">₹{d.package_lpa} LPA</p>}
+            <div className="flex gap-3 mt-2 text-xs text-gray-400 flex-wrap">
+              {d.location && <span>📍 {d.location}</span>}
+              {d.drive_date && <span>📅 {new Date(d.drive_date).toLocaleDateString()}</span>}
+              <span>{d.total_applications || 0} applied</span>
+            </div>
+          </div>
+        ))}
+        {!drives.length && <div className="card text-center py-12 text-gray-400 col-span-2">No placement events listed</div>}
+      </div>
+    </div>
+  );
+}
+
+// ── Job Match ─────────────────────────────────────────────────────────────────
+function JobsView() {
   const [drives, setDrives] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
-
-  useEffect(() => {
-    api.get('/placements/pod/matches').then(r => setDrives(r.data)).finally(() => setLoading(false));
-  }, []);
-
+  useEffect(() => { api.get('/placements/pod/matches').then(r => setDrives(r.data)).finally(() => setLoading(false)); }, []);
   if (loading) return <div className="py-20 text-center text-gray-400">Analysing your profile…</div>;
-
+  function matchColor(s) { return s>=80?'text-green-700 bg-green-50 border-green-200':s>=65?'text-yellow-700 bg-yellow-50 border-yellow-200':'text-red-700 bg-red-50 border-red-200'; }
+  function matchBar(s) { return s>=80?'bg-green-500':s>=65?'bg-yellow-400':'bg-red-400'; }
   return (
     <div className="space-y-4">
+      <h2 className="text-xl font-bold text-gray-900">Job Match AI</h2>
       <div className="flex items-center gap-2 p-4 bg-blue-50 rounded-xl border border-blue-100">
         <Zap className="w-5 h-5 text-msrim-blue flex-shrink-0" />
         <p className="text-sm text-blue-800">Matches are calculated based on your academic profile, PGDM specialisation, and drive requirements.</p>
       </div>
-
-      {drives.length === 0 && (
-        <div className="card text-center py-16 text-gray-400">No upcoming drives at the moment</div>
-      )}
-
       {drives.map(d => (
-        <div key={d.id} className="card hover:shadow-md transition-shadow cursor-pointer" onClick={() => setExpanded(expanded === d.id ? null : d.id)}>
+        <div key={d.id} className="card hover:shadow-md transition-shadow cursor-pointer" onClick={() => setExpanded(expanded===d.id?null:d.id)}>
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
@@ -234,27 +314,22 @@ function JobMatchTab() {
                 {d.package_lpa && <span className="text-green-600 font-semibold text-sm">₹{d.package_lpa} LPA</span>}
                 {d.location && <span className="text-gray-400 text-xs">📍 {d.location}</span>}
                 {d.drive_date && <span className="text-gray-400 text-xs">📅 {new Date(d.drive_date).toLocaleDateString()}</span>}
-                <span className="text-gray-400 text-xs">{d.applications} applied</span>
               </div>
             </div>
             <div className="flex flex-col items-end gap-2 flex-shrink-0">
-              <div className={`px-3 py-1.5 rounded-full border text-sm font-bold ${matchColor(d.match_score)}`}>
-                {d.match_score}% Match
-              </div>
+              <div className={`px-3 py-1.5 rounded-full border text-sm font-bold ${matchColor(d.match_score)}`}>{d.match_score}% Match</div>
               <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                <div className={`h-1.5 rounded-full ${matchBar(d.match_score)}`} style={{ width: d.match_score + '%' }} />
+                <div className={`h-1.5 rounded-full ${matchBar(d.match_score)}`} style={{ width: d.match_score+'%' }} />
               </div>
             </div>
           </div>
-
-          {expanded === d.id && (
+          {expanded===d.id && (
             <div className="mt-4 pt-4 border-t border-gray-100">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Why this matches you</p>
               <ul className="space-y-1.5">
-                {d.match_reasons.map((r, i) => (
+                {d.match_reasons.map((r,i) => (
                   <li key={i} className="flex items-center gap-2 text-sm text-gray-700">
-                    <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                    {r}
+                    <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />{r}
                   </li>
                 ))}
               </ul>
@@ -263,230 +338,292 @@ function JobMatchTab() {
           )}
         </div>
       ))}
+      {!drives.length && <div className="card text-center py-16 text-gray-400">No upcoming drives at the moment</div>}
     </div>
   );
 }
 
-// ── Interview Coach Tab ───────────────────────────────────────────────────────
-function InterviewCoachTab() {
+// ── Certificates ──────────────────────────────────────────────────────────────
+function CertificatesView() {
+  const certs = [
+    { title: 'PGDM Programme Certificate', issuer: 'MS Ramaiah Institute of Management', date: '2026', status: 'In Progress', color: 'bg-blue-50 border-blue-200' },
+    { title: 'Business Analytics Certification', issuer: 'MSRIM · RIM.IT', date: '2025', status: 'Completed', color: 'bg-green-50 border-green-200' },
+  ];
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold text-gray-900">Certificates</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {certs.map((c,i) => (
+          <div key={i} className={`card border-2 ${c.color}`}>
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center border"><GraduationCap className="w-5 h-5 text-msrim-blue" /></div>
+              <div>
+                <h3 className="font-semibold text-gray-900">{c.title}</h3>
+                <p className="text-sm text-gray-500">{c.issuer} · {c.date}</p>
+                <span className={`mt-2 inline-block text-xs px-2 py-0.5 rounded-full font-medium ${c.status==='Completed'?'bg-green-100 text-green-700':'bg-blue-100 text-blue-700'}`}>{c.status}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Messages ──────────────────────────────────────────────────────────────────
+function MessagesView() {
+  const msgs = [
+    { from: 'Placement Cell', subject: 'Amazon India drive shortlist released', time: '2h ago', unread: true },
+    { from: 'MSRIM Admin', subject: 'Pre-placement talk — Deloitte on 28 Oct', time: '1d ago', unread: false },
+  ];
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold text-gray-900">Messages</h2>
+      <div className="card p-0 overflow-hidden divide-y divide-gray-50">
+        {msgs.map((m,i) => (
+          <div key={i} className={`flex items-start gap-4 p-4 hover:bg-gray-50 cursor-pointer ${m.unread?'bg-blue-50/40':''}`}>
+            <div className="w-9 h-9 rounded-full bg-msrim-blue flex items-center justify-center text-white text-sm font-bold flex-shrink-0">{m.from[0]}</div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <p className="font-semibold text-sm text-gray-900">{m.from}</p>
+                <span className="text-xs text-gray-400">{m.time}</span>
+              </div>
+              <p className="text-sm text-gray-600 truncate">{m.subject}</p>
+            </div>
+            {m.unread && <div className="w-2 h-2 rounded-full bg-msrim-blue mt-1.5 flex-shrink-0" />}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Forums ────────────────────────────────────────────────────────────────────
+function ForumsView() {
+  const threads = [
+    { title: 'Tips for Deloitte case interview round?', replies: 12, views: 84, tag: 'Interview Prep', time: '3h ago' },
+    { title: 'Amazon Operations Manager — what to expect?', replies: 8,  views: 56, tag: 'Company Prep',   time: '1d ago' },
+    { title: 'Best resources for KPMG Business Analyst role', replies: 5,  views: 30, tag: 'Resources',     time: '2d ago' },
+    { title: 'Resume review — anyone willing to help?', replies: 20, views: 110, tag: 'Resume Help',   time: '4d ago' },
+  ];
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold text-gray-900">Forums</h2>
+      <div className="space-y-3">
+        {threads.map((t,i) => (
+          <div key={i} className="card hover:shadow-md transition-shadow cursor-pointer">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 font-medium">{t.tag}</span>
+                <h3 className="font-semibold text-gray-900 mt-1.5">{t.title}</h3>
+                <div className="flex gap-4 mt-1.5 text-xs text-gray-400">
+                  <span>{t.replies} replies</span><span>{t.views} views</span><span>{t.time}</span>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-300 flex-shrink-0 mt-1" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── People ────────────────────────────────────────────────────────────────────
+function PeopleView() {
+  const people = [
+    { name: 'Aarav Mehta',  role: 'PGDM Student · Batch 2024', dept: 'Business Analytics', status: 'Placed — Amazon India' },
+    { name: 'Diya Sharma',  role: 'PGDM Student · Batch 2024', dept: 'Marketing',           status: 'Seeking Opportunities' },
+    { name: 'Rohan Patel',  role: 'PGDM Student · Batch 2024', dept: 'Finance',             status: 'Placed — KPMG India' },
+    { name: 'Sneha Reddy',  role: 'PGDM Student · Batch 2024', dept: 'Operations',          status: 'Seeking Opportunities' },
+  ];
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold text-gray-900">People</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {people.map((p,i) => (
+          <div key={i} className="card flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-msrim-blue to-purple-500 flex items-center justify-center text-white font-bold flex-shrink-0">{p.name[0]}</div>
+            <div>
+              <h3 className="font-semibold text-gray-900">{p.name}</h3>
+              <p className="text-xs text-gray-500">{p.role}</p>
+              <p className="text-xs text-gray-400">{p.dept}</p>
+              <span className={`mt-1.5 inline-block text-xs px-2 py-0.5 rounded-full font-medium ${p.status.startsWith('Placed')?'bg-green-100 text-green-700':'bg-yellow-100 text-yellow-700'}`}>{p.status}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Placement Console (Admin) ─────────────────────────────────────────────────
+function ConsoleView() {
+  const [drives, setDrives] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => { api.get('/placements').then(r => setDrives(r.data)).finally(() => setLoading(false)); }, []);
+  if (loading) return <div className="py-20 text-center text-gray-400">Loading…</div>;
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold text-gray-900">Placement Console</h2>
+        <Link to="/placements" className="btn-primary text-sm">Manage Drives</Link>
+      </div>
+      <div className="card p-0 overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b">
+            <tr>
+              <th className="table-th">Company</th><th className="table-th">Role</th>
+              <th className="table-th">Package</th><th className="table-th">Drive Date</th>
+              <th className="table-th">Applications</th><th className="table-th">Status</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {drives.map(d => (
+              <tr key={d.id} className="hover:bg-gray-50">
+                <td className="table-td font-semibold">{d.company_name}</td>
+                <td className="table-td">{d.job_role}</td>
+                <td className="table-td text-green-600 font-medium">{d.package_lpa ? `₹${d.package_lpa}L` : '—'}</td>
+                <td className="table-td">{d.drive_date ? new Date(d.drive_date).toLocaleDateString() : '—'}</td>
+                <td className="table-td">{d.total_applications}</td>
+                <td className="table-td">
+                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${d.status==='upcoming'?'bg-blue-100 text-blue-700':d.status==='completed'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-500'}`}>{d.status}</span>
+                </td>
+              </tr>
+            ))}
+            {!drives.length && <tr><td colSpan={6} className="table-td text-center py-8 text-gray-400">No drives</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ── Interview Coach ───────────────────────────────────────────────────────────
+function CoachView() {
   const [role, setRole] = useState(ROLES[0]);
   const [idx, setIdx] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [done, setDone] = useState([]);
-
   const questions = INTERVIEW_QB[role];
   const q = questions[idx];
-  const progress = Math.round(((done.length) / questions.length) * 100);
-
-  function handleNext() {
-    if (!done.includes(idx)) setDone(d => [...d, idx]);
-    setRevealed(false);
-    setIdx(i => Math.min(i + 1, questions.length - 1));
-  }
-  function handlePrev() {
-    setRevealed(false);
-    setIdx(i => Math.max(i - 1, 0));
-  }
-  function handleRole(r) {
-    setRole(r); setIdx(0); setRevealed(false); setDone([]);
-  }
-
+  const progress = Math.round((done.length / questions.length) * 100);
+  function handleNext() { if (!done.includes(idx)) setDone(d => [...d, idx]); setRevealed(false); setIdx(i => Math.min(i+1, questions.length-1)); }
+  function handleRole(r) { setRole(r); setIdx(0); setRevealed(false); setDone([]); }
   return (
     <div className="space-y-5">
-      {/* Role selector */}
+      <h2 className="text-xl font-bold text-gray-900">Interview Coach</h2>
       <div className="flex flex-wrap gap-2">
         {ROLES.map(r => (
           <button key={r} onClick={() => handleRole(r)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${role === r ? 'bg-msrim-blue text-white border-msrim-blue' : 'bg-white text-gray-600 border-gray-200 hover:border-msrim-blue hover:text-msrim-blue'}`}>
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${role===r?'bg-msrim-blue text-white border-msrim-blue':'bg-white text-gray-600 border-gray-200 hover:border-msrim-blue hover:text-msrim-blue'}`}>
             {r}
           </button>
         ))}
       </div>
-
-      {/* Progress */}
       <div>
         <div className="flex items-center justify-between text-xs text-gray-500 mb-1.5">
-          <span>Question {idx + 1} of {questions.length}</span>
+          <span>Question {idx+1} of {questions.length}</span>
           <span>{done.length} answered · {progress}% complete</span>
         </div>
         <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-          <div className="h-1.5 bg-msrim-blue rounded-full transition-all" style={{ width: progress + '%' }} />
+          <div className="h-1.5 bg-msrim-blue rounded-full" style={{ width: progress+'%' }} />
         </div>
       </div>
-
-      {/* Question card */}
       <div className="card">
         <div className="flex items-start gap-3 mb-4">
           <div className="w-8 h-8 rounded-full bg-msrim-blue text-white flex items-center justify-center text-sm font-bold flex-shrink-0">Q</div>
           <p className="text-gray-900 font-medium leading-relaxed text-lg">{q.q}</p>
         </div>
-
         {!revealed ? (
-          <button onClick={() => setRevealed(true)}
-            className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl text-gray-400 text-sm hover:border-msrim-blue hover:text-msrim-blue transition-colors">
+          <button onClick={() => setRevealed(true)} className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl text-gray-400 text-sm hover:border-msrim-blue hover:text-msrim-blue transition-colors">
             Tap to reveal model answer
           </button>
         ) : (
           <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-              </div>
+              <CheckCircle className="w-4 h-4 text-green-600" />
               <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Model Answer</span>
             </div>
             <p className="text-gray-800 text-sm leading-relaxed">{q.a}</p>
           </div>
         )}
-
         <div className="flex items-center justify-between mt-4">
-          <button onClick={handlePrev} disabled={idx === 0}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+          <button onClick={() => { setRevealed(false); setIdx(i => Math.max(i-1,0)); }} disabled={idx===0}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-40 transition-colors">
             <ChevronLeft className="w-4 h-4" /> Previous
           </button>
-          <button onClick={handleNext} disabled={idx === questions.length - 1}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm bg-msrim-blue text-white hover:bg-blue-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+          <button onClick={handleNext} disabled={idx===questions.length-1}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm bg-msrim-blue text-white hover:bg-blue-800 disabled:opacity-40 transition-colors">
             Next <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
-
       <div className="grid grid-cols-5 gap-1.5">
-        {questions.map((_, i) => (
+        {questions.map((_,i) => (
           <button key={i} onClick={() => { setIdx(i); setRevealed(false); }}
-            className={`h-2 rounded-full transition-colors ${i === idx ? 'bg-msrim-blue' : done.includes(i) ? 'bg-green-400' : 'bg-gray-200'}`} />
+            className={`h-2 rounded-full transition-colors ${i===idx?'bg-msrim-blue':done.includes(i)?'bg-green-400':'bg-gray-200'}`} />
         ))}
       </div>
     </div>
   );
 }
 
-// ── Resume Analyser Tab ───────────────────────────────────────────────────────
-function ResumeAnalyserTab() {
+// ── Resume Analyser ───────────────────────────────────────────────────────────
+function ResumeView() {
   const [file, setFile] = useState(null);
   const [analysing, setAnalysing] = useState(false);
   const [result, setResult] = useState(null);
-  const dropRef = useRef(null);
-
   const CHECKS = [
-    { key: 'contact',    label: 'Contact Information',     weight: 10 },
-    { key: 'summary',    label: 'Professional Summary',    weight: 10 },
-    { key: 'education',  label: 'Education & CGPA',        weight: 15 },
-    { key: 'experience', label: 'Work / Internship Exp.',  weight: 20 },
-    { key: 'skills',     label: 'Skills & Certifications', weight: 20 },
-    { key: 'projects',   label: 'Projects & Achievements', weight: 15 },
-    { key: 'format',     label: 'ATS-Friendly Formatting', weight: 10 },
+    { key: 'contact',    label: 'Contact Information',    weight: 10 },
+    { key: 'summary',    label: 'Professional Summary',   weight: 10 },
+    { key: 'education',  label: 'Education & CGPA',       weight: 15 },
+    { key: 'experience', label: 'Work / Internship Exp.', weight: 20 },
+    { key: 'skills',     label: 'Skills & Certifications',weight: 20 },
+    { key: 'projects',   label: 'Projects & Achievements',weight: 15 },
+    { key: 'format',     label: 'ATS-Friendly Formatting',weight: 10 },
   ];
-
   function analyse() {
-    if (!file) return;
-    setAnalysing(true);
+    if (!file) return; setAnalysing(true);
     setTimeout(() => {
-      const seed = file.name.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-      const scores = CHECKS.map((c, i) => ({
-        ...c,
-        score: Math.min(100, 55 + ((seed * (i + 3) * 7) % 46)),
-      }));
-      const ats = Math.round(scores.reduce((a, s) => a + (s.score / 100) * s.weight, 0));
-      const tips = [];
-      scores.forEach(s => {
-        if (s.score < 70) {
-          const map = {
-            contact: 'Add LinkedIn URL, city, and a professional email address.',
-            summary: 'Include a 2–3 line career objective tailored to your target role.',
-            education: 'List CGPA, relevant coursework, and honours/distinctions.',
-            experience: 'Use action verbs (Led, Designed, Achieved) and quantify impact.',
-            skills: 'Separate technical skills from soft skills; add relevant certifications.',
-            projects: 'Describe project impact with metrics (revenue, time saved, accuracy).',
-            format: 'Use a single-column layout, standard fonts, and avoid tables/images.',
-          };
-          tips.push(map[s.key]);
-        }
-      });
-      setResult({ scores, ats, tips });
-      setAnalysing(false);
+      const seed = file.name.split('').reduce((a,c) => a+c.charCodeAt(0), 0);
+      const scores = CHECKS.map((c,i) => ({ ...c, score: Math.min(100, 55+((seed*(i+3)*7)%46)) }));
+      const ats = Math.round(scores.reduce((a,s) => a+(s.score/100)*s.weight, 0));
+      const tips = []; const map = { contact:'Add LinkedIn URL, city, and a professional email.', summary:'Include a 2–3 line career objective tailored to your target role.', education:'List CGPA, relevant coursework, and honours.', experience:'Use action verbs and quantify impact.', skills:'Separate technical and soft skills; add certifications.', projects:'Describe project impact with metrics.', format:'Use a single-column layout and standard fonts.' };
+      scores.forEach(s => { if (s.score<70) tips.push(map[s.key]); });
+      setResult({ scores, ats, tips }); setAnalysing(false);
     }, 2200);
   }
-
-  function onDrop(e) {
-    e.preventDefault();
-    const f = e.dataTransfer.files[0];
-    if (f) setFile(f);
-  }
-
-  function scoreColor(s) {
-    if (s >= 80) return 'text-green-600';
-    if (s >= 60) return 'text-yellow-600';
-    return 'text-red-500';
-  }
-  function barColor(s) {
-    if (s >= 80) return 'bg-green-500';
-    if (s >= 60) return 'bg-yellow-400';
-    return 'bg-red-400';
-  }
-
+  function scoreColor(s) { return s>=80?'text-green-600':s>=60?'text-yellow-600':'text-red-500'; }
+  function barColor(s)   { return s>=80?'bg-green-500':s>=60?'bg-yellow-400':'bg-red-400'; }
   return (
     <div className="space-y-5">
+      <h2 className="text-xl font-bold text-gray-900">Resume Analyser</h2>
       {!result ? (
         <>
-          <div
-            ref={dropRef}
-            onDrop={onDrop}
-            onDragOver={e => e.preventDefault()}
-            className="border-2 border-dashed border-gray-200 rounded-2xl p-10 text-center hover:border-msrim-blue transition-colors cursor-pointer"
-            onClick={() => document.getElementById('resume-file').click()}
-          >
+          <div className="border-2 border-dashed border-gray-200 rounded-2xl p-10 text-center hover:border-msrim-blue transition-colors cursor-pointer" onClick={() => document.getElementById('resume-file').click()}>
             <Upload className="w-10 h-10 text-gray-300 mx-auto mb-3" />
             <p className="font-medium text-gray-700">Drop your resume here or click to upload</p>
             <p className="text-sm text-gray-400 mt-1">PDF or DOCX — max 5 MB</p>
-            {file && (
-              <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full text-msrim-blue text-sm font-medium">
-                <FileText className="w-4 h-4" /> {file.name}
-              </div>
-            )}
-            <input id="resume-file" type="file" accept=".pdf,.docx,.doc" className="hidden"
-              onChange={e => setFile(e.target.files[0])} />
+            {file && <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full text-msrim-blue text-sm font-medium"><FileText className="w-4 h-4" />{file.name}</div>}
+            <input id="resume-file" type="file" accept=".pdf,.docx,.doc" className="hidden" onChange={e => setFile(e.target.files[0])} />
           </div>
-
-          <button
-            onClick={analyse}
-            disabled={!file || analysing}
-            className="w-full btn-primary py-3 text-base disabled:opacity-50"
-          >
-            {analysing ? (
-              <span className="flex items-center justify-center gap-2">
-                <RefreshCw className="w-4 h-4 animate-spin" /> Analysing resume…
-              </span>
-            ) : 'Analyse Resume'}
+          <button onClick={analyse} disabled={!file||analysing} className="w-full btn-primary py-3 disabled:opacity-50">
+            {analysing ? <span className="flex items-center justify-center gap-2"><RefreshCw className="w-4 h-4 animate-spin" />Analysing…</span> : 'Analyse Resume'}
           </button>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {['ATS Score', 'Keyword Match', 'Readability', 'Impact Score'].map(label => (
-              <div key={label} className="card text-center py-4">
-                <p className="text-2xl font-bold text-gray-200">—</p>
-                <p className="text-xs text-gray-400 mt-1">{label}</p>
-              </div>
-            ))}
-          </div>
         </>
       ) : (
         <>
-          {/* Score overview */}
           <div className="card bg-gradient-to-br from-msrim-blue to-blue-800 text-white">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-blue-200 text-sm">Overall ATS Score</p>
                 <p className="text-5xl font-bold mt-1">{result.ats}<span className="text-2xl text-blue-200">/100</span></p>
-                <p className="text-blue-200 text-sm mt-1">
-                  {result.ats >= 80 ? 'Excellent — highly ATS-compatible' : result.ats >= 60 ? 'Good — minor improvements needed' : 'Needs improvement before applying'}
-                </p>
+                <p className="text-blue-200 text-sm mt-1">{result.ats>=80?'Excellent — highly ATS-compatible':result.ats>=60?'Good — minor improvements needed':'Needs improvement before applying'}</p>
               </div>
-              <div className="w-20 h-20 rounded-full border-4 border-blue-300 flex items-center justify-center">
-                <Star className="w-8 h-8 text-yellow-300" fill="currentColor" />
-              </div>
+              <Star className="w-14 h-14 text-yellow-300" fill="currentColor" />
             </div>
           </div>
-
-          {/* Section scores */}
           <div className="card">
             <h3 className="font-semibold text-gray-700 mb-4">Section Analysis</h3>
             <div className="space-y-3">
@@ -497,32 +634,23 @@ function ResumeAnalyserTab() {
                     <span className={`text-sm font-bold ${scoreColor(s.score)}`}>{s.score}%</span>
                   </div>
                   <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div className={`h-2 rounded-full transition-all ${barColor(s.score)}`} style={{ width: s.score + '%' }} />
+                    <div className={`h-2 rounded-full ${barColor(s.score)}`} style={{ width: s.score+'%' }} />
                   </div>
                 </div>
               ))}
             </div>
           </div>
-
-          {/* Tips */}
-          {result.tips.length > 0 && (
+          {result.tips.length>0 && (
             <div className="card border-l-4 border-msrim-orange">
               <h3 className="font-semibold text-gray-700 mb-3">Improvement Tips</h3>
               <ul className="space-y-2">
-                {result.tips.map((tip, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                    <XCircle className="w-4 h-4 text-msrim-orange flex-shrink-0 mt-0.5" />
-                    {tip}
-                  </li>
+                {result.tips.map((tip,i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-gray-700"><XCircle className="w-4 h-4 text-msrim-orange flex-shrink-0 mt-0.5" />{tip}</li>
                 ))}
               </ul>
             </div>
           )}
-
-          <button onClick={() => { setResult(null); setFile(null); }}
-            className="btn-secondary w-full">
-            Analyse Another Resume
-          </button>
+          <button onClick={() => { setResult(null); setFile(null); }} className="btn-secondary w-full">Analyse Another Resume</button>
         </>
       )}
     </div>
@@ -531,10 +659,43 @@ function ResumeAnalyserTab() {
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function PlacementPOD() {
-  const [tab, setTab] = useState('analytics');
+  const [active, setActive] = useState('home');
+  const [counts, setCounts] = useState({});
+
+  useEffect(() => {
+    Promise.all([
+      api.get('/placements'),
+      api.get('/placements/pod/analytics'),
+    ]).then(([plc, pod]) => {
+      const upcoming = plc.data.filter(d => d.status === 'upcoming').length;
+      const total    = plc.data.length;
+      setCounts({
+        events:       total,
+        jobs:         upcoming,
+        certificates: 1,
+        messages:     2,
+        forums:       30,
+        people:       6,
+        console:      total,
+      });
+    }).catch(() => {});
+  }, []);
+
+  const views = {
+    home:         <HomeView />,
+    events:       <EventsView />,
+    jobs:         <JobsView />,
+    certificates: <CertificatesView />,
+    messages:     <MessagesView />,
+    forums:       <ForumsView />,
+    people:       <PeopleView />,
+    console:      <ConsoleView />,
+    coach:        <CoachView />,
+    resume:       <ResumeView />,
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link to="/placements" className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
@@ -551,25 +712,13 @@ export default function PlacementPOD() {
         </div>
       </div>
 
-      {/* Tab bar */}
-      <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit flex-wrap">
-        {TABS.map(t => {
-          const Icon = t.icon;
-          return (
-            <button key={t.id} onClick={() => setTab(t.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tab === t.id ? 'bg-white text-msrim-blue shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-              <Icon className="w-4 h-4" />
-              {t.label}
-            </button>
-          );
-        })}
+      {/* Two-column layout */}
+      <div className="flex gap-5 items-start">
+        <PodSidebar active={active} setActive={setActive} counts={counts} />
+        <div className="flex-1 min-w-0">
+          {views[active] || <HomeView />}
+        </div>
       </div>
-
-      {/* Content */}
-      {tab === 'analytics' && <AnalyticsTab />}
-      {tab === 'match'     && <JobMatchTab />}
-      {tab === 'coach'     && <InterviewCoachTab />}
-      {tab === 'resume'    && <ResumeAnalyserTab />}
     </div>
   );
 }

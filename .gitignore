@@ -6,6 +6,9 @@ dist/
 .env
 *.log
 
+# Claude Code internal worktrees
+.claude/
+
 # Screenshots and test artifacts
 ss_*.png
 test-results.json

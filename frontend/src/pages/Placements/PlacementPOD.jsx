@@ -73,12 +73,27 @@ function Badge({ count, color = 'bg-msrim-blue' }) {
 }
 
 // ── POD Sidebar ───────────────────────────────────────────────────────────────
+const CONSOLE_ITEMS = [
+  { id: 'console-events',       label: 'Placement Events',  icon: CalendarDays  },
+  { id: 'console-students',     label: 'Students',          icon: Users         },
+  { id: 'console-job-offers',   label: 'Job Offers',        icon: Briefcase     },
+  { id: 'console-intern-offers',label: 'Internship Offers', icon: ScrollText    },
+  { id: 'console-reports',      label: 'Reports',           icon: BarChart2     },
+  { id: 'console-categories',   label: 'Categories',        icon: Network       },
+  { id: 'console-department',   label: 'Department',        icon: GraduationCap },
+];
+
+const CONSOLE_IDS = CONSOLE_ITEMS.map(i => i.id);
+
 function PodSidebar({ active, setActive, counts }) {
   const [networkOpen, setNetworkOpen] = useState(true);
+  const [consoleOpen, setConsoleOpen] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const networkTotal = (counts.jobs || 0) + (counts.certificates || 0) +
     (counts.messages || 0) + (counts.forums || 0) + (counts.people || 0);
+
+  const consoleTotal = counts.console || 0;
 
   function NavItem({ id, icon: Icon, label, badge, badgeColor, onClick, indent }) {
     const isActive = active === id;
@@ -86,10 +101,10 @@ function PodSidebar({ active, setActive, counts }) {
       <button
         onClick={() => { onClick ? onClick() : setActive(id); }}
         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors
-          ${indent ? 'pl-9' : ''}
-          ${isActive ? 'bg-blue-50 text-msrim-blue font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+          ${indent ? 'pl-8' : ''}
+          ${isActive ? 'bg-purple-50 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
       >
-        <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-msrim-blue' : 'text-gray-400'}`} />
+        <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-purple-600' : 'text-gray-400'}`} />
         <span className="flex-1 text-left">{label}</span>
         {badge ? <Badge count={badge} color={badgeColor || 'bg-msrim-blue'} /> : null}
       </button>
@@ -97,17 +112,17 @@ function PodSidebar({ active, setActive, counts }) {
   }
 
   return (
-    <div className="w-56 flex-shrink-0 bg-white rounded-2xl border border-gray-100 shadow-sm p-3 flex flex-col gap-1 self-start sticky top-6">
+    <div className="w-56 flex-shrink-0 bg-white rounded-2xl border border-gray-100 shadow-sm p-3 flex flex-col gap-0.5 self-start sticky top-6">
 
       {/* Main nav */}
-      <NavItem id="home"   icon={Home}          label="Home" />
-      <NavItem id="events" icon={CalendarDays}   label="Events"     badge={counts.events} />
+      <NavItem id="home"   icon={Home}        label="Home" />
+      <NavItem id="events" icon={CalendarDays} label="Events" badge={counts.events} />
 
       {/* My Network group */}
       <button
         onClick={() => setNetworkOpen(o => !o)}
         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors
-          ${['jobs','certificates','messages','forums','people'].includes(active) ? 'bg-blue-50 text-msrim-blue font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+          ${['jobs','certificates','messages','forums','people'].includes(active) ? 'bg-purple-50 text-purple-700 font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
       >
         <Network className="w-4 h-4 flex-shrink-0 text-gray-400" />
         <span className="flex-1 text-left">My Network</span>
@@ -116,38 +131,58 @@ function PodSidebar({ active, setActive, counts }) {
       </button>
 
       {networkOpen && (
-        <div className="flex flex-col gap-0.5 mt-0.5">
-          <NavItem id="jobs"         icon={Briefcase}       label="Jobs"         badge={counts.jobs}         indent />
-          <NavItem id="certificates" icon={ScrollText}       label="Certificates" badge={counts.certificates} indent />
-          <NavItem id="messages"     icon={Inbox}            label="Messages"     badge={counts.messages}     badgeColor="bg-sky-500" indent />
-          <NavItem id="forums"       icon={MessagesSquare}   label="Forums"       badge={counts.forums}       badgeColor="bg-purple-500" indent />
-          <NavItem id="people"       icon={Users}            label="People"       badge={counts.people}       badgeColor="bg-green-500" indent />
+        <div className="flex flex-col gap-0.5">
+          <NavItem id="jobs"         icon={Briefcase}     label="Jobs"         badge={counts.jobs}         indent />
+          <NavItem id="certificates" icon={ScrollText}     label="Certificates" badge={counts.certificates} indent />
+          <NavItem id="messages"     icon={Inbox}          label="Messages"     badge={counts.messages}     badgeColor="bg-sky-500" indent />
+          <NavItem id="forums"       icon={MessagesSquare} label="Forums"       badge={counts.forums}       badgeColor="bg-purple-500" indent />
+          <NavItem id="people"       icon={Users}          label="People"       badge={counts.people}       badgeColor="bg-green-500" indent />
         </div>
       )}
 
       {/* Divider */}
       <div className="border-t border-gray-100 my-2" />
 
-      {/* Admin Consoles */}
-      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest px-3 mb-1">Admin Consoles</p>
-      <NavItem id="console"  icon={Shield}    label="Placement Console" badge={counts.console} />
+      {/* Admin Consoles — Placement Console expandable */}
+      <button
+        onClick={() => setConsoleOpen(o => !o)}
+        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors
+          ${CONSOLE_IDS.includes(active) || active === 'console'
+            ? 'bg-purple-50 text-purple-700'
+            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+      >
+        <Shield className="w-4 h-4 flex-shrink-0 text-purple-500" />
+        <span className="flex-1 text-left">Placement Console</span>
+        <Badge count={consoleTotal} color="bg-purple-500" />
+        {consoleOpen ? <ChevronUp className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+      </button>
+
+      {consoleOpen && (
+        <div className="flex flex-col gap-0.5">
+          {CONSOLE_ITEMS.map(item => (
+            <NavItem key={item.id} id={item.id} icon={item.icon} label={item.label} indent />
+          ))}
+        </div>
+      )}
+
+      {/* Settings */}
       <button
         onClick={() => setSettingsOpen(o => !o)}
-        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-50 transition-colors mt-1"
       >
         <Settings className="w-4 h-4 text-gray-400" />
         <span className="flex-1 text-left">Settings</span>
         {settingsOpen ? <ChevronUp className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
       </button>
       {settingsOpen && (
-        <div className="flex flex-col gap-0.5 pl-6">
-          <NavItem id="resume" icon={FileText}       label="Resume Analyser" indent />
-          <NavItem id="coach"  icon={MessageSquare}  label="Interview Coach" indent />
+        <div className="flex flex-col gap-0.5">
+          <NavItem id="resume" icon={FileText}      label="Resume Analyser" indent />
+          <NavItem id="coach"  icon={MessageSquare} label="Interview Coach" indent />
         </div>
       )}
 
       {/* Footer */}
-      <div className="mt-auto pt-3 border-t border-gray-100">
+      <div className="mt-3 pt-3 border-t border-gray-100">
         <p className="text-xs text-gray-400 text-center">Powered by RIM.IT</p>
       </div>
     </div>
@@ -657,6 +692,226 @@ function ResumeView() {
   );
 }
 
+// ── Console Sub-Views ─────────────────────────────────────────────────────────
+
+function ConsoleEventsView() {
+  const [drives, setDrives] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => { api.get('/placements').then(r => setDrives(r.data)).finally(() => setLoading(false)); }, []);
+  if (loading) return <div className="py-16 text-center text-gray-400">Loading…</div>;
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold">Placement Events</h2>
+      <div className="card p-0 overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b">
+            <tr><th className="table-th">Company</th><th className="table-th">Role</th><th className="table-th">Package</th><th className="table-th">Drive Date</th><th className="table-th">Applied</th><th className="table-th">Status</th></tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {drives.map(d => (
+              <tr key={d.id} className="hover:bg-gray-50">
+                <td className="table-td font-semibold">{d.company_name}</td>
+                <td className="table-td">{d.job_role}</td>
+                <td className="table-td text-green-600 font-medium">{d.package_lpa ? `₹${d.package_lpa}L` : '—'}</td>
+                <td className="table-td">{d.drive_date ? new Date(d.drive_date).toLocaleDateString() : '—'}</td>
+                <td className="table-td">{d.total_applications}</td>
+                <td className="table-td"><span className={`text-xs px-2 py-1 rounded-full font-medium ${d.status==='upcoming'?'bg-blue-100 text-blue-700':d.status==='completed'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-500'}`}>{d.status}</span></td>
+              </tr>
+            ))}
+            {!drives.length && <tr><td colSpan={6} className="table-td text-center py-8 text-gray-400">No events</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function ConsoleStudentsView() {
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  useEffect(() => { api.get('/students').then(r => setStudents(r.data || [])).finally(() => setLoading(false)); }, []);
+  const filtered = students.filter(s => !search || (s.name||'').toLowerCase().includes(search.toLowerCase()) || (s.enrollment_number||'').includes(search));
+  if (loading) return <div className="py-16 text-center text-gray-400">Loading…</div>;
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold">Students</h2>
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…" className="input-field w-48 text-sm" />
+      </div>
+      <div className="card p-0 overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b">
+            <tr><th className="table-th">Name</th><th className="table-th">Enroll No.</th><th className="table-th">Program</th><th className="table-th">CGPA</th><th className="table-th">Batch</th><th className="table-th">Eligibility</th></tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {filtered.slice(0,50).map(s => (
+              <tr key={s.id} className="hover:bg-gray-50">
+                <td className="table-td font-medium">{s.name}</td>
+                <td className="table-td text-gray-500 text-sm">{s.enrollment_number}</td>
+                <td className="table-td text-sm">{s.program || '—'}</td>
+                <td className="table-td">{s.cgpa || '—'}</td>
+                <td className="table-td">{s.batch_year || '—'}</td>
+                <td className="table-td">
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${(s.backlogs||0)===0?'bg-green-100 text-green-700':'bg-red-100 text-red-600'}`}>
+                    {(s.backlogs||0)===0 ? 'Eligible' : `${s.backlogs} backlogs`}
+                  </span>
+                </td>
+              </tr>
+            ))}
+            {!filtered.length && <tr><td colSpan={6} className="table-td text-center py-8 text-gray-400">No students found</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function ConsoleOffersView({ type }) {
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => { api.get(`/jobs?type=${type}`).then(r => setJobs(r.data)).finally(() => setLoading(false)); }, [type]);
+  const label = type === 'fulltime' ? 'Job Offers' : 'Internship Offers';
+  if (loading) return <div className="py-16 text-center text-gray-400">Loading…</div>;
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold">{label}</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {jobs.map(j => (
+          <div key={j.id} className="card hover:shadow-md transition-shadow">
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <h3 className="font-bold text-gray-900">{j.title}</h3>
+                <p className="text-sm text-gray-500">{j.company?.name} · {j.location}</p>
+              </div>
+              <span className={`text-xs px-2 py-1 rounded-full font-medium ${j.status==='open'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-500'}`}>{j.status}</span>
+            </div>
+            <div className="flex gap-3 mt-2 text-sm flex-wrap">
+              {type==='fulltime' && j.package_lpa && <span className="text-green-600 font-semibold">₹{j.package_lpa} LPA</span>}
+              {type==='internship' && j.stipend_monthly && <span className="text-green-600 font-semibold">₹{j.stipend_monthly}/mo</span>}
+              {j.min_cgpa > 0 && <span className="text-gray-400">CGPA ≥ {j.min_cgpa}</span>}
+              <span className="text-gray-400">{j.total_applications} applied</span>
+            </div>
+          </div>
+        ))}
+        {!jobs.length && <div className="col-span-2 card text-center py-12 text-gray-400">No {label.toLowerCase()} posted yet</div>}
+      </div>
+    </div>
+  );
+}
+
+function ConsoleReportsView() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => { api.get('/jobs/stats/overview').then(r => setData(r.data)).finally(() => setLoading(false)); }, []);
+  if (loading) return <div className="py-16 text-center text-gray-400">Loading…</div>;
+  if (!data) return null;
+  return (
+    <div className="space-y-5">
+      <h2 className="text-xl font-bold">Reports</h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: 'Total Companies', value: data.overview.total_companies },
+          { label: 'Total Jobs', value: data.overview.total_jobs },
+          { label: 'Open Jobs', value: data.overview.open_jobs },
+          { label: 'Total Offers', value: data.overview.total_offers || 0 },
+        ].map(({ label, value }) => (
+          <div key={label} className="card text-center">
+            <p className="text-3xl font-bold text-msrim-blue">{value ?? '—'}</p>
+            <p className="text-xs text-gray-500 mt-1">{label}</p>
+          </div>
+        ))}
+      </div>
+      <div className="card">
+        <h3 className="font-semibold text-gray-700 mb-3">Job Type Breakdown</h3>
+        <div className="space-y-3">
+          {data.byType?.map(t => (
+            <div key={t.type}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-medium capitalize text-gray-700">{t.type}</span>
+                <span className="text-sm text-gray-500">{t.count} · {t.avg_pkg ? `₹${parseFloat(t.avg_pkg).toFixed(1)}L avg` : '—'}</span>
+              </div>
+              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-2 bg-purple-500 rounded-full" style={{ width: `${Math.min(100,(t.count/(data.overview.total_jobs||1))*100)}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ConsoleCategoriesView() {
+  const [companies, setCompanies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => { api.get('/companies').then(r => setCompanies(r.data)).finally(() => setLoading(false)); }, []);
+  if (loading) return <div className="py-16 text-center text-gray-400">Loading…</div>;
+  const bySector = companies.reduce((acc, c) => {
+    const s = c.sector || 'Other';
+    if (!acc[s]) acc[s] = { count: 0, hired: 0 };
+    acc[s].count++; acc[s].hired += c.total_hired || 0;
+    return acc;
+  }, {});
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold">Categories</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {Object.entries(bySector).map(([sector, info]) => (
+          <div key={sector} className="card flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold text-gray-900">{sector}</h3>
+              <p className="text-sm text-gray-500">{info.count} companies</p>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-bold text-purple-600">{info.hired}</p>
+              <p className="text-xs text-gray-400">hired</p>
+            </div>
+          </div>
+        ))}
+        {!Object.keys(bySector).length && <div className="col-span-2 card text-center py-12 text-gray-400">No categories yet</div>}
+      </div>
+    </div>
+  );
+}
+
+function ConsoleDepartmentView() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => { api.get('/jobs/stats/overview').then(r => setData(r.data)).finally(() => setLoading(false)); }, []);
+  if (loading) return <div className="py-16 text-center text-gray-400">Loading…</div>;
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold">Department-wise Placement</h2>
+      <div className="card p-0 overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b">
+            <tr><th className="table-th">Department</th><th className="table-th">Students Placed</th><th className="table-th">Progress</th></tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {data?.byDept?.length ? data.byDept.map(d => (
+              <tr key={d.dept} className="hover:bg-gray-50">
+                <td className="table-td font-medium">{d.dept || '—'}</td>
+                <td className="table-td text-purple-600 font-bold">{d.placed}</td>
+                <td className="table-td">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-2 bg-purple-500 rounded-full" style={{ width: `${Math.min(100, d.placed * 5)}%` }} />
+                    </div>
+                    <span className="text-xs text-gray-400 w-8">{d.placed}</span>
+                  </div>
+                </td>
+              </tr>
+            )) : (
+              <tr><td colSpan={3} className="table-td text-center py-8 text-gray-400">No placement data yet</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function PlacementPOD() {
   const [active, setActive] = useState('home');
@@ -665,10 +920,11 @@ export default function PlacementPOD() {
   useEffect(() => {
     Promise.all([
       api.get('/placements'),
-      api.get('/placements/pod/analytics'),
-    ]).then(([plc, pod]) => {
+      api.get('/jobs'),
+    ]).then(([plc, jobs]) => {
       const upcoming = plc.data.filter(d => d.status === 'upcoming').length;
       const total    = plc.data.length;
+      const totalJobs = jobs.data.length;
       setCounts({
         events:       total,
         jobs:         upcoming,
@@ -676,22 +932,30 @@ export default function PlacementPOD() {
         messages:     2,
         forums:       30,
         people:       6,
-        console:      total,
+        console:      totalJobs + total,
       });
     }).catch(() => {});
   }, []);
 
   const views = {
-    home:         <HomeView />,
-    events:       <EventsView />,
-    jobs:         <JobsView />,
-    certificates: <CertificatesView />,
-    messages:     <MessagesView />,
-    forums:       <ForumsView />,
-    people:       <PeopleView />,
-    console:      <ConsoleView />,
-    coach:        <CoachView />,
-    resume:       <ResumeView />,
+    home:                 <HomeView />,
+    events:               <EventsView />,
+    jobs:                 <JobsView />,
+    certificates:         <CertificatesView />,
+    messages:             <MessagesView />,
+    forums:               <ForumsView />,
+    people:               <PeopleView />,
+    console:              <ConsoleView />,
+    coach:                <CoachView />,
+    resume:               <ResumeView />,
+    // Console sub-items
+    'console-events':        <ConsoleEventsView />,
+    'console-students':      <ConsoleStudentsView />,
+    'console-job-offers':    <ConsoleOffersView type="fulltime" />,
+    'console-intern-offers': <ConsoleOffersView type="internship" />,
+    'console-reports':       <ConsoleReportsView />,
+    'console-categories':    <ConsoleCategoriesView />,
+    'console-department':    <ConsoleDepartmentView />,
   };
 
   return (

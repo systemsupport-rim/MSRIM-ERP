@@ -7,7 +7,7 @@ router.use(authenticate);
 
 router.get('/', (req, res) => {
   const { department_id, search } = req.query;
-  let query = `SELECT f.*, u.name, u.email, u.phone, u.profile_photo, u.gender, d.name as dept_name
+  let query = `SELECT f.*, u.name, u.email, u.phone, u.profile_photo, u.gender, u.designation, u.department as user_department, d.name as dept_name
     FROM faculty f JOIN users u ON f.user_id = u.id LEFT JOIN departments d ON f.department_id = d.id WHERE u.is_active = 1`;
   const params = [];
   if (req.user.role === 'faculty') {
@@ -23,13 +23,13 @@ router.get('/', (req, res) => {
 router.get('/stats/overview', authorize('admin', 'registrar', 'hod'), (req, res) => {
   const total = db.prepare('SELECT COUNT(*) as count FROM faculty').get();
   const byDept = db.prepare('SELECT d.name, COUNT(*) as count FROM faculty f JOIN departments d ON f.department_id = d.id GROUP BY d.id').all();
-  const byDesignation = db.prepare('SELECT designation, COUNT(*) as count FROM faculty GROUP BY designation').all();
+  const byDesignation = db.prepare('SELECT u.designation, COUNT(*) as count FROM faculty f JOIN users u ON f.user_id=u.id GROUP BY u.designation').all();
   const byEmploymentType = db.prepare("SELECT employment_type, COUNT(*) as count FROM faculty GROUP BY employment_type").all();
   res.json({ total: total.count, byDept, byDesignation, byEmploymentType });
 });
 
 router.get('/:id', (req, res) => {
-  const faculty = db.prepare(`SELECT f.*, u.name, u.email, u.phone, u.gender, d.name as dept_name
+  const faculty = db.prepare(`SELECT f.*, u.name, u.email, u.phone, u.gender, u.designation, d.name as dept_name
     FROM faculty f JOIN users u ON f.user_id = u.id LEFT JOIN departments d ON f.department_id = d.id WHERE f.id = ?`).get(req.params.id);
   if (!faculty) return res.status(404).json({ error: 'Faculty not found.' });
   const courses = db.prepare(`SELECT c.*, ay.name as academic_year FROM courses c JOIN academic_years ay ON c.academic_year_id = ay.id WHERE c.faculty_id = ? ORDER BY ay.name, c.semester`).all(req.params.id);
@@ -61,7 +61,7 @@ router.post('/', authorize('admin', 'registrar'), (req, res) => {
   const { name, email, phone, employee_id, department_id, designation, qualification, specialization, experience_years, joining_date, employment_type, salary } = req.body;
   const username = employee_id.toLowerCase().replace(/-/g, '');
   const password = bcrypt.hashSync('Msrim@123', 10);
-  const userResult = db.prepare('INSERT INTO users (username,password,role,name,email,phone,department) VALUES (?,?,?,?,?,?,?)').run(username, password, 'faculty', name, email, phone, 'Management Studies');
+  const userResult = db.prepare('INSERT INTO users (username,password,role,name,email,phone,department,designation) VALUES (?,?,?,?,?,?,?,?)').run(username, password, 'faculty', name, email, phone, 'Management Studies', designation || '');
   db.prepare('INSERT INTO faculty (user_id,employee_id,department_id,designation,qualification,specialization,experience_years,joining_date,employment_type,salary) VALUES (?,?,?,?,?,?,?,?,?,?)').run(userResult.lastInsertRowid, employee_id, department_id, designation, qualification, specialization || '', experience_years || 0, joining_date, employment_type || 'full-time', salary || 0);
   res.status(201).json({ message: 'Faculty created.', username, defaultPassword: 'Msrim@123' });
 });
@@ -70,17 +70,16 @@ router.put('/:id', authorize('admin', 'registrar'), (req, res) => {
   const faculty = db.prepare('SELECT f.*, u.id as user_id FROM faculty f JOIN users u ON f.user_id = u.id WHERE f.id = ?').get(req.params.id);
   if (!faculty) return res.status(404).json({ error: 'Faculty not found.' });
   const { department_id, designation, qualification, specialization, experience_years, employment_type, salary, bank_account, ifsc_code } = req.body;
+  const newDesignation = designation || faculty.designation;
   db.prepare('UPDATE faculty SET department_id=?, designation=?, qualification=?, specialization=?, experience_years=?, employment_type=?, salary=?, bank_account=?, ifsc_code=? WHERE id=?')
-    .run(department_id || faculty.department_id, designation || faculty.designation, qualification || faculty.qualification, specialization || faculty.specialization, experience_years !== undefined ? experience_years : faculty.experience_years, employment_type || faculty.employment_type, salary !== undefined ? salary : faculty.salary, bank_account || faculty.bank_account, ifsc_code || faculty.ifsc_code, req.params.id);
-  // Always update user fields if provided (use !== undefined so empty string is allowed)
-  const uUpdates = []; const vals = [];
+    .run(department_id || faculty.department_id, newDesignation, qualification || faculty.qualification, specialization || faculty.specialization, experience_years !== undefined ? experience_years : faculty.experience_years, employment_type || faculty.employment_type, salary !== undefined ? salary : faculty.salary, bank_account || faculty.bank_account, ifsc_code || faculty.ifsc_code, req.params.id);
+  // Always sync users table — designation is canonical in users table
+  const uUpdates = ['designation=?']; const vals = [newDesignation];
   if (req.body.name  !== undefined) { uUpdates.push('name=?');  vals.push(req.body.name); }
   if (req.body.phone !== undefined) { uUpdates.push('phone=?'); vals.push(req.body.phone); }
   if (req.body.email !== undefined) { uUpdates.push('email=?'); vals.push(req.body.email); }
-  if (uUpdates.length > 0) {
-    vals.push(faculty.user_id);
-    db.prepare(`UPDATE users SET ${uUpdates.join(',')} WHERE id=?`).run(...vals);
-  }
+  vals.push(faculty.user_id);
+  db.prepare(`UPDATE users SET ${uUpdates.join(',')} WHERE id=?`).run(...vals);
   res.json({ message: 'Faculty updated.' });
 });
 

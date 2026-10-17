@@ -10,7 +10,7 @@ import {
   ArrowLeft, Plus, Trash2, RotateCcw, Settings2, X, Check, KeyRound, Edit2,
   MessageSquare, Send, BarChart2, Cpu, Bell, Globe, MapPin, Video,
   Megaphone, BookMarked as BookIcon, Target,
-  FlaskConical, TrendingUp, Mic, Building2 as Corp
+  FlaskConical, TrendingUp, Mic, Building2 as Corp, Lightbulb
 } from 'lucide-react';
 
 const allGroups = [
@@ -170,7 +170,21 @@ const allGroups = [
       { to: '/fdp',                 icon: GraduationCap,label: 'Faculty Development',    desc: 'FDP programs, external training & certificates', roles: 'all' },
       { to: '/rankings',            icon: TrendingUp,   label: 'Rankings & Metrics',     desc: 'NIRF, QS, AACSB, EQUIS, FT MBA metrics', roles: ['admin','registrar','hod'] },
       { to: '/corporate-relations', icon: Corp,         label: 'Corporate Relations',    desc: 'Partners, MOUs, guest lectures & advisory board', roles: ['admin','registrar','hod','placement'] },
-      { to: '/intelligence-2036',   icon: Sparkles,     label: 'Vision 2036 AI Brain',   desc: 'PRI · FES · Conversational ERP · Skill Gap · Predictions', roles: ['admin','registrar','hod','faculty','student'] },
+    ]
+  },
+  {
+    group: 'AI Intelligence · Vision 2036',
+    color: 'bg-violet-50 border-violet-100',
+    iconBg: 'bg-violet-100',
+    iconColor: 'text-violet-600',
+    headingColor: 'text-violet-700',
+    items: [
+      { to: '/intelligence-2036?tab=executive',      icon: BarChart3,    label: 'Executive Dashboard',    desc: 'Real-time KPIs, campus health score, revenue trend',         roles: ['admin','registrar','hod'] },
+      { to: '/intelligence-2036?tab=pri',            icon: Target,       label: 'Placement Readiness',    desc: 'PRI scores, class ranking, McKinsey readiness levels',       roles: ['admin','registrar','hod','placement','faculty'] },
+      { to: '/intelligence-2036?tab=fes',            icon: Users,        label: 'Faculty Effectiveness',  desc: 'FES scores, research, FDP, engagement analytics',            roles: ['admin','registrar','hod'] },
+      { to: '/intelligence-2036?tab=conversational', icon: MessageSquare,label: 'Ask AI (NLQ)',           desc: 'Natural language queries — ask anything about your campus',  roles: 'all' },
+      { to: '/intelligence-2036?tab=skills',         icon: Lightbulb,    label: 'Skill Gap Engine',       desc: 'Industry demand vs student skills, 2036 gap analysis',       roles: ['admin','registrar','hod','placement','faculty','student'] },
+      { to: '/intelligence-2036?tab=predictions',    icon: Zap,          label: 'Predictions',            desc: 'Fee defaults, placement risk, dropout risk, MOU expiry',    roles: ['admin','registrar','hod','placement','accounts'] },
     ]
   },
   {

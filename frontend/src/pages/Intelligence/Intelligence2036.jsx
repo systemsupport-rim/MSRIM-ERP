@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -52,7 +53,8 @@ function BreakdownBar({ label, score, max, value }) {
 
 export default function Intelligence2036() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('executive');
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'executive');
   const [loading, setLoading] = useState(true);
 
   // Executive dashboard

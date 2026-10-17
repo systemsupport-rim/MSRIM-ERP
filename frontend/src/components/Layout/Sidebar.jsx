@@ -9,7 +9,7 @@ import {
   Zap, Banknote, ShoppingCart, Network, BadgeCheck, Sparkles,
   Layers, Brain, BarChart3, HardDrive, Shield, KeyRound, ArrowLeft,
   MessageSquare, Send, Settings2, MapPin,
-  FlaskConical, TrendingUp, Globe, Mic
+  FlaskConical, TrendingUp, Globe, Mic, Target, Lightbulb
 } from 'lucide-react';
 
 const mainItems = [
@@ -211,6 +211,19 @@ const moduleNavMap = [
       { to: '/alumni',        icon: Network,      label: 'Alumni Connect' },
       { to: '/accreditation', icon: BadgeCheck,   label: 'Accreditation & NAAC' },
       { to: '/intelligence',  icon: Sparkles,     label: 'AI Command Center' },
+    ],
+  },
+  {
+    match: ['/intelligence-2036'],
+    label: 'Vision 2036 AI',
+    back: '/admin-console',
+    items: [
+      { to: '/intelligence-2036', icon: Brain,      label: 'Executive Dashboard' },
+      { to: '/intelligence-2036', icon: Target,     label: 'Placement Readiness' },
+      { to: '/intelligence-2036', icon: Users,      label: 'Faculty Effectiveness' },
+      { to: '/intelligence-2036', icon: MessageSquare, label: 'Ask AI (NLQ)' },
+      { to: '/intelligence-2036', icon: Lightbulb,  label: 'Skill Gap Engine' },
+      { to: '/intelligence-2036', icon: Zap,        label: 'Predictions' },
     ],
   },
   {

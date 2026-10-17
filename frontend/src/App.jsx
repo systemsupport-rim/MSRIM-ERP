@@ -45,6 +45,7 @@ import Procurement from './pages/Procurement/Procurement';
 import Alumni from './pages/Alumni/Alumni';
 import Accreditation from './pages/Accreditation/Accreditation';
 import Intelligence from './pages/Intelligence/Intelligence';
+import Intelligence2036 from './pages/Intelligence/Intelligence2036';
 import Research from './pages/Research/Research';
 import FDP from './pages/FDP/FDP';
 import Rankings from './pages/Rankings/Rankings';
@@ -166,6 +167,7 @@ function AppRoutes() {
         <Route path="/rankings" element={<ProtectedRoute roles={['admin','registrar','hod']}><Rankings /></ProtectedRoute>} />
         <Route path="/corporate-relations" element={<ProtectedRoute roles={['admin','registrar','hod','placement']}><CorporateRelations /></ProtectedRoute>} />
         <Route path="/intelligence" element={<ProtectedRoute roles={['admin','registrar','hod','faculty']}><Intelligence /></ProtectedRoute>} />
+        <Route path="/intelligence-2036" element={<ProtectedRoute roles={['admin','registrar','hod','faculty','student']}><Intelligence2036 /></ProtectedRoute>} />
         <Route path="/admin-console" element={<AdminConsole />} />
         <Route path="/leave-management" element={<LeaveManagement />} />
         <Route path="/staff-attendance" element={<StaffAttendance />} />

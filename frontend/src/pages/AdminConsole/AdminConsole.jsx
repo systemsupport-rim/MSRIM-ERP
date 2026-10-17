@@ -170,6 +170,7 @@ const allGroups = [
       { to: '/fdp',                 icon: GraduationCap,label: 'Faculty Development',    desc: 'FDP programs, external training & certificates', roles: 'all' },
       { to: '/rankings',            icon: TrendingUp,   label: 'Rankings & Metrics',     desc: 'NIRF, QS, AACSB, EQUIS, FT MBA metrics', roles: ['admin','registrar','hod'] },
       { to: '/corporate-relations', icon: Corp,         label: 'Corporate Relations',    desc: 'Partners, MOUs, guest lectures & advisory board', roles: ['admin','registrar','hod','placement'] },
+      { to: '/intelligence-2036',   icon: Sparkles,     label: 'Vision 2036 AI Brain',   desc: 'PRI · FES · Conversational ERP · Skill Gap · Predictions', roles: ['admin','registrar','hod','faculty','student'] },
     ]
   },
   {

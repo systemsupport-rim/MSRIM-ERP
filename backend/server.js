@@ -133,6 +133,9 @@ app.use('/api/institution', require('./routes/institution'));
 // Roles & Privileges management
 app.use('/api/roles', require('./routes/roles'));
 
+// Vision 2036 AI Brain — Intelligence Engine
+app.use('/api/ai', require('./routes/ai_brain'));
+
 app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Date().toISOString(), name: 'MSRIM Digital Campus ERP', version: '3.0', modules: 52 }));
 
 // Serve built React frontend (production mode — run BUILD-FRONTEND.bat first)

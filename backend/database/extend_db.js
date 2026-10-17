@@ -36,6 +36,13 @@ function extendDatabase() {
     console.log('Seeded default role privileges.');
   }
 
+  // Migration: add cgpa to students table
+  const stuCols = db.prepare("PRAGMA table_info(students)").all();
+  if (!stuCols.some(c => c.name === 'cgpa')) {
+    db.exec("ALTER TABLE students ADD COLUMN cgpa REAL DEFAULT 0");
+    console.log('Migrated students table: added cgpa column.');
+  }
+
   // Migration: add designation, gender, joining_date columns to users table
   const userCols = db.prepare("PRAGMA table_info(users)").all();
   if (!userCols.some(c => c.name === 'designation')) {

@@ -1,15 +1,17 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 const { initializeDatabase } = require('./database/db');
 const { extendDatabase } = require('./database/extend_db');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:3000'], credentials: true }));
+app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5000'], credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 initializeDatabase();
 extendDatabase();
@@ -106,6 +108,19 @@ app.use('/api/alumni', require('./routes/alumni'));
 
 // Accreditation & Quality Management (NAAC / SAP QM equivalent)
 app.use('/api/accreditation', require('./routes/accreditation'));
+
+// ── Global B-School Grade Modules ────────────────────────────────────────────
+// Research Management (publications, grants, patents, consultancy, PhD supervision)
+app.use('/api/research', require('./routes/research'));
+
+// Faculty Development Programs
+app.use('/api/fdp', require('./routes/fdp'));
+
+// Rankings & Accreditation Metrics (NIRF, QS, AACSB, EQUIS, FT)
+app.use('/api/rankings', require('./routes/rankings'));
+
+// Corporate Relations & Industry Connect (MOUs, guest lectures, advisory board)
+app.use('/api/corporate-relations', require('./routes/corporate_relations'));
 
 // Phase 3-7 new modules
 app.use('/api/curriculum', require('./routes/curriculum'));

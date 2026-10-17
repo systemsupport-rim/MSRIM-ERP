@@ -31,11 +31,11 @@ router.get('/forms/:id', (req, res) => {
 router.post('/forms', authorize('admin','hod','registrar','faculty'), (req, res) => {
   const { title, description, type, target_role, course_id, faculty_id, academic_year_id, start_date, end_date, is_anonymous, questions } = req.body;
   const result = db.prepare('INSERT INTO feedback_forms (title,description,type,target_role,course_id,faculty_id,academic_year_id,start_date,end_date,is_anonymous,status,created_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)')
-    .run(title,description,type||'general',target_role||'student',course_id||null,faculty_id||null,academic_year_id||1,start_date,end_date,is_anonymous?1:1,'active',req.user.id);
+    .run(title,description,type||'general',target_role||'student',course_id||null,faculty_id||null,academic_year_id||1,start_date,end_date,is_anonymous?1:0,'active',req.user.id);
   const formId = result.lastInsertRowid;
   if (questions && Array.isArray(questions)) {
     const qStmt = db.prepare('INSERT INTO feedback_questions (form_id,question_text,question_type,is_required,order_num) VALUES (?,?,?,?,?)');
-    questions.forEach((q,i) => qStmt.run(formId,q.text,q.type||'rating',q.required?1:1,i+1));
+    questions.forEach((q,i) => qStmt.run(formId,q.text,q.type||'rating',q.required?1:0,i+1));
   }
   res.status(201).json({ id: formId });
 });

@@ -74,6 +74,12 @@ router.post('/results', authorize('faculty','admin','registrar'), (req, res) => 
 });
 
 router.get('/report/:studentId', (req, res) => {
+  if (req.user.role === 'student') {
+    const stu = db.prepare('SELECT id FROM students WHERE user_id = ?').get(req.user.id);
+    if (!stu || stu.id !== parseInt(req.params.studentId)) return res.status(403).json({ error: 'Access denied.' });
+  } else if (!['admin','registrar','hod','faculty','accounts'].includes(req.user.role)) {
+    return res.status(403).json({ error: 'Access denied.' });
+  }
   const { semester, academic_year_id } = req.query;
   let query = `SELECT r.*, e.name as exam_name, e.exam_type, e.total_marks, e.exam_date,
     c.name as course_name, c.code as course_code, c.credits, c.semester

@@ -2076,6 +2076,348 @@ function seedExtendedData() {
     ins.run('EY GDS','Accounting / Advisory','https://ey.com','Suresh Patel','suresh.p@ey.com','9876540008','Bengaluru');
     console.log('Seeded 8 company profiles.');
   }
+
+  // ── Refresh tokens (SPA secure auth) ────────────────────────────────────────
+  db.exec(`CREATE TABLE IF NOT EXISTS refresh_tokens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    token_hash TEXT NOT NULL UNIQUE,
+    expires_at TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  )`);
+
+  // ── Research Management ───────────────────────────────────────────────────────
+  db.exec(`CREATE TABLE IF NOT EXISTS research_publications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    faculty_id INTEGER NOT NULL,
+    dept_id INTEGER,
+    title TEXT NOT NULL,
+    pub_type TEXT NOT NULL DEFAULT 'journal',
+    journal_conference TEXT,
+    issn_isbn TEXT,
+    volume TEXT,
+    issue TEXT,
+    pages TEXT,
+    publication_year INTEGER,
+    doi TEXT,
+    url TEXT,
+    impact_factor REAL DEFAULT 0,
+    quartile TEXT,
+    indexed_in TEXT,
+    abstract TEXT,
+    keywords TEXT,
+    is_scopus INTEGER DEFAULT 0,
+    is_wos INTEGER DEFAULT 0,
+    is_ugc INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'published',
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (faculty_id) REFERENCES users(id)
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS research_publication_authors (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    publication_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    email TEXT,
+    affiliation TEXT,
+    FOREIGN KEY (publication_id) REFERENCES research_publications(id) ON DELETE CASCADE
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS research_grants (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    pi_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    funding_agency TEXT NOT NULL,
+    scheme TEXT,
+    amount REAL DEFAULT 0,
+    start_date TEXT,
+    end_date TEXT,
+    status TEXT DEFAULT 'ongoing',
+    reference_number TEXT,
+    description TEXT,
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (pi_id) REFERENCES users(id)
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS research_grant_co_pis (
+    grant_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    PRIMARY KEY (grant_id, user_id),
+    FOREIGN KEY (grant_id) REFERENCES research_grants(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS research_patents (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    lead_inventor_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    application_number TEXT,
+    filing_date TEXT,
+    grant_date TEXT,
+    country TEXT DEFAULT 'India',
+    status TEXT DEFAULT 'filed',
+    co_inventors TEXT,
+    description TEXT,
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (lead_inventor_id) REFERENCES users(id)
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS research_consultancy (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    faculty_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    client TEXT NOT NULL,
+    amount REAL DEFAULT 0,
+    start_date TEXT,
+    end_date TEXT,
+    description TEXT,
+    status TEXT DEFAULT 'ongoing',
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (faculty_id) REFERENCES users(id)
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS research_phd_supervision (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    supervisor_id INTEGER NOT NULL,
+    student_name TEXT NOT NULL,
+    student_id_ext TEXT,
+    university TEXT DEFAULT 'MSRIM',
+    enrollment_year INTEGER,
+    thesis_title TEXT,
+    status TEXT DEFAULT 'ongoing',
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (supervisor_id) REFERENCES users(id)
+  )`);
+
+  // ── Faculty Development Programs (FDP) ───────────────────────────────────────
+  db.exec(`CREATE TABLE IF NOT EXISTS fdp_programs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    type TEXT DEFAULT 'attended',
+    mode TEXT DEFAULT 'offline',
+    organizer TEXT DEFAULT 'MSRIM',
+    sponsor TEXT,
+    venue TEXT,
+    start_date TEXT NOT NULL,
+    end_date TEXT,
+    duration_days INTEGER DEFAULT 1,
+    description TEXT,
+    target_audience TEXT DEFAULT 'all',
+    max_participants INTEGER DEFAULT 50,
+    coordinator_id INTEGER,
+    status TEXT DEFAULT 'upcoming',
+    created_by INTEGER,
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (coordinator_id) REFERENCES users(id),
+    FOREIGN KEY (created_by) REFERENCES users(id)
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS fdp_participants (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    program_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    attendance TEXT DEFAULT 'present',
+    certificate_issued INTEGER DEFAULT 0,
+    registered_by INTEGER,
+    registered_at TEXT DEFAULT (datetime('now')),
+    UNIQUE (program_id, user_id),
+    FOREIGN KEY (program_id) REFERENCES fdp_programs(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS fdp_external (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    organizer TEXT,
+    mode TEXT DEFAULT 'offline',
+    start_date TEXT NOT NULL,
+    end_date TEXT,
+    duration_days INTEGER DEFAULT 1,
+    certificate_url TEXT,
+    skills_gained TEXT,
+    sponsored_by_msrim INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'pending',
+    approved_by INTEGER,
+    approved_at TEXT,
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  )`);
+
+  // ── Rankings & Metrics ────────────────────────────────────────────────────────
+  db.exec(`CREATE TABLE IF NOT EXISTS ranking_systems (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    description TEXT,
+    frequency TEXT DEFAULT 'annual',
+    website TEXT,
+    is_active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS ranking_metrics (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    system_id INTEGER NOT NULL,
+    category TEXT DEFAULT 'general',
+    name TEXT NOT NULL,
+    description TEXT,
+    weight REAL DEFAULT 1,
+    unit TEXT DEFAULT 'number',
+    data_source TEXT DEFAULT 'manual',
+    auto_calculate INTEGER DEFAULT 0,
+    FOREIGN KEY (system_id) REFERENCES ranking_systems(id) ON DELETE CASCADE
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS ranking_cycles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    system_id INTEGER NOT NULL,
+    submission_year INTEGER NOT NULL,
+    submission_deadline TEXT,
+    target_rank INTEGER,
+    target_score REAL,
+    actual_rank INTEGER,
+    actual_score REAL,
+    status TEXT DEFAULT 'data_collection',
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (system_id) REFERENCES ranking_systems(id) ON DELETE CASCADE
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS ranking_values (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cycle_id INTEGER NOT NULL,
+    metric_id INTEGER NOT NULL,
+    value REAL,
+    notes TEXT,
+    evidence_url TEXT,
+    updated_by INTEGER,
+    updated_at TEXT DEFAULT (datetime('now')),
+    UNIQUE (cycle_id, metric_id),
+    FOREIGN KEY (cycle_id) REFERENCES ranking_cycles(id) ON DELETE CASCADE,
+    FOREIGN KEY (metric_id) REFERENCES ranking_metrics(id) ON DELETE CASCADE
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS ranking_results (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    system_id INTEGER NOT NULL,
+    year INTEGER NOT NULL,
+    rank INTEGER,
+    score REAL,
+    category TEXT,
+    notes TEXT,
+    UNIQUE (system_id, year),
+    FOREIGN KEY (system_id) REFERENCES ranking_systems(id)
+  )`);
+
+  // Seed ranking systems
+  const rsCount = db.prepare('SELECT COUNT(*) as c FROM ranking_systems').get();
+  if (rsCount.c === 0) {
+    const rsStmt = db.prepare('INSERT INTO ranking_systems (name,description,frequency,website) VALUES (?,?,?,?)');
+    rsStmt.run('NIRF','National Institutional Ranking Framework (India)','annual','https://www.nirfindia.org');
+    rsStmt.run('QS World','QS World University Rankings','annual','https://www.topuniversities.com');
+    rsStmt.run('AACSB','AACSB International Accreditation','5-year','https://www.aacsb.edu');
+    rsStmt.run('EQUIS','EFMD Quality Improvement System','5-year','https://www.efmdglobal.org');
+    rsStmt.run('NBA','National Board of Accreditation (India)','3-year','https://www.nbaind.org');
+    rsStmt.run('FT MBA','Financial Times MBA Rankings','annual','https://rankings.ft.com/rankings/2885/ft-mba-ranking-2024');
+    console.log('Seeded 6 ranking systems.');
+  }
+
+  // ── Corporate Relations ───────────────────────────────────────────────────────
+  db.exec(`CREATE TABLE IF NOT EXISTS corporate_partners (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    sector TEXT,
+    partner_type TEXT DEFAULT 'placement',
+    website TEXT,
+    hq_city TEXT,
+    hq_country TEXT DEFAULT 'India',
+    hr_contact_name TEXT,
+    hr_contact_email TEXT,
+    hr_contact_phone TEXT,
+    description TEXT,
+    linkedin_url TEXT,
+    status TEXT DEFAULT 'active',
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS mou_agreements (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    partner_id INTEGER NOT NULL,
+    mou_type TEXT DEFAULT 'general',
+    signing_date TEXT NOT NULL,
+    expiry_date TEXT,
+    scope TEXT,
+    benefits TEXT,
+    document_url TEXT,
+    signed_by TEXT,
+    status TEXT DEFAULT 'active',
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (partner_id) REFERENCES corporate_partners(id)
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS cr_guest_lectures (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    speaker_name TEXT NOT NULL,
+    speaker_designation TEXT,
+    speaker_company TEXT,
+    partner_id INTEGER,
+    topic TEXT NOT NULL,
+    event_date TEXT NOT NULL,
+    venue TEXT,
+    duration_hours REAL DEFAULT 1,
+    program TEXT,
+    audience_size INTEGER DEFAULT 0,
+    feedback_score REAL,
+    faculty_coordinator_id INTEGER,
+    recording_url TEXT,
+    description TEXT,
+    created_by INTEGER,
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (partner_id) REFERENCES corporate_partners(id),
+    FOREIGN KEY (faculty_coordinator_id) REFERENCES users(id)
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS industry_advisory_board (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    designation TEXT,
+    company TEXT NOT NULL,
+    sector TEXT,
+    email TEXT,
+    phone TEXT,
+    expertise TEXT,
+    member_since TEXT,
+    term_end TEXT,
+    profile_url TEXT,
+    is_active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS executive_mentors (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    designation TEXT,
+    company_id INTEGER,
+    company_name TEXT,
+    sector TEXT,
+    email TEXT,
+    phone TEXT,
+    expertise TEXT,
+    linkedin_url TEXT,
+    max_mentees INTEGER DEFAULT 5,
+    is_active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (company_id) REFERENCES corporate_partners(id)
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS executive_mentor_assignments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    mentor_id INTEGER NOT NULL,
+    student_id INTEGER NOT NULL,
+    batch_year INTEGER,
+    assigned_by INTEGER,
+    assigned_at TEXT DEFAULT (datetime('now')),
+    UNIQUE (mentor_id, student_id),
+    FOREIGN KEY (mentor_id) REFERENCES executive_mentors(id),
+    FOREIGN KEY (student_id) REFERENCES students(id)
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS cr_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    event_type TEXT DEFAULT 'seminar',
+    partner_id INTEGER,
+    event_date TEXT NOT NULL,
+    venue TEXT,
+    description TEXT,
+    audience_size INTEGER DEFAULT 0,
+    outcome TEXT,
+    created_by INTEGER,
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (partner_id) REFERENCES corporate_partners(id)
+  )`);
 }
 
 module.exports = { extendDatabase };

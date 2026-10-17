@@ -210,7 +210,7 @@ router.post('/:id/rounds', authorize(...adminRoles), (req, res) => {
   const result = db.prepare(`
     INSERT INTO hiring_rounds (job_id,round_number,round_name,round_type,scheduled_date,venue,duration_minutes,is_eliminatory,instructions)
     VALUES (?,?,?,?,?,?,?,?,?)
-  `).run(req.params.id,round_number,round_name,round_type||'interview',scheduled_date,venue,duration_minutes||60,is_eliminatory?1:1,instructions);
+  `).run(req.params.id,round_number,round_name,round_type||'interview',scheduled_date,venue,duration_minutes||60,is_eliminatory?1:0,instructions);
   res.status(201).json({ id: result.lastInsertRowid, message: 'Round added.' });
 });
 

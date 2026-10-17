@@ -45,6 +45,10 @@ import Procurement from './pages/Procurement/Procurement';
 import Alumni from './pages/Alumni/Alumni';
 import Accreditation from './pages/Accreditation/Accreditation';
 import Intelligence from './pages/Intelligence/Intelligence';
+import Research from './pages/Research/Research';
+import FDP from './pages/FDP/FDP';
+import Rankings from './pages/Rankings/Rankings';
+import CorporateRelations from './pages/CorporateRelations/CorporateRelations';
 import AdminConsole from './pages/AdminConsole/AdminConsole';
 import LeaveManagement from './pages/LeaveManagement/LeaveManagement';
 import StaffAttendance from './pages/StaffAttendance/StaffAttendance';
@@ -157,6 +161,10 @@ function AppRoutes() {
         <Route path="/procurement" element={<ProtectedRoute roles={['admin','accounts','registrar','hod','faculty']}><Procurement /></ProtectedRoute>} />
         <Route path="/alumni" element={<Alumni />} />
         <Route path="/accreditation" element={<ProtectedRoute roles={['admin','registrar','hod']}><Accreditation /></ProtectedRoute>} />
+        <Route path="/research" element={<ProtectedRoute roles={['admin','registrar','hod','faculty']}><Research /></ProtectedRoute>} />
+        <Route path="/fdp" element={<ProtectedRoute roles={['admin','registrar','hod','faculty','staff','accounts','librarian','placement']}><FDP /></ProtectedRoute>} />
+        <Route path="/rankings" element={<ProtectedRoute roles={['admin','registrar','hod']}><Rankings /></ProtectedRoute>} />
+        <Route path="/corporate-relations" element={<ProtectedRoute roles={['admin','registrar','hod','placement']}><CorporateRelations /></ProtectedRoute>} />
         <Route path="/intelligence" element={<ProtectedRoute roles={['admin','registrar','hod','faculty']}><Intelligence /></ProtectedRoute>} />
         <Route path="/admin-console" element={<AdminConsole />} />
         <Route path="/leave-management" element={<LeaveManagement />} />

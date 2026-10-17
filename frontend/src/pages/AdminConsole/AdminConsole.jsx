@@ -9,7 +9,8 @@ import {
   Layers, Brain, BarChart3, HardDrive, Shield, LayoutDashboard,
   ArrowLeft, Plus, Trash2, RotateCcw, Settings2, X, Check, KeyRound, Edit2,
   MessageSquare, Send, BarChart2, Cpu, Bell, Globe, MapPin, Video,
-  Megaphone, BookMarked as BookIcon, Target
+  Megaphone, BookMarked as BookIcon, Target,
+  FlaskConical, TrendingUp, Mic, Building2 as Corp
 } from 'lucide-react';
 
 const allGroups = [
@@ -156,6 +157,19 @@ const allGroups = [
     headingColor: 'text-indigo-700',
     items: [
       { to: '/integrations', icon: Globe, label: 'All Integrations', desc: 'Zoom, Extraaedge, NPF, LeadSquared, Salesforce, SEB', roles: ['admin'] },
+    ]
+  },
+  {
+    group: 'Global B-School Programs',
+    color: 'bg-pink-50 border-pink-100',
+    iconBg: 'bg-pink-100',
+    iconColor: 'text-pink-600',
+    headingColor: 'text-pink-700',
+    items: [
+      { to: '/research',            icon: FlaskConical, label: 'Research Management',    desc: 'Publications, grants, patents & consultancy', roles: ['admin','hod','registrar','faculty'] },
+      { to: '/fdp',                 icon: GraduationCap,label: 'Faculty Development',    desc: 'FDP programs, external training & certificates', roles: 'all' },
+      { to: '/rankings',            icon: TrendingUp,   label: 'Rankings & Metrics',     desc: 'NIRF, QS, AACSB, EQUIS, FT MBA metrics', roles: ['admin','registrar','hod'] },
+      { to: '/corporate-relations', icon: Corp,         label: 'Corporate Relations',    desc: 'Partners, MOUs, guest lectures & advisory board', roles: ['admin','registrar','hod','placement'] },
     ]
   },
   {

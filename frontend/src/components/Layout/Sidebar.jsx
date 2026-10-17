@@ -8,7 +8,8 @@ import {
   Briefcase, Library, BedDouble, Building, HelpCircle, Heart,
   Zap, Banknote, ShoppingCart, Network, BadgeCheck, Sparkles,
   Layers, Brain, BarChart3, HardDrive, Shield, KeyRound, ArrowLeft,
-  MessageSquare, Send, Settings2, MapPin
+  MessageSquare, Send, Settings2, MapPin,
+  FlaskConical, TrendingUp, Globe, Mic
 } from 'lucide-react';
 
 const mainItems = [
@@ -293,6 +294,42 @@ const moduleNavMap = [
     back: '/admin-console',
     items: [
       { to: '/integrations', icon: Network, label: 'All Integrations' },
+    ],
+  },
+  {
+    match: ['/research'],
+    label: 'Research',
+    back: '/admin-console',
+    items: [
+      { to: '/research',               icon: FlaskConical, label: 'Publications' },
+      { to: '/research',               icon: DollarSign,   label: 'Grants & Patents' },
+    ],
+  },
+  {
+    match: ['/fdp'],
+    label: 'Faculty Development',
+    back: '/admin-console',
+    items: [
+      { to: '/fdp', icon: GraduationCap, label: 'FDP Programs' },
+    ],
+  },
+  {
+    match: ['/rankings'],
+    label: 'Rankings & Metrics',
+    back: '/admin-console',
+    items: [
+      { to: '/rankings', icon: TrendingUp, label: 'Rankings Dashboard' },
+    ],
+  },
+  {
+    match: ['/corporate-relations'],
+    label: 'Corporate Relations',
+    back: '/admin-console',
+    items: [
+      { to: '/corporate-relations',               icon: Building2, label: 'Partners' },
+      { to: '/corporate-relations',               icon: FileText,  label: 'MOUs & Agreements' },
+      { to: '/corporate-relations',               icon: Mic,       label: 'Guest Lectures' },
+      { to: '/corporate-relations',               icon: Users2,    label: 'Advisory Board' },
     ],
   },
   {

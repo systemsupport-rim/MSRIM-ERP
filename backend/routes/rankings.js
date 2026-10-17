@@ -109,7 +109,7 @@ router.post('/cycles/:cycleId/auto-calculate', authorize(...mgmt), (req, res) =>
     const src = m.data_source;
     try {
       if (src === 'students_total')       value = db.prepare("SELECT COUNT(*) as c FROM students WHERE status='active'").get()?.c;
-      else if (src === 'faculty_total')   value = db.prepare("SELECT COUNT(*) as c FROM faculty WHERE status='active'").get()?.c;
+      else if (src === 'faculty_total')   value = db.prepare("SELECT COUNT(*) as c FROM faculty f JOIN users u ON f.user_id=u.id WHERE u.is_active=1").get()?.c;
       else if (src === 'publications')    value = db.prepare('SELECT COUNT(*) as c FROM research_publications').get()?.c;
       else if (src === 'scopus_pubs')     value = db.prepare('SELECT COUNT(*) as c FROM research_publications WHERE is_scopus=1').get()?.c;
       else if (src === 'wos_pubs')        value = db.prepare('SELECT COUNT(*) as c FROM research_publications WHERE is_wos=1').get()?.c;
@@ -168,7 +168,7 @@ router.get('/dashboard', (req, res) => {
   const pendingCycles = db.prepare("SELECT rc.*, rs.name as system_name FROM ranking_cycles rc JOIN ranking_systems rs ON rc.system_id=rs.id WHERE rc.status != 'submitted' ORDER BY rc.submission_deadline").all();
   const keyMetrics = {
     students: db.prepare("SELECT COUNT(*) as c FROM students WHERE status='active'").get()?.c || 0,
-    faculty: db.prepare("SELECT COUNT(*) as c FROM faculty WHERE status='active'").get()?.c || 0,
+    faculty: db.prepare("SELECT COUNT(*) as c FROM faculty f JOIN users u ON f.user_id=u.id WHERE u.is_active=1").get()?.c || 0,
     publications: db.prepare('SELECT COUNT(*) as c FROM research_publications').get()?.c || 0,
     scopusPubs: db.prepare('SELECT COUNT(*) as c FROM research_publications WHERE is_scopus=1').get()?.c || 0,
     patents: db.prepare('SELECT COUNT(*) as c FROM research_patents').get()?.c || 0,

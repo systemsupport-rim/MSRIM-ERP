@@ -46,9 +46,9 @@ router.post('/publications', authorize(...faculty), (req, res) => {
      publication_year,doi,url,impact_factor,quartile,indexed_in,abstract,keywords,
      is_scopus,is_wos,is_ugc,status)
     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'published')`).run(
-    faculty_id,dept_id||null,title,pub_type,journal_conference,issn_isbn,volume,issue,pages,
-    publication_year||new Date().getFullYear(),doi,url,impact_factor||0,quartile||null,
-    indexed_in,abstract,keywords,is_scopus?1:0,is_wos?1:0,is_ugc?1:0);
+    faculty_id,dept_id||null,title,pub_type,journal_conference||null,issn_isbn||null,volume||null,issue||null,pages||null,
+    publication_year||new Date().getFullYear(),doi||null,url||null,impact_factor||0,quartile||null,
+    indexed_in||null,abstract||null,keywords||null,is_scopus?1:0,is_wos?1:0,is_ugc?1:0);
   // add co-authors
   if (Array.isArray(req.body.authors)) {
     const stmt = db.prepare('INSERT INTO research_publication_authors (publication_id,name,email,affiliation) VALUES (?,?,?,?)');

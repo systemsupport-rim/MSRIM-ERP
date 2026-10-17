@@ -117,6 +117,13 @@ app.use('/api/institution', require('./routes/institution'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Date().toISOString(), name: 'MSRIM Digital Campus ERP', version: '3.0', modules: 52 }));
 
+// Serve built React frontend (production mode — run BUILD-FRONTEND.bat first)
+const frontendDist = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendDist));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendDist, 'index.html'));
+});
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Internal server error.' });

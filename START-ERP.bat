@@ -14,34 +14,30 @@ echo            Drive, Mentor-Mentee, Feed, Help Center, Analytics
 echo ================================================================
 echo.
 
-echo [1/2] Starting Backend Server (Port 5000)...
-start "MSRIM Backend - MS Ramaiah Institute" cmd /k "cd /d "%~dp0backend" && node server.js"
+if not exist "%~dp0frontend\dist\index.html" (
+  echo [!] Frontend not built yet. Running BUILD-FRONTEND.bat first...
+  call "%~dp0BUILD-FRONTEND.bat"
+)
 
-timeout /t 4 /nobreak > nul
+echo [1/1] Starting MSRIM ERP Server (Port 5000)...
+start "MSRIM Digital Campus ERP" cmd /k "cd /d "%~dp0backend" && node server.js"
 
-echo [2/2] Starting Frontend Portal (Port 5173)...
-start "MSRIM Frontend - MS Ramaiah Institute" cmd /k "cd /d "%~dp0frontend" && npm run dev"
-
-timeout /t 6 /nobreak > nul
+timeout /t 3 /nobreak > nul
 
 echo.
 echo ================================================================
 echo  MSRIM Digital Campus ERP is RUNNING!
 echo.
-echo  Portal URL:  http://localhost:5173
-echo  API URL:     http://localhost:5000
+echo  Portal URL:  http://localhost:5000
+echo  API URL:     http://localhost:5000/api
 echo.
 echo  Login Credentials:
-echo   Admin:       admin      / Admin@123
-echo   Registrar:   registrar  / Reg@123
-echo   HOD:         hod.mgt    / Hod@123
-echo   Faculty:     faculty1   / Fac@123
-echo   Student:     student1   / Stu@123
-echo   Accounts:    accounts   / Acc@123
-echo   Librarian:   librarian  / Lib@123
-echo   Placement:   placement  / Plc@123
+echo   Admin:       systemsupport@msrim.org  / support@2026
+echo   Student:     student1                 / Stu@123
+echo   Faculty:     shashidhar               / (use /api/auth/reset)
+echo   Accounts:    accounts                 / Acc@123
 echo ================================================================
 echo.
 
-start http://localhost:5173
+start http://localhost:5000
 pause

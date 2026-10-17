@@ -8,6 +8,34 @@ function extendDatabase() {
     db.exec("PRAGMA foreign_keys = ON");
   } catch (_) { /* already removed or db locked during migration — safe to skip */ }
 
+  // Role privileges table (persists role-privilege mappings, supports custom roles)
+  db.exec(`CREATE TABLE IF NOT EXISTS role_privileges (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    role TEXT NOT NULL,
+    privilege TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now')),
+    UNIQUE (role, privilege)
+  )`);
+
+  // Seed default role privileges if table is empty
+  const rpCount = db.prepare('SELECT COUNT(*) as c FROM role_privileges').get();
+  if (rpCount.c === 0) {
+    const ALL = ['Academic Fee Management','Academic Management','Access Management','Admission Management','Attendance Console','Bulk Attendance','Certificates Management','Content Management','Course Registration','Curriculum Management','Degree Management','Drive','EMS Question Bank','EMS Result Declaration','Exam Enrollment Management','Examination Management','Faculty Records Management','Fee Management','Feedback Management','Gate Pass Management','Hostel Management','HR Management','ID Card Configuration','Infrastructure Management','Inventory Management','Leave Management','Library Management','LMS Management','Mentor Management','NAAC Management','Notices','OBE Dashboard','Parent Management','Placement Management','Post Moderation','Research Management','Roles and Privileges','Scholarship Management','Staff Attendance','Student Records','Survey Management','Timetable Management','Transport Management','User Management','Venue Booking','Visitor Management'];
+    const DEFAULTS = {
+      admin: ALL,
+      registrar: ['Academic Management','Admission Management','Attendance Console','Bulk Attendance','Certificates Management','Curriculum Management','Degree Management','EMS Result Declaration','Exam Enrollment Management','Examination Management','Faculty Records Management','Fee Management','Hostel Management','Infrastructure Management','Leave Management','Library Management','Mentor Management','Notices','Parent Management','Placement Management','Student Records','Venue Booking'],
+      hod: ['Academic Management','Attendance Console','Bulk Attendance','Curriculum Management','Feedback Management','Leave Management','LMS Management','Mentor Management','NAAC Management','Notices','OBE Dashboard','Placement Management','Student Records'],
+      faculty: ['Attendance Console','Bulk Attendance','EMS Result Declaration','Feedback Management','Leave Management','LMS Management','Mentor Management','Notices','OBE Dashboard'],
+      student: ['Academic Fee Management','Attendance Console','Drive','Feedback Management','Hostel Management','Library Management','LMS Management','Notices','OBE Dashboard','Placement Management','Venue Booking'],
+      accounts: ['Academic Fee Management','Fee Management','Notices'],
+      librarian: ['Library Management','Notices'],
+      placement: ['Notices','Placement Management'],
+    };
+    const stmt = db.prepare('INSERT OR IGNORE INTO role_privileges (role, privilege) VALUES (?,?)');
+    Object.entries(DEFAULTS).forEach(([role, privs]) => privs.forEach(p => stmt.run(role, p)));
+    console.log('Seeded default role privileges.');
+  }
+
   // Migration: add designation, gender, joining_date columns to users table
   const userCols = db.prepare("PRAGMA table_info(users)").all();
   if (!userCols.some(c => c.name === 'designation')) {

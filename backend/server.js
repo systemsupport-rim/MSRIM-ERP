@@ -130,6 +130,9 @@ app.use('/api/venues', require('./routes/venues'));
 app.use('/api/audience', require('./routes/audience'));
 app.use('/api/institution', require('./routes/institution'));
 
+// Roles & Privileges management
+app.use('/api/roles', require('./routes/roles'));
+
 app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Date().toISOString(), name: 'MSRIM Digital Campus ERP', version: '3.0', modules: 52 }));
 
 // Serve built React frontend (production mode — run BUILD-FRONTEND.bat first)

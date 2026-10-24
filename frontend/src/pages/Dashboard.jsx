@@ -68,9 +68,9 @@ export default function Dashboard() {
           <StatCard label="Faculty Members" value={stats?.faculty} icon={Users} color="bg-msrim-orange" />
           <StatCard label="Active Courses" value={stats?.courses} icon={BookOpen} color="bg-green-500" />
           <StatCard label="Avg Attendance" value={`${stats?.avgAttendance || 0}%`} icon={CheckCircle} color="bg-purple-500" />
-          <StatCard label="Fees Collected" value={`₹${((stats?.feesCollected||0)/100000).toFixed(1)}L`} icon={DollarSign} color="bg-indigo-500" sub="This year" />
-          <StatCard label="Upcoming Drives" value={stats?.upcomingDrives} icon={Briefcase} color="bg-pink-500" />
-          <StatCard label="Library Issued" value={stats?.libraryIssued} icon={Library} color="bg-teal-500" />
+          <StatCard label="Fees Collected" value={`₹${((stats?.feeCollected||0)/100000).toFixed(1)}L`} icon={DollarSign} color="bg-indigo-500" sub="This year" />
+          <StatCard label="Upcoming Drives" value={stats?.placements} icon={Briefcase} color="bg-pink-500" />
+          <StatCard label="Library Issued" value={stats?.libIssued} icon={Library} color="bg-teal-500" />
           <StatCard label="New Notices" value={stats?.newNotices} icon={Bell} color="bg-amber-500" sub="This week" />
         </div>
 

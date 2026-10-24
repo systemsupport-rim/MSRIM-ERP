@@ -9,7 +9,7 @@ import {
   Layers, Brain, BarChart3, HardDrive, Shield, LayoutDashboard,
   ArrowLeft, Plus, Trash2, RotateCcw, Settings2, X, Check, KeyRound, Edit2,
   MessageSquare, Send, BarChart2, Cpu, Bell, Globe, MapPin, Video,
-  Megaphone, BookMarked as BookIcon, Target,
+  Megaphone, BookMarked as BookIcon, Target, Calendar,
   FlaskConical, TrendingUp, Mic, Building2 as Corp, Lightbulb
 } from 'lucide-react';
 
@@ -124,6 +124,7 @@ const allGroups = [
     iconColor: 'text-orange-600',
     headingColor: 'text-orange-700',
     items: [
+      { to: '/calendar',          icon: Calendar,    label: 'Institutional Calendar', desc: 'Academic events, holidays & schedules', roles: 'all' },
       { to: '/placements',        icon: Briefcase,   label: 'Placements',      desc: 'Campus drives & job placements',    roles: 'all' },
       { to: '/library',           icon: Library,     label: 'Library',         desc: 'Books, issues & digital resources', roles: 'all' },
       { to: '/hostel',            icon: BedDouble,   label: 'Hostel',          desc: 'Hostel allotment & facilities',     roles: ['admin','registrar','student'] },

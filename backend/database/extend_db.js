@@ -1273,14 +1273,22 @@ function seedExtendedData() {
     al.run('Lakshmi Chandrasekhar', 2019, 'MBA', 'Bajaj Finserv', 'Chief Manager – Treasury', 'Pune', 'https://linkedin.com/in/lakshmi-c', 'BFSI', '35-45 LPA', 'Treasury, FX, Derivatives, Risk Management', 1, 1);
     al.run('Nikhil Sharma', 2022, 'MBA', 'Swiggy', 'City Head – Bengaluru South', 'Bengaluru', 'https://linkedin.com/in/nikhil-s', 'Food Tech', '18-24 LPA', 'P&L Management, Operations, Growth, Partner Success', 0, 0);
 
+    const getAlId = (name) => db.prepare('SELECT id FROM alumni WHERE name=? LIMIT 1').get(name)?.id;
     const jobs = db.prepare('INSERT INTO alumni_jobs (posted_by, title, company, location, job_type, experience_required, salary_range, description, apply_link, last_date, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)');
-    jobs.run(1, 'Business Analyst – Strategy', 'Deloitte India', 'Bengaluru / Mumbai / Hyderabad', 'full_time', '0-2 years', '9-14 LPA', 'Join Deloitte\'s consulting practice. Work with Fortune 500 clients on transformation projects. Strong analytical mindset, MBA preferred. MSRIM alumni in team.', 'https://careers.deloitte.com', '2025-03-31');
-    jobs.run(3, 'Senior Program Manager', 'Amazon India', 'Hyderabad', 'full_time', '3-6 years', '20-30 LPA', 'Drive large-scale operations and logistics programs. PMP certified preferred. Experience in supply chain or e-commerce. Excellent leadership skills required.', 'https://amazon.jobs', '2025-04-15');
-    jobs.run(6, 'Associate Consultant', 'McKinsey & Company', 'Delhi / Mumbai', 'full_time', '2-4 years', '25-40 LPA', 'McKinsey is hiring Associates for its India offices. MBA from top B-school essential. Strong problem-solving, structured thinking, and presentation skills.', 'https://mckinsey.com/careers', '2025-02-28');
-    jobs.run(7, 'Assistant Vice President – Corporate Finance', 'Tata Capital', 'Mumbai', 'full_time', '4-7 years', '28-38 LPA', 'Lead debt structuring and syndication for mid-market corporates. CA or MBA Finance. Strong credit assessment and client relationship skills.', 'https://tatacapital.com/careers', '2025-03-20');
-    jobs.run(12, 'Product Analyst Intern', 'PhonePe', 'Bengaluru', 'internship', 'Fresher / MBA 1st year', '40-50K/month', '6-month paid internship in Product team. Work on real UPI and financial products. SQL, Excel, and passion for Fintech required.', 'https://phonepe.com/careers', '2025-02-15');
-    jobs.run(8, 'Brand Manager – Home Care', 'HUL', 'Mumbai', 'full_time', '1-3 years', '14-20 LPA', 'Manage brand P&L for HUL\'s home care portfolio. MBA Marketing from top institute. Experience in consumer goods preferred. Creative and analytical mindset.', 'https://hul.co.in/careers', '2025-04-01');
-    jobs.run(9, 'Industry Manager – EdTech', 'Google India', 'Bengaluru', 'full_time', '5-8 years', '45-65 LPA', 'Drive Google Ads revenue for EdTech vertical. MBA with 5+ years in digital sales. Track record of exceeding revenue targets and stakeholder management.', 'https://careers.google.com', '2025-03-10');
+    const poster1 = getAlId('Arjun Krishnaswamy');
+    const poster3 = getAlId('Rohit Shenoy');
+    const poster6 = getAlId('Ananya Menon');
+    const poster7 = getAlId('Vivek Rajagopalan');
+    const poster8 = getAlId('Meera Subramaniam');
+    const poster9 = getAlId('Aditya Kulkarni');
+    const poster12= getAlId('Pooja Hebbar');
+    if (poster1)  jobs.run(poster1,  'Business Analyst – Strategy', 'Deloitte India', 'Bengaluru / Mumbai / Hyderabad', 'full_time', '0-2 years', '9-14 LPA', 'Join Deloitte\'s consulting practice. Work with Fortune 500 clients on transformation projects. Strong analytical mindset, MBA preferred. MSRIM alumni in team.', 'https://careers.deloitte.com', '2025-03-31');
+    if (poster3)  jobs.run(poster3,  'Senior Program Manager', 'Amazon India', 'Hyderabad', 'full_time', '3-6 years', '20-30 LPA', 'Drive large-scale operations and logistics programs. PMP certified preferred. Experience in supply chain or e-commerce. Excellent leadership skills required.', 'https://amazon.jobs', '2025-04-15');
+    if (poster6)  jobs.run(poster6,  'Associate Consultant', 'McKinsey & Company', 'Delhi / Mumbai', 'full_time', '2-4 years', '25-40 LPA', 'McKinsey is hiring Associates for its India offices. MBA from top B-school essential. Strong problem-solving, structured thinking, and presentation skills.', 'https://mckinsey.com/careers', '2025-02-28');
+    if (poster7)  jobs.run(poster7,  'Assistant Vice President – Corporate Finance', 'Tata Capital', 'Mumbai', 'full_time', '4-7 years', '28-38 LPA', 'Lead debt structuring and syndication for mid-market corporates. CA or MBA Finance. Strong credit assessment and client relationship skills.', 'https://tatacapital.com/careers', '2025-03-20');
+    if (poster12) jobs.run(poster12, 'Product Analyst Intern', 'PhonePe', 'Bengaluru', 'internship', 'Fresher / MBA 1st year', '40-50K/month', '6-month paid internship in Product team. Work on real UPI and financial products. SQL, Excel, and passion for Fintech required.', 'https://phonepe.com/careers', '2025-02-15');
+    if (poster8)  jobs.run(poster8,  'Brand Manager – Home Care', 'HUL', 'Mumbai', 'full_time', '1-3 years', '14-20 LPA', 'Manage brand P&L for HUL\'s home care portfolio. MBA Marketing from top institute. Experience in consumer goods preferred. Creative and analytical mindset.', 'https://hul.co.in/careers', '2025-04-01');
+    if (poster9)  jobs.run(poster9,  'Industry Manager – EdTech', 'Google India', 'Bengaluru', 'full_time', '5-8 years', '45-65 LPA', 'Drive Google Ads revenue for EdTech vertical. MBA with 5+ years in digital sales. Track record of exceeding revenue targets and stakeholder management.', 'https://careers.google.com', '2025-03-10');
 
     const evts = db.prepare('INSERT INTO alumni_events (title, type, description, date, venue, max_attendees, status) VALUES (?, ?, ?, ?, ?, ?, ?)');
     evts.run('MSRIM Alumni Grand Reunion 2025', 'reunion', 'Annual grand alumni gathering celebrating 30 years of MSRIM excellence. Keynote by Aditya Kulkarni (Google). Panel: "Future of Management in AI Era". Gala dinner and awards night.', '2025-03-22', 'The Leela Palace, Bengaluru', 300, 'upcoming');
@@ -1334,41 +1342,7 @@ function seedExtendedData() {
     }
   } catch (e) { console.log('Student seed skipped:', e.message); }
 
-  // ── Attendance Records ─────────────────────────────────────────────────────
-  try {
-  const attCount = db.prepare('SELECT COUNT(*) as c FROM attendance').get().c;
-  if (attCount < 50) {
-    const students = db.prepare('SELECT id FROM students LIMIT 20').all();
-    const courses = db.prepare('SELECT id FROM courses LIMIT 4').all();
-    const markerId = adminId;
-    const att = db.prepare(`INSERT OR IGNORE INTO attendance (student_id,course_id,date,status,marked_by) VALUES (?,?,?,?,?)`);
-    const dates = [];
-    for (let d = 1; d <= 60; d++) {
-      const dt = new Date('2024-07-15'); dt.setDate(dt.getDate() + d);
-      if (dt.getDay() !== 0 && dt.getDay() !== 6) dates.push(dt.toISOString().split('T')[0]);
-    }
-    const statuses = ['present','present','present','present','present','present','present','present','late','absent'];
-    students.forEach(s => {
-      courses.forEach(c => {
-        dates.slice(0, 40).forEach((date, i) => {
-          const roll = Math.random();
-          const status = roll < 0.05 ? 'absent' : roll < 0.08 ? 'late' : 'present';
-          att.run(s.id, c.id, date, status, markerId);
-        });
-      });
-    });
-    // Make 2 students have low attendance
-    const lowStudents = students.slice(0, 2);
-    lowStudents.forEach(s => {
-      courses.forEach(c => {
-        dates.slice(0, 20).forEach(date => {
-          try { db.prepare(`UPDATE attendance SET status='absent' WHERE student_id=? AND course_id=? AND date=?`).run(s.id, c.id, date); } catch (_) {}
-        });
-      });
-    });
-    console.log('Attendance records seeded.');
-  }
-  } catch (e) { console.log('Attendance seed skipped:', e.message); }
+  // Attendance — NOT auto-seeded. Mark real attendance via the Attendance module.
 
   // ── Fee Structures & Payments ──────────────────────────────────────────────
   try {
@@ -1383,79 +1357,12 @@ function seedExtendedData() {
     fs.run('Hostel Fee', 45000, '2025-01-15', 2);
   }
 
-  const feePayCount = db.prepare('SELECT COUNT(*) as c FROM fee_payments').get().c;
-  if (feePayCount < 5) {
-    const students = db.prepare('SELECT id FROM students').all();
-    const feeStructures = db.prepare('SELECT id FROM fee_structures WHERE semester=1').all();
-    const pay = db.prepare(`INSERT OR IGNORE INTO fee_payments (student_id,fee_structure_id,amount_paid,payment_date,payment_mode,transaction_id,receipt_number,status,collected_by) VALUES (?,?,?,?,?,?,?,?,?)`);
-    let rnum = 1;
-    students.forEach((s, si) => {
-      feeStructures.forEach((fs, fi) => {
-        // 75% of students have paid sem 1 fees
-        if (Math.random() > 0.25 || si < 15) {
-          const mode = ['online','online','online','dd','cheque'][Math.floor(Math.random()*5)];
-          const txn = `TXN${Date.now()}${si}${fi}`.slice(0,16);
-          const rcpt = `MSRIM-RCPT-2024-${String(rnum++).padStart(4,'0')}`;
-          const days = Math.floor(Math.random()*20);
-          const dt = new Date('2024-08-01'); dt.setDate(dt.getDate()+days);
-          pay.run(s.id, fs.id, db.prepare('SELECT amount FROM fee_structures WHERE id=?').get(fs.id)?.amount||0, dt.toISOString().split('T')[0], mode, txn, rcpt, 'paid', adminId);
-        }
-      });
-    });
-    console.log('Fee payments seeded.');
-  }
+  // Fee payments NOT auto-seeded — enter real payment data via the Fees module.
   } catch (e) { console.log('Fee seed skipped:', e.message); }
 
-  // ── Library Transactions ───────────────────────────────────────────────────
-  try {
-  const libTxnCount = db.prepare('SELECT COUNT(*) as c FROM library_transactions').get().c;
-  if (libTxnCount < 5) {
-    const books = db.prepare('SELECT id FROM library_books LIMIT 10').all();
-    const students = db.prepare('SELECT user_id FROM students LIMIT 15').all();
-    if (books.length > 0 && students.length > 0) {
-      const lib = db.prepare(`INSERT OR IGNORE INTO library_transactions (book_id,user_id,issue_date,due_date,return_date,status,issued_by) VALUES (?,?,?,?,?,?,?)`);
-      const statuses2 = ['returned','returned','returned','issued','issued','overdue'];
-      students.forEach((s, i) => {
-        const bk = books[i % books.length];
-        const issDate = new Date('2024-08-01'); issDate.setDate(issDate.getDate() + i * 3);
-        const dueDate = new Date(issDate); dueDate.setDate(dueDate.getDate() + 14);
-        const st = statuses2[i % statuses2.length];
-        const retDate = st === 'returned' ? new Date(issDate.getTime() + 10*86400000).toISOString().split('T')[0] : null;
-        lib.run(bk.id, s.user_id, issDate.toISOString().split('T')[0], dueDate.toISOString().split('T')[0], retDate, st, adminId);
-      });
-    }
-  }
+  // Library transactions — NOT auto-seeded. Issue books via the Library module.
 
-  } catch (e) { console.log('Library seed skipped:', e.message); }
-
-  // ── Placements: Drives & Applications ─────────────────────────────────────
-  try {
-  const placDriveCount = db.prepare('SELECT COUNT(*) as c FROM placements').get().c;
-  if (placDriveCount < 3) {
-    const plac = db.prepare(`INSERT INTO placements (company_name,job_role,package_lpa,drive_date,last_apply_date,description,requirements,location,type,status,hr_contact,created_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`);
-    plac.run('Deloitte USI', 'Analyst – Management Consulting', 14.5, '2024-10-15', '2024-10-05', 'Deloitte is hiring MBA graduates for its consulting practice. Work with global clients on strategy and transformation.', 'MBA Finance/Strategy, Strong analytical skills, 60%+ academics', 'Bengaluru / Mumbai', 'campus', 'completed', 'hr@deloitte.com', adminId);
-    plac.run('HDFC Bank', 'Relationship Manager – Priority Banking', 9.5, '2024-11-02', '2024-10-25', 'HDFC Bank Priority Banking division hiring RMs to manage HNI clients. Training provided.', 'MBA Finance/Marketing, Good communication, Banking interest', 'Pan India', 'campus', 'completed', 'campus@hdfcbank.com', adminId);
-    plac.run('ITC Limited', 'Area Sales Manager', 12.0, '2024-11-20', '2024-11-10', 'ITC FMCG division hiring ASMs for South India territory management. Strong leadership and sales aptitude required.', 'MBA Marketing/Sales, Willing to relocate, 2-wheeler licence', 'South India', 'campus', 'completed', 'campus@itc.in', adminId);
-    plac.run('Amazon India', 'Operations Manager Trainee', 18.5, '2024-12-05', '2024-11-28', 'Amazon India hiring MTs for Operations. Fast-paced environment, high-growth role. Rotational program across fulfilment centres.', 'MBA Operations/General, Strong analytical ability, Flexibility', 'Hyderabad / Bengaluru', 'campus', 'completed', 'uni-campus@amazon.com', adminId);
-    plac.run('Accenture Strategy', 'Strategy Analyst', 16.0, '2025-01-10', '2025-01-03', 'Accenture Strategy India hiring analysts for consulting projects in digital, cloud, and AI strategy.', 'MBA from Tier-1 institute, CGPA 7.5+, Strong PPT & Excel', 'Bengaluru / Gurgaon', 'campus', 'upcoming', 'campus@accenture.com', adminId);
-    plac.run('Swiggy', 'City Business Manager', 15.5, '2025-02-01', '2025-01-25', 'Swiggy is looking for MBAs to manage city-level P&L. Work with restaurant partners, delivery fleet, and marketing.', 'MBA, Entrepreneurial mindset, 60%+ academics, No backlogs', 'Multiple Cities', 'campus', 'upcoming', 'talent@swiggy.in', adminId);
-
-    // Applications & selections for completed drives
-    const students = db.prepare('SELECT id FROM students LIMIT 20').all();
-    const drives = db.prepare(`SELECT id FROM placements WHERE status='completed'`).all();
-    const app = db.prepare(`INSERT OR IGNORE INTO placement_applications (placement_id,student_id,applied_date,status,remarks) VALUES (?,?,?,?,?)`);
-    const statusOptions = ['selected','shortlisted','shortlisted','rejected','applied'];
-    drives.forEach(d => {
-      students.forEach((s, i) => {
-        if (Math.random() > 0.3) {
-          const st = statusOptions[i % statusOptions.length];
-          app.run(d.id, s.id, '2024-10-01', st, st === 'selected' ? 'Offer letter issued' : null);
-        }
-      });
-    });
-    console.log('Placement data seeded.');
-  }
-  } catch (e) { console.log('Placement seed skipped:', e.message); }
+  // Placement drives — NOT auto-seeded. Add real campus drives via the Placements module.
 
   // ── Workflow Instances ─────────────────────────────────────────────────────
   try {

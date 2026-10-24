@@ -8,15 +8,21 @@ router.get('/', (req, res) => {
   const { from_date, to_date, category } = req.query;
   let items = [];
 
-  // Academic events
-  let evtQ = 'SELECT id, title, description, event_date as start_date, end_date, venue as location, category, "event" as type FROM events WHERE 1=1';
+  // Academic events — include events that start, end, or span the requested period
+  let evtQ = "SELECT id, title, description, event_date as start_date, end_date, venue as location, category, 'event' as type FROM events WHERE 1=1";
   const evtP = [];
-  if (from_date) { evtQ += ' AND event_date >= ?'; evtP.push(from_date); }
-  if (to_date) { evtQ += ' AND event_date <= ?'; evtP.push(to_date); }
+  if (from_date && to_date) {
+    evtQ += ' AND (event_date <= ? AND COALESCE(end_date, event_date) >= ?)';
+    evtP.push(to_date, from_date);
+  } else if (from_date) {
+    evtQ += ' AND COALESCE(end_date, event_date) >= ?'; evtP.push(from_date);
+  } else if (to_date) {
+    evtQ += ' AND event_date <= ?'; evtP.push(to_date);
+  }
   items.push(...db.prepare(evtQ).all(...evtP));
 
   // Examinations
-  let examQ = `SELECT e.id, e.name as title, c.name || ' (' || e.exam_type || ')' as description, e.exam_date as start_date, e.exam_date as end_date, e.room as location, 'exam' as category, 'exam' as type FROM examinations e JOIN courses c ON e.course_id = c.id WHERE e.exam_date IS NOT NULL`;
+  let examQ = "SELECT e.id, e.name as title, c.name || ' (' || e.exam_type || ')' as description, e.exam_date as start_date, e.exam_date as end_date, e.room as location, 'exam' as category, 'exam' as type FROM examinations e JOIN courses c ON e.course_id = c.id WHERE e.exam_date IS NOT NULL";
   const examP = [];
   if (from_date) { examQ += ' AND e.exam_date >= ?'; examP.push(from_date); }
   if (to_date) { examQ += ' AND e.exam_date <= ?'; examP.push(to_date); }
@@ -31,7 +37,7 @@ router.get('/', (req, res) => {
 
   // Venue bookings
   if (['admin','registrar','faculty'].includes(req.user.role)) {
-    let bookQ = `SELECT vb.id, vb.purpose as title, r.room_number || ' - ' || b.name as description, vb.booking_date as start_date, vb.booking_date as end_date, r.room_number as location, 'venue' as category, 'venue' as type FROM venue_bookings vb JOIN infra_rooms r ON vb.room_id = r.id JOIN buildings b ON r.building_id = b.id WHERE vb.status = 'confirmed'`;
+    let bookQ = "SELECT vb.id, vb.purpose as title, r.room_number || ' - ' || b.name as description, vb.booking_date as start_date, vb.booking_date as end_date, r.room_number as location, 'venue' as category, 'venue' as type FROM venue_bookings vb JOIN infra_rooms r ON vb.room_id = r.id JOIN buildings b ON r.building_id = b.id WHERE vb.status = 'confirmed'";
     const bookP = [];
     if (from_date) { bookQ += ' AND vb.booking_date >= ?'; bookP.push(from_date); }
     if (to_date) { bookQ += ' AND vb.booking_date <= ?'; bookP.push(to_date); }
@@ -40,7 +46,7 @@ router.get('/', (req, res) => {
   }
 
   // LMS Assignment due dates
-  let asnQ = `SELECT a.id, a.title, c.name || ' Assignment Due' as description, a.due_date as start_date, a.due_date as end_date, '' as location, 'assignment' as category, 'assignment' as type FROM lms_assignments a JOIN courses c ON a.course_id = c.id WHERE a.due_date IS NOT NULL AND a.status = 'active'`;
+  let asnQ = "SELECT a.id, a.title, c.name || ' Assignment Due' as description, a.due_date as start_date, a.due_date as end_date, '' as location, 'assignment' as category, 'assignment' as type FROM lms_assignments a JOIN courses c ON a.course_id = c.id WHERE a.due_date IS NOT NULL AND a.status = 'active'";
   const asnP = [];
   if (from_date) { asnQ += ' AND a.due_date >= ?'; asnP.push(from_date); }
   if (to_date) { asnQ += ' AND a.due_date <= ?'; asnP.push(to_date); }

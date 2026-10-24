@@ -7,7 +7,7 @@ router.use(authenticate);
 
 router.get('/', (req, res) => {
   const { program_id, semester, faculty_id, academic_year_id } = req.query;
-  let query = `SELECT c.*, p.name as program_name, f.employee_id, u.name as faculty_name, ay.name as academic_year
+  let query = `SELECT c.*, p.name as program_name, p.code as program_code, f.employee_id, u.name as faculty_name, u.department as faculty_department, ay.name as academic_year
     FROM courses c JOIN programs p ON c.program_id = p.id
     LEFT JOIN faculty f ON c.faculty_id = f.id LEFT JOIN users u ON f.user_id = u.id
     LEFT JOIN academic_years ay ON c.academic_year_id = ay.id WHERE 1=1`;

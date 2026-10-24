@@ -184,7 +184,7 @@ export default function AcademicManagement() {
                   <tr key={c.id} className="border-b border-gray-50 hover:bg-gray-50">
                     <td className="table-td font-mono text-xs text-msrim-blue font-semibold">{c.code}</td>
                     <td className="table-td font-medium">{c.name}</td>
-                    <td className="table-td text-gray-500 text-sm">{c.program_name}</td>
+                    <td className="table-td"><span className={c.program_code==='FPM'?'badge-orange':'badge-blue'}>{c.program_code}</span></td>
                     <td className="table-td text-center"><span className="badge-gray text-xs">Term {c.semester}</span></td>
                     <td className="table-td text-center font-semibold">{c.credits}</td>
                     <td className="table-td"><span className={c.type==='core'?'badge-blue':'badge-orange'}>{c.type}</span></td>
@@ -332,7 +332,7 @@ export default function AcademicManagement() {
                             </span>
                           : <span className="flex items-center gap-1 text-red-500 text-xs font-medium"><X className="w-3 h-3"/>Not Assigned</span>}
                       </td>
-                      <td className="table-td text-xs text-gray-400">{c.program_name}</td>
+                      <td className="table-td text-xs text-gray-400">{c.faculty_department || '—'}</td>
                     </tr>
                   ))}
                   {!filteredCourses.length && <tr><td colSpan={6} className="table-td text-center py-10 text-gray-400">No courses match filters.</td></tr>}

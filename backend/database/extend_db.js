@@ -2374,6 +2374,231 @@ function seedExtendedData() {
     created_at TEXT DEFAULT (datetime('now')),
     FOREIGN KEY (partner_id) REFERENCES corporate_partners(id)
   )`);
+
+  // Migration: expand accreditation_cycles.body CHECK to include AACSB, NIRF, EQUIS, AMBA
+  try {
+    const bodyCheck = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='accreditation_cycles'").get()?.sql || '';
+    if (bodyCheck.includes("'NAAC','NBA','AICTE','ISO','Internal'") && !bodyCheck.includes('AACSB')) {
+      db.exec("PRAGMA foreign_keys = OFF");
+      db.exec(`CREATE TABLE IF NOT EXISTS accreditation_cycles_new (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        body TEXT DEFAULT 'NAAC' CHECK(body IN ('NAAC','NBA','AACSB','NIRF','EQUIS','AMBA','AICTE','ISO','Internal','Other')),
+        start_date TEXT, end_date TEXT, target_grade TEXT,
+        status TEXT DEFAULT 'planning' CHECK(status IN ('planning','in_progress','submitted','completed')),
+        created_at TEXT DEFAULT (datetime('now'))
+      )`);
+      db.exec("INSERT INTO accreditation_cycles_new SELECT * FROM accreditation_cycles");
+      db.exec("DROP TABLE accreditation_cycles");
+      db.exec("ALTER TABLE accreditation_cycles_new RENAME TO accreditation_cycles");
+      db.exec("PRAGMA foreign_keys = ON");
+      console.log('Migrated accreditation_cycles: expanded body CHECK constraint.');
+    }
+  } catch(e) { console.log('accreditation_cycles migration skipped:', e.message); }
+
+  // ── Accreditation Extended Schema ──────────────────────────────────────────
+  db.exec(`CREATE TABLE IF NOT EXISTS accreditation_evidence (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    criteria_id INTEGER REFERENCES quality_criteria(id) ON DELETE CASCADE,
+    body TEXT NOT NULL DEFAULT 'NAAC',
+    title TEXT NOT NULL,
+    description TEXT,
+    document_type TEXT DEFAULT 'report' CHECK(document_type IN ('policy','report','data','certificate','photo','mou','minutes','other')),
+    academic_year TEXT,
+    file_name TEXT,
+    uploaded_by INTEGER REFERENCES users(id),
+    verified_by INTEGER REFERENCES users(id),
+    verified_at TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+
+  db.exec(`CREATE TABLE IF NOT EXISTS accreditation_actions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    criteria_id INTEGER REFERENCES quality_criteria(id) ON DELETE SET NULL,
+    body TEXT NOT NULL DEFAULT 'NAAC',
+    criterion_ref TEXT,
+    gap_description TEXT NOT NULL,
+    action_planned TEXT NOT NULL,
+    responsible_person INTEGER REFERENCES users(id),
+    target_date TEXT,
+    status TEXT DEFAULT 'open' CHECK(status IN ('open','in_progress','completed','overdue')),
+    priority TEXT DEFAULT 'medium' CHECK(priority IN ('high','medium','low')),
+    completion_date TEXT,
+    remarks TEXT,
+    created_by INTEGER REFERENCES users(id),
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+
+  db.exec(`CREATE TABLE IF NOT EXISTS aol_goals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cycle_id INTEGER REFERENCES accreditation_cycles(id) ON DELETE CASCADE,
+    goal_code TEXT NOT NULL,
+    goal_name TEXT NOT NULL,
+    description TEXT,
+    program_id INTEGER REFERENCES programs(id),
+    status TEXT DEFAULT 'active' CHECK(status IN ('active','under_review','achieved','discontinued')),
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+
+  db.exec(`CREATE TABLE IF NOT EXISTS aol_measurements (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    goal_id INTEGER REFERENCES aol_goals(id) ON DELETE CASCADE,
+    learning_objective TEXT NOT NULL,
+    measurement_tool TEXT,
+    target_pct REAL DEFAULT 70,
+    achieved_pct REAL,
+    academic_year TEXT,
+    findings TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+
+  db.exec(`CREATE TABLE IF NOT EXISTS aol_closings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    goal_id INTEGER REFERENCES aol_goals(id) ON DELETE CASCADE,
+    gap_identified TEXT NOT NULL,
+    action_taken TEXT NOT NULL,
+    implementation_date TEXT,
+    outcome TEXT,
+    next_review_date TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+
+  db.exec(`CREATE TABLE IF NOT EXISTS nirf_data (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cycle_id INTEGER REFERENCES accreditation_cycles(id) ON DELETE CASCADE,
+    parameter TEXT NOT NULL,
+    metric_code TEXT NOT NULL,
+    metric_name TEXT NOT NULL,
+    value REAL DEFAULT 0,
+    max_value REAL DEFAULT 100,
+    weightage REAL DEFAULT 1,
+    academic_year TEXT,
+    data_source TEXT DEFAULT 'manual',
+    notes TEXT,
+    last_updated TEXT DEFAULT (datetime('now')),
+    UNIQUE(cycle_id, metric_code, academic_year)
+  )`);
+
+  db.exec(`CREATE TABLE IF NOT EXISTS accreditation_visits (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cycle_id INTEGER REFERENCES accreditation_cycles(id) ON DELETE CASCADE,
+    visit_type TEXT DEFAULT 'peer_team_visit' CHECK(visit_type IN ('peer_team_visit','dvv_validation','pre_visit','mock_audit','follow_up')),
+    scheduled_date TEXT,
+    actual_date TEXT,
+    peer_team TEXT,
+    agenda TEXT,
+    observations TEXT,
+    outcome TEXT,
+    grade_awarded TEXT,
+    status TEXT DEFAULT 'scheduled' CHECK(status IN ('scheduled','completed','postponed','cancelled')),
+    created_by INTEGER REFERENCES users(id),
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+
+  db.exec(`CREATE TABLE IF NOT EXISTS nirf_auto_data (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    academic_year TEXT NOT NULL,
+    total_students INTEGER DEFAULT 0,
+    phd_students INTEGER DEFAULT 0,
+    faculty_count INTEGER DEFAULT 0,
+    phd_faculty INTEGER DEFAULT 0,
+    publications INTEGER DEFAULT 0,
+    grants_amount REAL DEFAULT 0,
+    placement_pct REAL DEFAULT 0,
+    median_salary REAL DEFAULT 0,
+    female_students INTEGER DEFAULT 0,
+    sc_st_students INTEGER DEFAULT 0,
+    generated_at TEXT DEFAULT (datetime('now')),
+    UNIQUE(academic_year)
+  )`);
+
+  // Seed: NAAC default cycle + 7 criteria if none exist
+  try {
+    const naacCycleCount = db.prepare("SELECT COUNT(*) as c FROM accreditation_cycles WHERE body='NAAC'").get().c;
+    if (naacCycleCount === 0) {
+      const nc = db.prepare("INSERT INTO accreditation_cycles (name,body,start_date,end_date,target_grade,status) VALUES (?,?,?,?,?,?)").run('NAAC 4th Cycle 2024-29','NAAC','2024-01-01','2029-12-31','A++','in_progress');
+      const naacId = nc.lastInsertRowid;
+      const naacCriteria = [
+        ['1','Curricular Aspects',100,1.0],
+        ['2','Teaching-Learning & Evaluation',350,3.5],
+        ['3','Research, Innovations & Extension',120,1.2],
+        ['4','Infrastructure & Learning Resources',100,1.0],
+        ['5','Student Support & Progression',130,1.3],
+        ['6','Governance, Leadership & Management',100,1.0],
+        ['7','Institutional Values & Best Practices',100,1.0],
+      ];
+      const cStmt = db.prepare("INSERT INTO quality_criteria (cycle_id,criterion_number,criterion_name,max_score,weightage,status) VALUES (?,?,?,?,?,'not_started')");
+      naacCriteria.forEach(([n,name,max,w]) => cStmt.run(naacId,n,name,max,w));
+      console.log('Seeded NAAC default cycle and 7 criteria.');
+    }
+  } catch(e) { console.log('NAAC seed skipped:', e.message); }
+
+  // Seed: NBA default cycle + 9 criteria for PGDM if no criteria exist
+  try {
+    let nbaId;
+    const nbaCycle = db.prepare("SELECT id FROM accreditation_cycles WHERE body='NBA' LIMIT 1").get();
+    if (!nbaCycle) {
+      const nb = db.prepare("INSERT INTO accreditation_cycles (name,body,start_date,end_date,target_grade,status) VALUES (?,?,?,?,?,?)").run('NBA PGDM Accreditation 2024-27','NBA','2024-01-01','2027-12-31','Accredited','in_progress');
+      nbaId = nb.lastInsertRowid;
+    } else { nbaId = nbaCycle.id; }
+    const nbaCriteriaCount = db.prepare("SELECT COUNT(*) as c FROM quality_criteria WHERE cycle_id=?").get(nbaId).c;
+    if (nbaCriteriaCount === 0) {
+      const nbaCriteria = [
+        ['1','Vision, Mission & Programme Educational Objectives',75,0.75],
+        ['2','Programme Curriculum & Teaching-Learning Processes',125,1.25],
+        ['3','Course Outcomes & Programme Outcomes Attainment',175,1.75],
+        ['4','Students\' Performance',150,1.5],
+        ['5','Faculty Information & Contributions',200,2.0],
+        ['6','Facilities & Technical Support',75,0.75],
+        ['7','Continuous Improvement',75,0.75],
+        ['8','Competencies of Graduating Students',75,0.75],
+        ['9','Student Support Systems',50,0.5],
+      ];
+      const cStmt = db.prepare("INSERT INTO quality_criteria (cycle_id,criterion_number,criterion_name,max_score,weightage,status) VALUES (?,?,?,?,?,'not_started')");
+      nbaCriteria.forEach(([n,name,max,w]) => cStmt.run(nbaId,n,name,max,w));
+      console.log('Seeded NBA default cycle and 9 criteria.');
+    }
+  } catch(e) { console.log('NBA seed skipped:', e.message); }
+
+  // Seed: NIRF default cycle + metrics if none exist
+  try {
+    const nirfCycleCount = db.prepare("SELECT COUNT(*) as c FROM accreditation_cycles WHERE body='NIRF'").get().c;
+    if (nirfCycleCount === 0) {
+      const nr = db.prepare("INSERT INTO accreditation_cycles (name,body,start_date,end_date,target_grade,status) VALUES (?,?,?,?,?,?)").run('NIRF Ranking 2025','NIRF','2025-01-01','2025-12-31','Top 100','in_progress');
+      const nirfId = nr.lastInsertRowid;
+      const metrics = [
+        ['TLR','TLR-SS','Student Strength including Doctoral Students',20,30],
+        ['TLR','TLR-FSR','Faculty-Student Ratio with Emphasis on Permanent Faculty',30,30],
+        ['TLR','TLR-FQE','Combined Metric for Faculty with PhD and Experience',20,30],
+        ['TLR','TLR-FRU','Financial Resources and their Utilisation',30,30],
+        ['RP','RP-PU','Combined Metric for Publications',35,30],
+        ['RP','RP-QP','Combined Metric for Quality of Publications',35,30],
+        ['RP','RP-IPR','IPR and Patents: Published and Granted',15,30],
+        ['RP','RP-FPPP','Footprint of Projects and Professional Practice',15,30],
+        ['GO','GO-GPH','Metric for University Examinations',40,20],
+        ['GO','GO-GUE','Metric for University Examinations',15,20],
+        ['GO','GO-MS','Median Salary',25,20],
+        ['GO','GO-GPHD','Metric for PhD Students',20,20],
+        ['OI','OI-RD','Regional Diversity',30,10],
+        ['OI','OI-WD','Women Diversity',30,10],
+        ['OI','OI-ESCS','Economically & Socially Challenged Students',20,10],
+        ['OI','OI-PCS','Facilities for Physically Challenged Students',20,10],
+        ['PP','PP-PR','Peer Perception',100,10],
+      ];
+      const mStmt = db.prepare("INSERT OR IGNORE INTO nirf_data (cycle_id,parameter,metric_code,metric_name,max_value,weightage,academic_year,data_source) VALUES (?,?,?,?,?,?,'2024-25','manual')");
+      metrics.forEach(([p,c,n,max,w]) => mStmt.run(nirfId,p,c,n,max,w));
+      console.log('Seeded NIRF default cycle and metrics.');
+    }
+  } catch(e) { console.log('NIRF seed skipped:', e.message); }
+
+  // Seed: AACSB default cycle if none exist
+  try {
+    const aacsb = db.prepare("SELECT COUNT(*) as c FROM accreditation_cycles WHERE body='AACSB'").get().c;
+    if (aacsb === 0) {
+      db.prepare("INSERT INTO accreditation_cycles (name,body,start_date,end_date,target_grade,status) VALUES (?,?,?,?,?,?)").run('AACSB Initial Accreditation 2025-28','AACSB','2025-01-01','2028-12-31','Accredited','planning');
+      console.log('Seeded AACSB default cycle.');
+    }
+  } catch(e) { console.log('AACSB seed skipped:', e.message); }
 }
 
 module.exports = { extendDatabase };

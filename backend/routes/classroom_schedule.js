@@ -45,7 +45,7 @@ router.get('/slots', (req, res) => {
   if (faculty_id)        { q += ' AND f.id = ?';           params.push(faculty_id); }
   if (day)               { q += ' AND t.day = ?';          params.push(day); }
   if (academic_year_id)  { q += ' AND t.academic_year_id = ?'; params.push(academic_year_id); }
-  q += ` ORDER BY ${DAY_ORDER.replace(/day/g, 't.day')}, t.start_time`;
+  q += ` ORDER BY CASE t.day WHEN 'Monday' THEN 1 WHEN 'Tuesday' THEN 2 WHEN 'Wednesday' THEN 3 WHEN 'Thursday' THEN 4 WHEN 'Friday' THEN 5 WHEN 'Saturday' THEN 6 END, t.start_time`;
   res.json(db.prepare(q).all(...params));
 });
 
@@ -177,7 +177,7 @@ router.get('/faculty-load', (req, res) => {
     JOIN courses c ON c.faculty_id = f.id
     JOIN timetable t ON t.course_id = c.id
     JOIN programs p ON c.program_id = p.id
-    WHERE f.status = 'active'
+    WHERE 1=1
     ORDER BY u.name, t.day, t.start_time
   `).all();
   const byFaculty = {};

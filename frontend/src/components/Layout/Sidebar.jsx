@@ -444,8 +444,8 @@ export default function Sidebar({ isOpen, onToggle }) {
 
       {/* Footer */}
       <div className="p-3 border-t border-white/10 flex-shrink-0">
-        <p className="text-blue-400 text-xs text-center">MSRIM Digital Campus v3.0</p>
-        <p className="text-blue-500 text-xs text-center">30+ Modules · 150+ Features</p>
+        <p className="text-blue-400 text-xs text-center">MSRIM Digital Campus v3.1</p>
+        <p className="text-blue-500 text-xs text-center">52+ Modules · 200+ Features</p>
       </div>
     </aside>
   );

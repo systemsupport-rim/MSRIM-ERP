@@ -6,30 +6,50 @@ import { Search, Plus, Eye, X, BarChart2, BookOpen, UserX, UserCheck, Trash2 } f
 
 async function confirmAction(msg) { return window.confirm(msg); }
 
+const PGDM_SECTIONS = ['A', 'B', 'C', 'D'];
+const FPM_SECTIONS  = ['FPM'];
+
 export default function Students() {
   const { user } = useAuth();
-  const [students, setStudents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [semester, setSemester] = useState('');
-  const [section, setSection] = useState('');
-  const [selected, setSelected] = useState(null);
-  const [showAdd, setShowAdd] = useState(false);
+  const [students,  setStudents]  = useState([]);
+  const [programs,  setPrograms]  = useState([]);
+  const [loading,   setLoading]   = useState(true);
+  const [search,    setSearch]    = useState('');
+  const [semester,  setSemester]  = useState('');
+  const [section,   setSection]   = useState('');
+  const [programId, setProgramId] = useState('');
+  const [batchYear, setBatchYear] = useState('');
+  const [selected,  setSelected]  = useState(null);
+  const [showAdd,   setShowAdd]   = useState(false);
 
-  useEffect(() => { fetchStudents(); }, [search, semester, section]);
+  useEffect(() => {
+    api.get('/structure/programs').then(r => setPrograms(r.data || []));
+  }, []);
+
+  useEffect(() => {
+    // Reset section when program changes
+    setSection('');
+  }, [programId]);
+
+  useEffect(() => { fetchStudents(); }, [search, semester, section, programId, batchYear]);
 
   async function fetchStudents() {
     setLoading(true);
     try {
       const params = {};
-      if (search) params.search = search;
-      if (semester) params.semester = semester;
-      if (section) params.section = section;
+      if (search)    params.search     = search;
+      if (semester)  params.semester   = semester;
+      if (section)   params.section    = section;
+      if (programId) params.program_id = programId;
+      if (batchYear) params.batch_year = batchYear;
       const res = await api.get('/students', { params });
       setStudents(res.data);
     } catch { toast.error('Failed to load students'); }
     finally { setLoading(false); }
   }
+
+  const isFPM = programId === '2';
+  const sectionOptions = isFPM ? FPM_SECTIONS : PGDM_SECTIONS;
 
   if (user.role === 'student') return <StudentSelfView />;
 
@@ -51,17 +71,32 @@ export default function Students() {
         <div className="flex flex-wrap gap-3">
           <div className="flex items-center gap-2 bg-gray-100 rounded-lg px-3 py-2 flex-1 min-w-48">
             <Search className="w-4 h-4 text-gray-400" />
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name, enrollment..."
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name, enrollment…"
               className="bg-transparent text-sm outline-none w-full" />
           </div>
+          <select value={programId} onChange={e => setProgramId(e.target.value)} className="select-field w-36">
+            <option value="">All Programs</option>
+            {programs.map(p => <option key={p.id} value={p.id}>{p.code}</option>)}
+          </select>
+          <select value={batchYear} onChange={e => setBatchYear(e.target.value)} className="select-field w-32">
+            <option value="">All Batches</option>
+            <option value="2026">2026 Batch</option>
+            <option value="2025">2025 Batch</option>
+          </select>
           <select value={semester} onChange={e => setSemester(e.target.value)} className="select-field w-36">
             <option value="">All Semesters</option>
             {[1, 2, 3, 4].map(s => <option key={s} value={s}>Semester {s}</option>)}
           </select>
-          <select value={section} onChange={e => setSection(e.target.value)} className="select-field w-32">
-            <option value="">All Sections</option>
-            {['A', 'B', 'C'].map(s => <option key={s} value={s}>Section {s}</option>)}
-          </select>
+          {!isFPM && (
+            <select value={section} onChange={e => setSection(e.target.value)} className="select-field w-32">
+              <option value="">All Sections</option>
+              {PGDM_SECTIONS.map(s => <option key={s} value={s}>Section {s}</option>)}
+            </select>
+          )}
+          {(programId || batchYear || semester || section) && (
+            <button onClick={() => { setProgramId(''); setBatchYear(''); setSemester(''); setSection(''); }}
+              className="text-sm text-gray-400 hover:text-gray-600 underline self-center">Clear</button>
+          )}
         </div>
       </div>
 
@@ -98,8 +133,14 @@ export default function Students() {
                     </div>
                   </td>
                   <td className="table-td font-mono text-xs">{s.enrollment_number}</td>
-                  <td className="table-td"><span className="badge-blue">{s.program_code}</span></td>
-                  <td className="table-td">Sem {s.semester} / {s.section}</td>
+                  <td className="table-td">
+                    <span className={s.program_code === 'FPM' ? 'badge-orange' : 'badge-blue'}>{s.program_code}</span>
+                  </td>
+                  <td className="table-td">
+                    {s.program_code === 'FPM'
+                      ? <span className="text-sm">Yr {s.semester}</span>
+                      : `Sem ${s.semester} / Sec ${s.section}`}
+                  </td>
                   <td className="table-td">{s.batch_year}</td>
                   <td className="table-td">
                     <span className={`${s.status === 'active' ? 'badge-green' : s.status === 'graduated' ? 'badge-blue' : 'badge-red'}`}>
@@ -345,7 +386,7 @@ function StudentDetailModal({ student, canManage, onClose }) {
 }
 
 function AddStudentModal({ onClose }) {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', enrollment_number: '', program_id: '1', semester: '1', batch_year: '2024', section: 'A', roll_number: '', dob: '', gender: 'Male', admission_date: '2024-07-15', guardian_name: '', guardian_phone: '', guardian_relation: 'Father' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', enrollment_number: '', program_id: '1', semester: '1', batch_year: '2026', section: 'A', roll_number: '', dob: '', gender: 'Male', admission_date: '2026-08-01', guardian_name: '', guardian_phone: '', guardian_relation: 'Father' });
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e) {
@@ -380,9 +421,9 @@ function AddStudentModal({ onClose }) {
             </div>
           ))}
           {[['Semester', 'semester', [1, 2, 3, 4].map(v => ({ v, l: `Semester ${v}` }))],
-            ['Section', 'section', ['A', 'B', 'C'].map(v => ({ v, l: `Section ${v}` }))],
+            ['Section', 'section', (form.program_id === '2' ? FPM_SECTIONS : PGDM_SECTIONS).map(v => ({ v, l: v === 'FPM' ? 'FPM' : `Section ${v}` }))],
             ['Gender', 'gender', ['Male', 'Female', 'Other'].map(v => ({ v, l: v }))],
-            ['Program', 'program_id', [{ v: '1', l: 'PGDM' }, { v: '2', l: 'FPM' }, { v: '3', l: 'EPGDM' }]],
+            ['Program', 'program_id', [{ v: '1', l: 'PGDM' }, { v: '2', l: 'FPM' }]],
             ['Guardian Relation', 'guardian_relation', ['Father', 'Mother', 'Guardian', 'Spouse'].map(v => ({ v, l: v }))]].map(([l, k, opts]) => (
             <div key={k}>
               <label className="block text-sm font-medium text-gray-700 mb-1">{l}</label>

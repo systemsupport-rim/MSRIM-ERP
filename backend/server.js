@@ -84,6 +84,9 @@ app.use('/api/structure', require('./routes/structure'));
 // Timetable
 app.use('/api/timetable', require('./routes/timetable'));
 
+// Classroom Schedule Management
+app.use('/api/classroom-schedule', require('./routes/classroom_schedule'));
+
 // Analytics
 app.use('/api/analytics', require('./routes/analytics'));
 

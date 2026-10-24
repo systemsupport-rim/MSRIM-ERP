@@ -39,6 +39,7 @@ import OBEDashboard from './pages/OBE/OBEDashboard';
 import ExamsEnhanced from './pages/Examinations/ExamsEnhanced';
 import RolesPrivileges from './pages/Roles/Roles';
 import Timetable from './pages/Timetable/Timetable';
+import ClassroomSchedule from './pages/ClassroomSchedule/ClassroomSchedule';
 import WorkflowPage from './pages/Workflow/Workflow';
 import Finance from './pages/Finance/Finance';
 import Procurement from './pages/Procurement/Procurement';
@@ -109,6 +110,7 @@ function AppRoutes() {
         <Route path="/staff" element={<Staff />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="/timetable" element={<Timetable />} />
+        <Route path="/classroom-schedule" element={<ClassroomSchedule />} />
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/lms" element={<LMS />} />
         <Route path="/obe" element={<OBEDashboard />} />

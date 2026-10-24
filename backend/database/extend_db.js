@@ -36,6 +36,20 @@ function extendDatabase() {
     console.log('Seeded default role privileges.');
   }
 
+  // Schedule substitutions table
+  db.exec(`CREATE TABLE IF NOT EXISTS schedule_substitutions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timetable_id INTEGER NOT NULL REFERENCES timetable(id) ON DELETE CASCADE,
+    date TEXT NOT NULL,
+    type TEXT NOT NULL CHECK(type IN ('cancellation','substitution','rescheduled')),
+    substitute_faculty_id INTEGER REFERENCES faculty(id),
+    new_room TEXT,
+    reason TEXT,
+    created_by INTEGER REFERENCES users(id),
+    created_at TEXT DEFAULT (datetime('now')),
+    UNIQUE(timetable_id, date)
+  )`);
+
   // Migration: add cgpa to students table
   const stuCols = db.prepare("PRAGMA table_info(students)").all();
   if (!stuCols.some(c => c.name === 'cgpa')) {

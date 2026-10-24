@@ -61,14 +61,15 @@ const moduleNavMap = [
     ],
   },
   {
-    match: ['/courses', '/timetable', '/lms', '/mentor'],
+    match: ['/courses', '/timetable', '/classroom-schedule', '/lms', '/mentor'],
     label: 'Academic',
     back: '/admin-console',
     items: [
-      { to: '/courses',    icon: BookOpen,      label: 'Course Catalogue' },
-      { to: '/timetable',  icon: CalendarDays,  label: 'Timetable' },
-      { to: '/lms',        icon: BookMarked,    label: 'LMS' },
-      { to: '/mentor',     icon: UserCheck,     label: 'Mentor-Mentee' },
+      { to: '/courses',             icon: BookOpen,      label: 'Course Catalogue' },
+      { to: '/timetable',           icon: CalendarDays,  label: 'Timetable' },
+      { to: '/classroom-schedule',  icon: Layers,        label: 'Classroom Schedule' },
+      { to: '/lms',                 icon: BookMarked,    label: 'LMS' },
+      { to: '/mentor',              icon: UserCheck,     label: 'Mentor-Mentee' },
     ],
   },
   {

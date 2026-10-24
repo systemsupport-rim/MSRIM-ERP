@@ -139,7 +139,7 @@ app.use('/api/roles', require('./routes/roles'));
 // Vision 2036 AI Brain — Intelligence Engine
 app.use('/api/ai', require('./routes/ai_brain'));
 
-app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Date().toISOString(), name: 'MSRIM Digital Campus ERP', version: '3.1', modules: 52 }));
+app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Date().toISOString(), name: 'MSRIM Digital Campus ERP', version: '3.1', modules: 81 }));
 
 // Serve built React frontend (production mode — run BUILD-FRONTEND.bat first)
 const frontendDist = path.join(__dirname, '../frontend/dist');

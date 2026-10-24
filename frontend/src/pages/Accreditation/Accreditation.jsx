@@ -88,6 +88,15 @@ export default function Accreditation() {
 
   useEffect(() => { loadBase(); }, [loadBase]);
 
+  // Auto-select the matching body's cycle when switching to NAAC/NBA tabs
+  useEffect(() => {
+    if ((tab === 'naac' || tab === 'nba') && cycles.length) {
+      const body = tab === 'naac' ? 'NAAC' : 'NBA';
+      const bodyCycle = cycles.find(c => c.body === body);
+      if (bodyCycle) setSelectedCycle(String(bodyCycle.id));
+    }
+  }, [tab, cycles]);
+
   useEffect(() => {
     if (!selectedCycle) return;
     api.get(`/accreditation/criteria?cycle_id=${selectedCycle}`).then(r => setCriteria(r.data||[]));

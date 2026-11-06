@@ -2600,6 +2600,20 @@ function seedExtendedData() {
     }
   } catch(e) { console.log('AACSB seed skipped:', e.message); }
 
+  // LMS Announcements
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS lms_announcements (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      content TEXT,
+      course_id INTEGER REFERENCES courses(id),
+      faculty_id INTEGER REFERENCES faculty(id),
+      priority TEXT DEFAULT 'normal' CHECK(priority IN ('normal','important','urgent')),
+      pinned INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+  `);
+
   // Events & Activities
   db.exec(`
     CREATE TABLE IF NOT EXISTS events (

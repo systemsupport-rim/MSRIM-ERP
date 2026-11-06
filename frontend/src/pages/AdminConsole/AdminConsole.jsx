@@ -10,7 +10,8 @@ import {
   ArrowLeft, Plus, Trash2, RotateCcw, Settings2, X, Check, KeyRound, Edit2,
   MessageSquare, Send, BarChart2, Cpu, Bell, Globe, MapPin, Video,
   Megaphone, BookMarked as BookIcon, Target, Calendar,
-  FlaskConical, TrendingUp, Mic, Building2 as Corp, Lightbulb
+  FlaskConical, TrendingUp, Mic, Building2 as Corp, Lightbulb,
+  PartyPopper, Bus, Trophy
 } from 'lucide-react';
 
 const allGroups = [
@@ -135,6 +136,9 @@ const allGroups = [
       { to: '/attendance-console',icon: BarChart3,   label: 'Attendance Console',desc:'Consolidated attendance dashboard',roles: ['admin','registrar','hod','faculty'] },
       { to: '/helpdesk',          icon: HelpCircle,  label: 'Help Center',     desc: 'Raise & track support tickets',     roles: 'all' },
       { to: '/feedback',          icon: Heart,       label: 'IQAC / Feedback', desc: 'Feedback collection & IQAC',        roles: 'all' },
+      { to: '/events',            icon: PartyPopper, label: 'Events & Activities', desc: 'Campus events, fests & workshops', roles: 'all' },
+      { to: '/transport',         icon: Bus,         label: 'Transport Mgmt',  desc: 'Bus routes, vehicles & student passes', roles: ['admin','registrar','hod','faculty','student'] },
+      { to: '/sports',            icon: Trophy,      label: 'Sports & Recreation', desc: 'Teams, tournaments & facilities', roles: 'all' },
     ]
   },
   {

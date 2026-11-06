@@ -125,6 +125,11 @@ app.use('/api/rankings', require('./routes/rankings'));
 // Corporate Relations & Industry Connect (MOUs, guest lectures, advisory board)
 app.use('/api/corporate-relations', require('./routes/corporate_relations'));
 
+// Campus Life — Phase 8
+app.use('/api/events', require('./routes/events'));
+app.use('/api/transport', require('./routes/transport'));
+app.use('/api/sports', require('./routes/sports'));
+
 // Phase 3-7 new modules
 app.use('/api/curriculum', require('./routes/curriculum'));
 app.use('/api/cms', require('./routes/cms'));

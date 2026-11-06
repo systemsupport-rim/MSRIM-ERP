@@ -84,6 +84,10 @@ import BiometricManagement from './pages/Settings/BiometricManagement';
 import FeedSettings from './pages/Settings/FeedSettings';
 // Phase 7 – Integrations
 import Integrations from './pages/Integrations/Integrations';
+// Phase 8 – Campus Life
+import Events from './pages/Events/Events';
+import Transport from './pages/Transport/Transport';
+import Sports from './pages/Sports/Sports';
 
 function ProtectedRoute({ children, roles }) {
   const { user } = useAuth();
@@ -196,6 +200,10 @@ function AppRoutes() {
         <Route path="/feed-settings" element={<ProtectedRoute roles={['admin']}><FeedSettings /></ProtectedRoute>} />
         {/* Phase 7 – Integrations */}
         <Route path="/integrations" element={<ProtectedRoute roles={['admin']}><Integrations /></ProtectedRoute>} />
+        {/* Phase 8 – Campus Life */}
+        <Route path="/events" element={<Events />} />
+        <Route path="/transport" element={<ProtectedRoute roles={['admin','registrar','hod','faculty','student']}><Transport /></ProtectedRoute>} />
+        <Route path="/sports" element={<Sports />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" />} />
     </Routes>

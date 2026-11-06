@@ -2599,6 +2599,111 @@ function seedExtendedData() {
       console.log('Seeded AACSB default cycle.');
     }
   } catch(e) { console.log('AACSB seed skipped:', e.message); }
+
+  // Events & Activities
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      description TEXT,
+      event_type TEXT DEFAULT 'general',
+      start_date TEXT NOT NULL,
+      end_date TEXT,
+      start_time TEXT,
+      end_time TEXT,
+      venue TEXT,
+      organizer TEXT,
+      max_participants INTEGER,
+      status TEXT DEFAULT 'upcoming' CHECK(status IN ('upcoming','ongoing','completed','cancelled')),
+      created_by INTEGER REFERENCES users(id),
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE TABLE IF NOT EXISTS event_registrations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event_id INTEGER REFERENCES events(id) ON DELETE CASCADE,
+      user_id INTEGER REFERENCES users(id),
+      registered_at TEXT DEFAULT (datetime('now')),
+      status TEXT DEFAULT 'registered',
+      UNIQUE(event_id, user_id)
+    );
+  `);
+
+  // Transport Management
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS transport_vehicles (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      vehicle_number TEXT UNIQUE NOT NULL,
+      vehicle_type TEXT DEFAULT 'bus',
+      capacity INTEGER,
+      model TEXT,
+      insurance_expiry TEXT,
+      fitness_expiry TEXT,
+      status TEXT DEFAULT 'active',
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE TABLE IF NOT EXISTS transport_routes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      route_name TEXT NOT NULL,
+      route_number TEXT,
+      start_point TEXT,
+      end_point TEXT,
+      stops TEXT,
+      departure_time TEXT,
+      arrival_time TEXT,
+      vehicle_id INTEGER REFERENCES transport_vehicles(id),
+      driver_name TEXT,
+      driver_contact TEXT,
+      status TEXT DEFAULT 'active',
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE TABLE IF NOT EXISTS transport_passes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      student_id INTEGER REFERENCES students(id),
+      route_id INTEGER REFERENCES transport_routes(id),
+      pass_number TEXT UNIQUE,
+      valid_from TEXT,
+      valid_to TEXT,
+      status TEXT DEFAULT 'active',
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+  `);
+
+  // Sports & Recreation
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS sports_teams (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      sport TEXT NOT NULL,
+      category TEXT DEFAULT 'intercollegiate',
+      coach_name TEXT,
+      captain_name TEXT,
+      members_count INTEGER DEFAULT 0,
+      status TEXT DEFAULT 'active',
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE TABLE IF NOT EXISTS sports_tournaments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      sport TEXT,
+      start_date TEXT,
+      end_date TEXT,
+      venue TEXT,
+      level TEXT DEFAULT 'intercollegiate',
+      status TEXT DEFAULT 'upcoming',
+      result TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+    CREATE TABLE IF NOT EXISTS sports_facilities (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      facility_type TEXT,
+      capacity INTEGER,
+      location TEXT,
+      status TEXT DEFAULT 'available',
+      booking_allowed INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+  `);
 }
 
 module.exports = { extendDatabase };

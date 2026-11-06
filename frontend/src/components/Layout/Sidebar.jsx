@@ -9,7 +9,8 @@ import {
   Zap, Banknote, ShoppingCart, Network, BadgeCheck, Sparkles,
   Layers, Brain, BarChart3, HardDrive, Shield, KeyRound, ArrowLeft,
   MessageSquare, Send, Settings2, MapPin,
-  FlaskConical, TrendingUp, Globe, Mic, Target, Lightbulb
+  FlaskConical, TrendingUp, Globe, Mic, Target, Lightbulb,
+  PartyPopper, Bus, Trophy
 } from 'lucide-react';
 
 const mainItems = [
@@ -344,6 +345,31 @@ const moduleNavMap = [
       { to: '/corporate-relations',               icon: FileText,  label: 'MOUs & Agreements' },
       { to: '/corporate-relations',               icon: Mic,       label: 'Guest Lectures' },
       { to: '/corporate-relations',               icon: Users2,    label: 'Advisory Board' },
+    ],
+  },
+  {
+    match: ['/events'],
+    label: 'Events & Activities',
+    back: '/admin-console',
+    items: [
+      { to: '/events', icon: PartyPopper, label: 'All Events' },
+      { to: '/calendar',  icon: CalendarDays, label: 'Calendar' },
+    ],
+  },
+  {
+    match: ['/transport'],
+    label: 'Transport Management',
+    back: '/admin-console',
+    items: [
+      { to: '/transport', icon: Bus, label: 'Bus Routes' },
+    ],
+  },
+  {
+    match: ['/sports'],
+    label: 'Sports & Recreation',
+    back: '/admin-console',
+    items: [
+      { to: '/sports', icon: Trophy, label: 'Teams & Tournaments' },
     ],
   },
   {

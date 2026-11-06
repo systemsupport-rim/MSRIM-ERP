@@ -6,17 +6,18 @@ const router = express.Router();
 router.use(authenticate);
 
 router.get('/', (req, res) => {
-  const { semester, section, program_id, status, search } = req.query;
+  const { semester, section, program_id, status, search, batch_year } = req.query;
   let query = `SELECT s.*, u.name, u.email, u.phone, u.profile_photo, p.name as program_name, p.code as program_code
     FROM students s JOIN users u ON s.user_id = u.id JOIN programs p ON s.program_id = p.id WHERE 1=1`;
   const params = [];
   if (req.user.role === 'student') {
     query += ' AND s.user_id = ?'; params.push(req.user.id);
   } else {
-    if (semester) { query += ' AND s.semester = ?'; params.push(semester); }
-    if (section) { query += ' AND s.section = ?'; params.push(section); }
+    if (semester)   { query += ' AND s.semester = ?';   params.push(semester); }
+    if (section)    { query += ' AND s.section = ?';    params.push(section); }
     if (program_id) { query += ' AND s.program_id = ?'; params.push(program_id); }
-    if (status) { query += ' AND s.status = ?'; params.push(status); }
+    if (status)     { query += ' AND s.status = ?';     params.push(status); }
+    if (batch_year) { query += ' AND s.batch_year = ?'; params.push(batch_year); }
     if (search) {
       query += ' AND (u.name LIKE ? OR s.enrollment_number LIKE ? OR u.email LIKE ?)';
       params.push(`%${search}%`, `%${search}%`, `%${search}%`);

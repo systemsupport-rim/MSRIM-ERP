@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { Users, GraduationCap, BookOpen, Bell, TrendingUp, DollarSign, Library, Briefcase, FileText, Calendar, AlertCircle, CheckCircle } from 'lucide-react';
+import { Users, GraduationCap, BookOpen, Bell, TrendingUp, DollarSign, Library, Briefcase, FileText, Calendar, AlertCircle, CheckCircle, PartyPopper, Bus, Trophy } from 'lucide-react';
 
 const COLORS = ['#003087','#1e56a0','#f97316','#10b981','#6366f1','#ec4899'];
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -32,6 +33,33 @@ function NoticeCard({ notice }) {
         <p className="text-xs text-gray-400 mt-0.5">{notice.published_by_name} · {new Date(notice.created_at).toLocaleDateString()}</p>
       </div>
       <span className={`flex-shrink-0 ${colors[notice.category] || 'badge-gray'}`}>{notice.category}</span>
+    </div>
+  );
+}
+
+const QUICK_ACCESS = [
+  { to: '/events',    icon: PartyPopper, label: 'Events & Activities', desc: 'Campus events, fests & workshops', color: 'bg-pink-50 border-pink-100', iconBg: 'bg-pink-100', iconColor: 'text-pink-600' },
+  { to: '/transport', icon: Bus,         label: 'Transport Mgmt',      desc: 'Bus routes & student passes',    color: 'bg-sky-50 border-sky-100',   iconBg: 'bg-sky-100',   iconColor: 'text-sky-600' },
+  { to: '/sports',    icon: Trophy,      label: 'Sports & Recreation', desc: 'Teams, tournaments & facilities', color: 'bg-amber-50 border-amber-100', iconBg: 'bg-amber-100', iconColor: 'text-amber-600' },
+];
+
+function QuickAccess() {
+  const navigate = useNavigate();
+  return (
+    <div>
+      <h3 className="font-semibold text-gray-800 mb-3">Quick Access</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {QUICK_ACCESS.map(({ to, icon: Icon, label, desc, color, iconBg, iconColor }) => (
+          <button key={to} onClick={() => navigate(to)}
+            className={`flex items-center gap-3 p-4 rounded-2xl border ${color} text-left hover:shadow-md hover:-translate-y-0.5 transition-all duration-150`}>
+            <div className={`p-2.5 rounded-xl ${iconBg} flex-shrink-0`}><Icon className={`w-5 h-5 ${iconColor}`} /></div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-gray-800 truncate">{label}</p>
+              <p className="text-xs text-gray-500 truncate">{desc}</p>
+            </div>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -73,6 +101,8 @@ export default function Dashboard() {
           <StatCard label="Library Issued" value={stats?.libIssued} icon={Library} color="bg-teal-500" />
           <StatCard label="New Notices" value={stats?.newNotices} icon={Bell} color="bg-amber-500" sub="This week" />
         </div>
+
+        <QuickAccess />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="card">
@@ -152,6 +182,8 @@ export default function Dashboard() {
           <StatCard label="Fees Paid" value={`₹${((stats?.feesPaid||0)/1000).toFixed(0)}K`} icon={DollarSign} color="bg-indigo-500" />
         </div>
 
+        <QuickAccess />
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="card">
             <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2"><Bell className="w-4 h-4 text-msrim-orange" /> Announcements</h3>
@@ -227,6 +259,7 @@ export default function Dashboard() {
           <StatCard label="Total Students" value={stats?.totalStudents} icon={GraduationCap} color="bg-msrim-orange" />
           <StatCard label="Pending Results" value={stats?.pendingResults} icon={FileText} color="bg-red-500" />
         </div>
+        <QuickAccess />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="card">
             <h3 className="font-semibold text-gray-800 mb-4">My Courses</h3>
@@ -265,6 +298,7 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+      <QuickAccess />
       <div className="card">
         <h3 className="font-semibold text-gray-800 mb-4">Notices</h3>
         {(recentNotices||data?.notices||[]).map(n => <NoticeCard key={n.id} notice={n} />)}
